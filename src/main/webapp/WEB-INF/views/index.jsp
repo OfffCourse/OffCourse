@@ -1,116 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Off Course - 오프라인 강의 예약</title>
     <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {/* '온글잎 콘콘체' '카페24 슈퍼매직' */
-            font-family: '카페24 슈퍼매직', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #fff;
-        }
-
-
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            font-size: 14px;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #666;
-            border: 1px solid #ddd;
-        }
-
-        .btn-outline:hover {
-            background: #f8f9fa;
-            border-color: #162D43;
-            color: #162D43;
-        }
-
-        .btn-primary {
-            background: #162D43;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0f1f2f;
-        }
-
-        /* 헤더 스타일 */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 20px 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo {
-            font-size: 32px;
-            font-weight: 800;
-            color: #162D43;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-        }
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 40px;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: #1d1d1f;
-            font-weight: 500;
-            transition: color 0.3s;
-            font-size: 19px;
-        }
-
-        .nav-menu a:hover {
-            color: #162D43;
-        }
-
         /* 히어로 섹션 - 비디오 배경 */
         .hero-section {
             margin-top: 110px;
@@ -300,9 +192,6 @@
                 max-width: 300px;
             }
 
-            .nav-menu {
-                display: none;
-            }
         }
 
         /* 모바일에서 비디오 대체 이미지 */
@@ -322,51 +211,11 @@
             }
         }
 
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #162D43 0%, #264058 100%);
-            color: white;
-            padding: 100px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,0 1000,100 0,80"/></svg>') no-repeat bottom;
-            background-size: cover;
-        }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            position: relative;
-            z-index: 1;
-        }
-
         .hero-content {
             max-width: 600px;
         }
 
-        .hero-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero h1 {
+      /*  .hero h1 {
             font-size: 56px;
             font-weight: 800;
             line-height: 1.2;
@@ -379,32 +228,9 @@
             margin-bottom: 40px;
             opacity: 0.9;
             line-height: 1.5;
-        }
+        }*/
 
-        .hero-cta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
 
-        .btn-hero {
-            padding: 16px 32px;
-            font-size: 16px;
-            border-radius: 12px;
-        }
-
-        .btn-hero-primary {
-            background: #162D43;
-            color: white;
-            box-shadow: 0 8px 25px rgba(22, 45, 67, 0.3);
-        }
-
-        .btn-hero-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-        }
 
         /* Categories Section */
         .categories {
@@ -491,76 +317,6 @@
             color: #666;
             font-size: 14px;
             line-height: 1.5;
-        }
-
-        /* Search Section */
-        .search-section {
-            /* background: white; */
-            /* padding: 40px 0; */
-        }
-
-        .search-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 15px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .search-input {
-            min-width: 500px;
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #162D43;
-        }
-
-        .search-btn {
-            padding: 15px 30px;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #162D43;
-        }
-
-        .search-btn:hover {
-            background: #0f1f2f;
-        }
-
-        /* Filters */
-        .filters {
-            max-width: 1200px;
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .filter-select {
-            padding: 10px 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #162D43;
         }
 
         /* Courses Section */
@@ -767,53 +523,8 @@
             color: #ccc;
         }
 
-        /* Footer */
-        .footer {
-            background: #162D43;
-            color: white;
-            padding: 50px 0 30px;
-            margin-top: 80px;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 20px;
-            color: #84b3d3;
-        }
-
-        .footer-section p, .footer-section a {
-            color: #adb5bd;
-            text-decoration: none;
-            line-height: 1.8;
-        }
-
-        .footer-section a:hover {
-            color: white;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 40px;
-            }
-
-            .hero-cta {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
             .section-title {
                 font-size: 28px;
             }
@@ -843,50 +554,7 @@
             animation: fadeInUp 0.6s ease-out;
         }
     </style>
-</head>
-<body>
-<!-- Header -->
-<header class="header">
-    <div class="header-container">
-
-        <a href="#" class="logo"><img src="${path}/resources/images/logo.png" alt="Off Course" width="50px" height="50px">Off Course</a>
-        <!-- Search Section -->
-        <section class="search-section">
-            <div class="search-container">
-                <form class="search-form" action="#" method="GET">
-                    <div class="filters">
-                        <!-- <select class="filter-select" name="category">
-                            <option value="">카테고리</option>
-                            <option value="programming">강의명</option>
-                            <option value="design">강사명</option>
-                            <option value="business">평점</option>
-                            <option value="language">강의요일</option>
-                            <option value="language">강의시작일일</option>
-                        </select> -->
-                        <input type="text" name="keyword" class="search-input" placeholder="관심있는 강의를 검색해보세요">
-                        <button type="submit" class="search-btn btn btn-hero btn-hero-primary">검색</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-        <nav>
-
-            <ul class="nav-menu">
-                <!-- <li><a href="#home">홈</a></li> -->
-                <li><a href="#courses">강의</a></li>
-                <li><a href="#bootcamp">국비지원</a></li>
-                <!-- <li><a href="#online">온라인</a></li>
-                <li><a href="#offline">오프라인</a></li>
-                <li><a href="#corporate">기업 교육</a></li> -->
-            </ul>
-        </nav>
-        <div class="header-actions">
-            <a href="#login" class="btn btn-outline">로그인</a>
-            <a href="#signup" class="btn btn-primary">회원가입</a>
-        </div>
-    </div>
-</header>
-
+<section>
 <!-- 로딩 화면 -->
 <div class="loading-screen" id="loadingScreen">
     <div class="loader"></div>
@@ -896,8 +564,7 @@
 <section class="hero-section">
     <!-- 비디오 배경 -->
     <video class="video-background" id="bgVideo" muted playsinline>
-        <source src="light2.mp4" type="video/mp4">
-        <source src="your-video.webm" type="video/webm">
+        <source src="${path}/resources/upload/main.mp4" type="video/mp4">
         <!-- 비디오를 지원하지 않는 브라우저를 위한 대체 -->
         Your browser does not support the video tag.
     </video>
@@ -1367,55 +1034,51 @@
         </div>
     </div>
 </section>
-
-<!-- Footer -->
-<footer class="footer">
-    <div class="footer-content">
-        <div class="footer-section">
-            <h3>Off Course</h3>
-            <p>전문가와 함께하는 오프라인 교육의 새로운 경험을 제공합니다.</p>
-            <p>📧 info@educenter.com</p>
-            <p>📞 02-1234-5678</p>
-        </div>
-        <div class="footer-section">
-            <h3>강의 카테고리</h3>
-            <p><a href="#">프로그래밍</a></p>
-            <p><a href="#">디자인</a></p>
-            <p><a href="#">비즈니스</a></p>
-            <p><a href="#">외국어</a></p>
-        </div>
-        <div class="footer-section">
-            <h3>고객 지원</h3>
-            <p><a href="#">자주 묻는 질문</a></p>
-            <p><a href="#">환불 정책</a></p>
-            <p><a href="#">이용 약관</a></p>
-            <p><a href="#">개인정보 처리방침</a></p>
-        </div>
-    </div>
-</footer>
+</section>
 
 <script>
     // 비디오 자동 재생 및 제어
     document.addEventListener('DOMContentLoaded', function() {
         const video = document.getElementById('bgVideo');
         const loadingScreen = document.getElementById('loadingScreen');
+        let playPromise = null;
 
         // 비디오 설정
         video.autoplay = true;
-        video.loop = false; // 반복 재생 비활성화
+        video.loop = false;
+        video.muted = true; // 자동재생을 위해 음소거 필수
+        video.playsInline = true; // iOS Safari 호환성
 
-        // 비디오가 준비되면 재생
-        video.addEventListener('canplay', function() {
-            video.play().then(() => {
-                // 로딩 화면 숨기기
-                setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                }, 500);
-            }).catch(error => {
-                // 자동 재생이 차단된 경우
-                console.log('자동 재생이 차단되었습니다:', error);
-                loadingScreen.classList.add('hidden');
-            });
+        // 안전한 비디오 재생 함수
+        function playVideoSafely() {
+            if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+                playPromise = video.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('비디오 재생 성공');
+                        setTimeout(() => {
+                            loadingScreen.classList.add('hidden');
+                        }, 500);
+                    }).catch(error => {
+                        console.log('자동 재생 실패:', error.name, error.message);
+                        loadingScreen.classList.add('hidden');
+                    });
+                }
+            }
+        }
+
+        // 이벤트 리스너들
+        video.addEventListener('loadeddata', function() {
+            console.log('비디오 데이터 로드 완료');
+            playVideoSafely();
+        });
+
+        video.addEventListener('canplaythrough', function() {
+            console.log('비디오 재생 준비 완료');
+            if (!video.playing) {
+                playVideoSafely();
+            }
         });
 
         // 비디오가 끝나면 마지막 프레임에서 정지
@@ -1483,5 +1146,4 @@
         });
     }
 </script>
-</body>
-</html>
+<jsp:include page="/WEB-INF/views/common/footer.jsp"/>
