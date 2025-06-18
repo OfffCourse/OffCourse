@@ -192,9 +192,6 @@
                 max-width: 300px;
             }
 
-            .nav-menu {
-                display: none;
-            }
         }
 
         /* 모바일에서 비디오 대체 이미지 */
@@ -568,7 +565,6 @@
     <!-- 비디오 배경 -->
     <video class="video-background" id="bgVideo" muted playsinline>
         <source src="${path}/resources/upload/main.mp4" type="video/mp4">
-        <source src="your-video.webm" type="video/webm">
         <!-- 비디오를 지원하지 않는 브라우저를 위한 대체 -->
         Your browser does not support the video tag.
     </video>
