@@ -1041,25 +1041,35 @@
     document.addEventListener('DOMContentLoaded', function() {
         const video = document.getElementById('bgVideo');
         const loadingScreen = document.getElementById('loadingScreen');
+        let playPromise = null;
 
         // 비디오 설정
         video.autoplay = true;
-        video.loop = false; // 반복 재생 비활성화
+        video.loop = false;
+        video.muted = true; // 자동재생을 위해 음소거 필수
+        video.playsInline = true; // iOS Safari 호환성
 
-        // 비디오가 준비되면 재생
-        video.addEventListener('canplay', function() {
-            video.play().then(() => {
-                // 로딩 화면 숨기기
-                setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                }, 500);
-            }).catch(error => {
-                // 자동 재생이 차단된 경우
-                console.log('자동 재생이 차단되었습니다:', error);
-                loadingScreen.classList.add('hidden');
-            });
-        });
+        // 안전한 비디오 재생 함수
+        function playVideoSafely() {
+            if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+                playPromise = video.play();
 
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('비디오 재생 성공');
+                        setTimeout(() => {
+                            loadingScreen.classList.add('hidden');
+                        }, 500);
+                    }).catch(error => {
+                        console.log('자동 재생 실패:', error.name, error.message);
+                        loadingScreen.classList.add('hidden');
+
+                        // 사용자 상호작용을 위한 플레이 버튼 표시 (선택사항)
+                        showPlayButton();
+                    });
+                }
+            }
+        }
         // 비디오가 끝나면 마지막 프레임에서 정지
         video.addEventListener('ended', function() {
             // 비디오가 끝나면 마지막 프레임에서 멈춤
