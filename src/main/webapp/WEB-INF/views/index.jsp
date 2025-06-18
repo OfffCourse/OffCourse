@@ -15,63 +15,14 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+        body {/* '온글잎 콘콘체' '카페24 슈퍼매직' */
+            font-family: '카페24 슈퍼매직', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #fff;
         }
 
-        /* Header */
-        .header {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
 
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 70px;
-        }
-
-        .logo {
-            font-size: 32px;
-            font-weight: 800;
-            color: #162D43;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 40px;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            font-size: 16px;
-            transition: color 0.2s;
-        }
-
-        .nav-menu a:hover {
-            color: #162D43;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
 
         .btn {
             padding: 12px 24px;
@@ -121,7 +72,7 @@
         }
 
         .header-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -129,12 +80,19 @@
             align-items: center;
         }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #162D43;
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: #162D43;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
         .nav-menu {
             display: flex;
             list-style: none;
@@ -146,6 +104,7 @@
             color: #1d1d1f;
             font-weight: 500;
             transition: color 0.3s;
+            font-size: 19px;
         }
 
         .nav-menu a:hover {
@@ -261,7 +220,7 @@
         .btn-primary:hover {
             background: #0f1f2f;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(22, 45, 67, 0.4);
+
         }
 
         .btn-secondary {
@@ -359,7 +318,6 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                /*background: url('fallback-image.jpg') center/cover no-repeat;*/
                 z-index: -2;
             }
         }
@@ -537,8 +495,8 @@
 
         /* Search Section */
         .search-section {
-            background: white;
-            padding: 40px 0;
+            /* background: white; */
+            /* padding: 40px 0; */
         }
 
         .search-container {
@@ -892,14 +850,34 @@
     <div class="header-container">
 
         <a href="#" class="logo"><img src="${path}/resources/images/logo.png" alt="Off Course" width="50px" height="50px">Off Course</a>
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <form class="search-form" action="#" method="GET">
+                    <div class="filters">
+                        <!-- <select class="filter-select" name="category">
+                            <option value="">카테고리</option>
+                            <option value="programming">강의명</option>
+                            <option value="design">강사명</option>
+                            <option value="business">평점</option>
+                            <option value="language">강의요일</option>
+                            <option value="language">강의시작일일</option>
+                        </select> -->
+                        <input type="text" name="keyword" class="search-input" placeholder="관심있는 강의를 검색해보세요">
+                        <button type="submit" class="search-btn btn btn-hero btn-hero-primary">검색</button>
+                    </div>
+                </form>
+            </div>
+        </section>
         <nav>
+
             <ul class="nav-menu">
-                <li><a href="#home">홈</a></li>
-                <li><a href="#courses">전체 강의</a></li>
-                <li><a href="#bootcamp">부트캠프</a></li>
-                <li><a href="#online">온라인</a></li>
+                <!-- <li><a href="#home">홈</a></li> -->
+                <li><a href="#courses">강의</a></li>
+                <li><a href="#bootcamp">국비지원</a></li>
+                <!-- <li><a href="#online">온라인</a></li>
                 <li><a href="#offline">오프라인</a></li>
-                <li><a href="#corporate">기업 교육</a></li>
+                <li><a href="#corporate">기업 교육</a></li> -->
             </ul>
         </nav>
         <div class="header-actions">
@@ -950,28 +928,7 @@
         </div>
     </div>
 </section>
-<!-- Search Section -->
-<section class="search-section">
-    <div class="search-container">
-        <form class="search-form" action="#" method="GET">
-            <div class="filters">
-                <select class="filter-select" name="category">
-                    <option value="">카테고리</option>
-                    <option value="programming">강의명</option>
-                    <option value="design">강사명</option>
-                    <option value="business">평점</option>
-                    <option value="language">강의요일</option>
-                    <option value="language">강의시작일일</option>
-                </select>
-                <input type="text" name="keyword" class="search-input" placeholder="관심있는 강의를 검색해보세요">
-                <button type="submit" class="search-btn btn btn-hero btn-hero-primary">검색</button>
-            </div>
 
-
-
-        </form>
-    </div>
-</section>
 
 <!-- Categories -->
 <section class="categories">
