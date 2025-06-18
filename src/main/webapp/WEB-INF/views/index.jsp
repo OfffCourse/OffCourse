@@ -1063,13 +1063,24 @@
                     }).catch(error => {
                         console.log('자동 재생 실패:', error.name, error.message);
                         loadingScreen.classList.add('hidden');
-
-                        // 사용자 상호작용을 위한 플레이 버튼 표시 (선택사항)
-                        showPlayButton();
                     });
                 }
             }
         }
+
+        // 이벤트 리스너들
+        video.addEventListener('loadeddata', function() {
+            console.log('비디오 데이터 로드 완료');
+            playVideoSafely();
+        });
+
+        video.addEventListener('canplaythrough', function() {
+            console.log('비디오 재생 준비 완료');
+            if (!video.playing) {
+                playVideoSafely();
+            }
+        });
+
         // 비디오가 끝나면 마지막 프레임에서 정지
         video.addEventListener('ended', function() {
             // 비디오가 끝나면 마지막 프레임에서 멈춤
