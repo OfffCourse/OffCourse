@@ -22,6 +22,10 @@ public class CustomUserDetails implements UserDetails {
         return Collections.singleton(() -> role);
     }
 
+    public Long getMemberSeq() {
+        return member.getMemberSeq();
+    }
+
     @Override
     public String getPassword() {
         return member.getMemberPwd();

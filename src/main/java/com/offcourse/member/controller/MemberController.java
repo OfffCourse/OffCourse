@@ -87,7 +87,7 @@ public class MemberController {
 //            int result = 1;
             if (result > 0) {
                 redirectAttributes.addFlashAttribute("msg", "회원가입 성공!");
-                return "redirect:/";
+                return "redirect:/member/loginform";
             } else {
                 deleteFile(profilePath, profileFileName);
                 deleteFile(portfolioPath, portfolioFileName);
@@ -152,5 +152,10 @@ public class MemberController {
     public String showInstructorEnrollPage(Model model) {
         model.addAttribute("memberType", "instructor");
         return "member/enrollInstructor";
+    }
+
+    @GetMapping("/member/loginform")
+    public String loginForm() {
+        return "member/login";
     }
 }

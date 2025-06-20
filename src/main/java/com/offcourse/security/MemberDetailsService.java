@@ -25,6 +25,9 @@ public class MemberDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        System.out.println("🔍 로그인 시도 중: " + username);
+
         // MyBatis 매퍼 인터페이스 구현체 얻기
         MemberDao memberDao = sqlSession.getMapper(MemberDao.class);
 
@@ -39,4 +42,5 @@ public class MemberDetailsService implements UserDetailsService {
         // 조회된 회원 정보를 기반으로 Spring Security용 UserDetails 구현체 반환
         return new CustomUserDetails(member);
     }
+
 }
