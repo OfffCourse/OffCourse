@@ -49,8 +49,8 @@
             </ul>
         </nav>
         <div class="header-actions">
-            <a href="#login" class="btn btn-outline">로그인</a>
-            <a href="#signup" class="btn btn-primary">회원가입</a>
+            <a href="${path}/member/loginform" class="btn btn-outline">로그인</a>
+            <a href="${path}/member/enroll/select" class="btn btn-primary">회원가입</a>
         </div>
     </div>
 </header>
