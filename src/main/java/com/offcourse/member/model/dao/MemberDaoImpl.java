@@ -1,15 +1,15 @@
 package com.offcourse.member.model.dao;
 
 import com.offcourse.member.model.dto.Member;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberDaoImpl implements MemberDao {
 
-    @Autowired
-    private SqlSession sqlSession;
+    private final SqlSession sqlSession;
 
     private static final String NAMESPACE = "member.";
 
