@@ -1,13 +1,20 @@
 package com.offcourse.course.model.service;
 
 import com.offcourse.course.model.dao.CourseDao;
-import com.offcourse.course.model.dto.CourseListResponse;
+import com.offcourse.course.model.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,5 +30,57 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public int getCourseListCount(Map<String, Object> param) {
         return dao.getCourseListCount(param);
+    }
+
+    @Override
+    @Transactional
+    public int insertCourse(Course course, Integer episodeCount, List<String> courseDays) {
+        int result = dao.insertCourse(course);
+        Long courseSeq = course.getCourseSeq();
+
+        if (result > 0 && !courseDays.isEmpty()) {
+            for (String day : courseDays) {
+                CourseDay cd = new CourseDay();
+                cd.setCourseSeq(courseSeq);
+                cd.setDayDays(day);
+                dao.insertCourseDay(cd);
+            }
+        }
+
+        if (result > 0 && episodeCount != null) {
+            LocalDate start = course.getCourseStartDate().toLocalDate();
+            LocalDate end = course.getCourseEndDate().toLocalDate();
+
+            List<DayOfWeek> days = courseDays.stream()
+                    .map(DayCode::fromCode)
+                    .filter(Objects::nonNull)
+                    .map(DayCode::toDayOfWeek)
+                    .collect(Collectors.toList());
+
+            List<LocalDate> episodeDates = getEpisodeDates(start, end, days, episodeCount);
+
+            int count = 1;
+            for (LocalDate date : episodeDates) {
+                Episode ep = new Episode();
+                ep.setEpisodeCount(count++);
+                ep.setEpisodeDate(Date.valueOf(date));
+                ep.setCourseSeq(courseSeq);
+                dao.insertEpisode(ep);
+            }
+
+        }
+        return result;
+    }
+
+    //날짜 계산용 메소드
+    private List<LocalDate> getEpisodeDates(LocalDate start, LocalDate end,
+                                            List<DayOfWeek> days, int episodeCount) {
+        List<LocalDate> result = new ArrayList<>();
+        for (LocalDate date = start; !date.isAfter(end) && result.size() < episodeCount; date = date.plusDays(1)) {
+            if (days.contains(date.getDayOfWeek())) {
+                result.add(date);
+            }
+        }
+        return result;
     }
 }
