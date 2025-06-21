@@ -1,5 +1,7 @@
 package com.offcourse.course.model.dto;
 
+import java.time.DayOfWeek;
+
 public enum DayCode {
     MONDAY("0", "월"),
     TUESDAY("1", "화"),
@@ -25,6 +27,7 @@ public enum DayCode {
         return name;
     }
 
+    //DayCode로 반환해주는 메소드
     public static DayCode fromCode(String code) {
         for (DayCode d : values()) {
             if (d.code.equals(code)) {
@@ -32,6 +35,19 @@ public enum DayCode {
             }
         }
         return null;
+    }
+
+    //회차 날짜 계산 용
+    public DayOfWeek toDayOfWeek() {
+        return switch (this) {
+            case MONDAY -> DayOfWeek.MONDAY;
+            case TUESDAY -> DayOfWeek.TUESDAY;
+            case WEDNESDAY -> DayOfWeek.WEDNESDAY;
+            case THURSDAY -> DayOfWeek.THURSDAY;
+            case FRIDAY -> DayOfWeek.FRIDAY;
+            case SATURDAY -> DayOfWeek.SATURDAY;
+            case SUNDAY -> DayOfWeek.SUNDAY;
+        };
     }
 
 }
