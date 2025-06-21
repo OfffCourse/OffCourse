@@ -16,16 +16,12 @@ public class CourseDaoImpl implements CourseDao {
     private final SqlSessionTemplate session;
 
     @Override
-    public List<CourseListResponse> courseList(Map<String, Integer> param) {
-        int cPage = param.get("cPage");
-        int numPerPage = param.get("numPerPage");
-        RowBounds rowBounds
-                = new RowBounds((cPage - 1) * numPerPage, numPerPage);
-        return session.selectList("course.courseList", null, rowBounds);
+    public List<CourseListResponse> getCourseList(Map<String, Object> param, RowBounds rb) {
+        return session.selectList("course.selectCourseList", param, rb);
     }
 
     @Override
-    public int courseCount() {
-        return session.selectOne("course.courseCount");
+    public int getCourseListCount(Map<String, Object> param) {
+        return session.selectOne("course.selectCourseCount", param);
     }
 }

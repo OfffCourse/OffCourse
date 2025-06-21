@@ -3,6 +3,7 @@ package com.offcourse.course.model.service;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.course.model.dto.CourseListResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +16,12 @@ public class CourseServiceImpl implements CourseService {
     private final CourseDao dao;
 
     @Override
-    public List<CourseListResponse> courseList(Map<String, Integer> param) {
-        return dao.courseList(param);
+    public List<CourseListResponse> getCourseList(Map<String, Object> param, RowBounds rb) {
+        return dao.getCourseList(param, rb);
     }
 
     @Override
-    public int courseCount() {
-        return dao.courseCount();
+    public int getCourseListCount(Map<String, Object> param) {
+        return dao.getCourseListCount(param);
     }
 }
