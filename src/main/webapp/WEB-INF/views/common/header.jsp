@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: poj23
-  Date: 25. 6. 18.
-  Time: 오후 7:24
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -36,8 +29,8 @@
         <!-- Search Section -->
         <section class="search-section">
             <div class="search-container">
-                <form class="search-form" action="#" method="GET">
-                    <input type="text" name="keyword" class="search-input" placeholder="관심있는 강의를 검색해보세요">
+                <form id="headerSearchForm" class="search-form" action="${pageContext.request.contextPath}/course/listpage" method="GET">
+                    <input type="text" name="courseTitle" class="search-input" placeholder="관심있는 강의를 검색해보세요">
                     <button type="submit" class="search-btn btn btn-hero btn-hero-primary">검색</button>
                 </form>
             </div>
