@@ -87,6 +87,12 @@ public class CourseServiceImpl implements CourseService {
         return dao.getCategorySeqByType(categoryType);
     }
 
+    @Override
+    @Transactional
+    public int updateCourse(Course course) {
+        return dao.updateCourse(course);
+    }
+
     //날짜 계산용 메소드
     private List<LocalDate> getEpisodeDates(LocalDate start, LocalDate end,
                                             List<DayOfWeek> days) {

@@ -16,4 +16,5 @@ public interface CourseDao {
     int insertCourseDay(CourseDay courseDay);
     int insertEpisode(Episode episode);
     long getCategorySeqByType(String categoryType);
+    int updateCourse(Course course);
 }

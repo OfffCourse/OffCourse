@@ -47,4 +47,9 @@ public class CourseDaoImpl implements CourseDao {
     public long getCategorySeqByType(String categoryType) {
         return session.selectOne("course.selectCategorySeqByType",categoryType);
     }
+
+    @Override
+    public int updateCourse(Course course) {
+        return session.update("course.updateCourse",course);
+    }
 }

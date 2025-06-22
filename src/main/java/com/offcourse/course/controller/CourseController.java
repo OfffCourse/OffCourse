@@ -41,11 +41,6 @@ public class CourseController {
         return Map.of("courses", list, "pageBar", pageBar);
     }
 
-    /*@GetMapping("/insertpage")
-    public String insertCourse() {
-        return "course/courseInsert";
-    }*/
-
     @PostMapping("/insert")
     public String insertEndCourse(@ModelAttribute Course course,
                                   @RequestParam("categoryType") String categoryType,
@@ -58,7 +53,7 @@ public class CourseController {
 
         int result = service.insertCourse(course, episodeCount, courseDays);
         if (result > 0) {
-            model.addAttribute("msg", "강의 등록 성공!");
+            model.addAttribute("msg", "강의 등록 성공");
             model.addAttribute("loc", "/course/listpage");
         } else {
             model.addAttribute("msg", "강의 등록 실패");
@@ -67,8 +62,21 @@ public class CourseController {
         return "common/msg";
     }
 
-    @ExceptionHandler(value=CourseEpisodeMismatchException.class)
-    public String handleException(CourseEpisodeMismatchException e,Model model) {
+    @PostMapping("/update")
+    public String updateCourse(@ModelAttribute Course course, Model model) {
+        int result = service.updateCourse(course);
+        if (result > 0) {
+            model.addAttribute("msg", "강의 수정 성공");
+            model.addAttribute("loc", "/course/view?courseSeq=" + course.getCourseSeq());
+        } else {
+            model.addAttribute("msg", "강의 수정 실패");
+            model.addAttribute("loc", "/mypage");
+        }
+        return "common/msg";
+    }
+
+    @ExceptionHandler(value = CourseEpisodeMismatchException.class)
+    public String handleException(CourseEpisodeMismatchException e, Model model) {
         model.addAttribute("msg", e.getMessage());
         model.addAttribute("loc", "/mypage");
         return "common/msg";

@@ -12,4 +12,5 @@ public interface CourseService {
     int getCourseListCount(Map<String,Object> param);
     int insertCourse(Course course, Integer episodeCount, List<String> courseDays);
     long getCategorySeqByType(String categoryType);
+    int updateCourse(Course course);
 }
