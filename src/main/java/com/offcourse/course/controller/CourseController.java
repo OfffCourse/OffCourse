@@ -1,6 +1,7 @@
 package com.offcourse.course.controller;
 
 import com.offcourse.common.AjaxPageFactory;
+import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dto.Course;
 import com.offcourse.course.model.dto.CourseListResponse;
 import com.offcourse.course.model.service.CourseService;
@@ -40,25 +41,36 @@ public class CourseController {
         return Map.of("courses", list, "pageBar", pageBar);
     }
 
-    @GetMapping("/insertpage")
+    /*@GetMapping("/insertpage")
     public String insertCourse() {
         return "course/courseInsert";
-    }
+    }*/
 
     @PostMapping("/insert")
     public String insertEndCourse(@ModelAttribute Course course,
-                                  @RequestParam Integer episodeCount,
-                                  @RequestParam List<String> courseDays,
+                                  @RequestParam("categoryType") String categoryType,
+                                  @RequestParam("episodeCount") Integer episodeCount,
+                                  @RequestParam("dayList") List<String> courseDays,
                                   Model model) {
+
+        long categorySeq = service.getCategorySeqByType(categoryType);
+        course.setCategorySeq(categorySeq);
+
         int result = service.insertCourse(course, episodeCount, courseDays);
         if (result > 0) {
             model.addAttribute("msg", "강의 등록 성공!");
             model.addAttribute("loc", "/course/listpage");
         } else {
             model.addAttribute("msg", "강의 등록 실패");
-            model.addAttribute("loc", "/course/insertpage");
+            model.addAttribute("loc", "/mypage");
         }
         return "common/msg";
     }
 
+    @ExceptionHandler(value=CourseEpisodeMismatchException.class)
+    public String handleException(CourseEpisodeMismatchException e,Model model) {
+        model.addAttribute("msg", e.getMessage());
+        model.addAttribute("loc", "/mypage");
+        return "common/msg";
+    }
 }

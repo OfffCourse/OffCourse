@@ -42,4 +42,9 @@ public class CourseDaoImpl implements CourseDao {
     public int insertEpisode(Episode episode) {
         return session.insert("course.insertEpisode",episode);
     }
+
+    @Override
+    public long getCategorySeqByType(String categoryType) {
+        return session.selectOne("course.selectCategorySeqByType",categoryType);
+    }
 }
