@@ -1,5 +1,6 @@
 package com.offcourse.course.model.service;
 
+import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.course.model.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +58,17 @@ public class CourseServiceImpl implements CourseService {
                     .map(DayCode::toDayOfWeek)
                     .collect(Collectors.toList());
 
-            List<LocalDate> episodeDates = getEpisodeDates(start, end, days, episodeCount);
+            // 가능한 날짜 계산
+            List<LocalDate> possibleDates = getEpisodeDates(start, end, days);
+
+            if (episodeCount > possibleDates.size()) {
+                throw new CourseEpisodeMismatchException(
+                        String.format("선택된 기간 및 요일 내 최대 회차 수는 %d입니다.", possibleDates.size())
+                );
+            }
+
+            // 회차 수에 맞게 자르기
+            List<LocalDate> episodeDates = possibleDates.subList(0, episodeCount);
 
             int count = 1;
             for (LocalDate date : episodeDates) {
@@ -67,16 +78,26 @@ public class CourseServiceImpl implements CourseService {
                 ep.setCourseSeq(courseSeq);
                 dao.insertEpisode(ep);
             }
-
         }
         return result;
     }
 
+    @Override
+    public long getCategorySeqByType(String categoryType) {
+        return dao.getCategorySeqByType(categoryType);
+    }
+
+    @Override
+    @Transactional
+    public int updateCourse(Course course) {
+        return dao.updateCourse(course);
+    }
+
     //날짜 계산용 메소드
     private List<LocalDate> getEpisodeDates(LocalDate start, LocalDate end,
-                                            List<DayOfWeek> days, int episodeCount) {
+                                            List<DayOfWeek> days) {
         List<LocalDate> result = new ArrayList<>();
-        for (LocalDate date = start; !date.isAfter(end) && result.size() < episodeCount; date = date.plusDays(1)) {
+        for (LocalDate date = start; !date.isAfter(end) && result.size() < Integer.MAX_VALUE; date = date.plusDays(1)) {
             if (days.contains(date.getDayOfWeek())) {
                 result.add(date);
             }

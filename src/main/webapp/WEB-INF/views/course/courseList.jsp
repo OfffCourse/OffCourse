@@ -228,6 +228,9 @@
 
                 data.courses.forEach(c => {
                     const discounted = Math.round(c.coursePrice * (1 - c.courseDiscount / 100));
+                    const date = new Date(c.courseStartDate);
+                    const formatted = `\${date.getFullYear()}-\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
+
                     const courseCard = `
                   <div class="course-card">
                       <div class="course-image">
@@ -244,7 +247,7 @@
                           <div class="course-schedule">
                               <div class="schedule-row">
                                   <span class="schedule-label">시작일</span>
-                                  <span class="schedule-value">\${new Date(c.courseStartDate).toISOString().slice(0, 10)}</span>
+                                  <span class="schedule-value">\${formatted}</span>
                               </div>
                               <div class="schedule-row">
                                   <span class="schedule-label">일시</span>
