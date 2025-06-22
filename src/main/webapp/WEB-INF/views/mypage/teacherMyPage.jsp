@@ -15,15 +15,15 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="#" class="menu-item active" data-section="create-course">
+            <li><a href="${path}/mypage?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
                 <span class="icon">➕</span>
                 <span>강의 개설</span>
             </a></li>
-            <li><a href="#" class="menu-item" data-section="manage-courses">
+            <li><a href="${path}/mypage?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
                 <span class="icon">📚</span>
                 <span>강의 정보 수정</span>
             </a></li>
-            <li><a href="#" class="menu-item" data-section="settlement">
+            <li><a href="${path}/mypage?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
                 <span class="icon">💰</span>
                 <span>강의 정산 신청</span>
             </a></li>
@@ -41,7 +41,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- 강의 개설 Section -->
-        <div class="section active" id="create-course">
+        <div class="section ${section == 'create-course' ? 'active' : ''}" id="create-course">
             <div class="page-header">
                 <h1 class="page-title">강의 개설</h1>
                 <p class="page-subtitle">새로운 강의를 개설하고 학생들에게 지식을 전달하세요</p>
@@ -207,117 +207,82 @@
         </div>
 
         <!-- 강의 정보 수정 Section -->
-        <div class="section" id="manage-courses">
+        <div class="section ${section == 'manage-courses' ? 'active' : ''}" id="manage-courses">
             <div class="page-header">
                 <h1 class="page-title">강의 정보 수정</h1>
                 <p class="page-subtitle">내 강의 목록을 확인하고 관리하세요</p>
             </div>
 
             <div class="course-list">
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>풀스택 웹개발 마스터 부트캠프</h3>
-                            <div class="course-meta">
-                                <span>📅 2025.01.15 ~ 2025.04.15</span>
-                                <span>⏰ 평일 19:00-22:00</span>
-                                <span>📍 강남 캠퍼스</span>
-                                <span>👥 수강생 24명</span>
+                <c:if test="${not empty myPageResponses}">
+                    <c:forEach var="m" items="${myPageResponses}">
+                        <div class="course-item">
+                            <div class="course-header">
+                                <div class="course-info">
+                                    <h3>${m.courseName}</h3>
+                                    <div class="course-meta">
+                                        <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
+                                        <%--<span>⏰ 평일 19:00-22:00</span>--%>
+                                        <span>📍 ${m.courseAddress}</span>
+                                        <span>👥 수강생 ${courseSize}명</span>
+                                    </div>
+                                </div>
+                                <div class="course-status status-progress">진행중</div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openEditModal(this)"
+                                        data-course-name="${m.courseName}"
+                                        data-course-curriculum="${m.courseCurriculum}"
+                                        data-course-address="${m.courseAddress}"
+                                        data-course-detail-address="${m.courseDetailAddress}"
+                                        data-course-discount="${m.courseDiscount}"
+                                        data-course-qalink="${m.courseQaLink}"
+                                        data-course-seq="${m.courseSeq}">강의 정보 수정</button>
+                                <button class="btn btn-danger btn-sm" onclick="openDeleteModal('course1')">강의 삭제 신청</button>
                             </div>
                         </div>
-                        <div class="course-status status-progress">진행중</div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openEditModal('course1')">강의 정보 수정</button>
-                        <button class="btn btn-outline btn-sm" onclick="openFileModal('course1')">회차별 파일 등록</button>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('course1')">강의 삭제 신청</button>
-                    </div>
-                </div>
-
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>React Native 모바일 앱 개발</h3>
-                            <div class="course-meta">
-                                <span>📅 2025.02.01 ~ 2025.03.26</span>
-                                <span>⏰ 주말 10:00-18:00</span>
-                                <span>📍 강남 캠퍼스</span>
-                                <span>👥 수강생 18명</span>
-                            </div>
-                        </div>
-                        <div class="course-status status-progress">진행중</div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openEditModal('course2')">강의 정보 수정</button>
-                        <button class="btn btn-outline btn-sm" onclick="openFileModal('course2')">회차별 파일 등록</button>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('course2')">강의 삭제 신청</button>
-                    </div>
-                </div>
-
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>JavaScript 기초 완성 과정</h3>
-                            <div class="course-meta">
-                                <span>📅 2024.10.01 ~ 2024.12.15</span>
-                                <span>⏰ 평일 19:00-21:00</span>
-                                <span>📍 강남 캠퍼스</span>
-                                <span>👥 수강생 32명</span>
-                            </div>
-                        </div>
-                        <div class="course-status status-completed">완료</div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openEditModal('course3')">강의 정보 수정</button>
-                        <button class="btn btn-outline btn-sm" onclick="openFileModal('course3')">회차별 파일 등록</button>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('course3')">강의 삭제 신청</button>
-                    </div>
-                </div>
+                    </c:forEach>
+                </c:if>
             </div>
+            <c:if test="${section == 'manage-courses'}">
+                <div id="pageBar">${pageBar}</div>
+            </c:if>
         </div>
 
         <!-- 강의 정산 신청 Section -->
-        <div class="section" id="settlement">
+        <div class="section ${section == 'settlement' ? 'active' : ''}" id="settlement">
             <div class="page-header">
                 <h1 class="page-title">강의 정산 신청</h1>
                 <p class="page-subtitle">완료된 강의에 대한 정산을 신청하세요</p>
             </div>
 
             <div class="course-list">
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>JavaScript 기초 완성 과정</h3>
-                            <div class="course-meta">
-                                <span>📅 2024.10.01 ~ 2024.12.15</span>
-                                <span>👥 수강생 32명</span>
-                                <span>💰 정산 예정금액: ₩2,400,000</span>
+                <c:if test="${not empty myPageResponses}">
+                    <c:forEach var="m" items="${myPageResponses}">
+                        <div class="course-item">
+                            <div class="course-header">
+                                <div class="course-info">
+                                    <h3>${m.courseName}</h3>
+                                    <div class="course-meta">
+                                        <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
+                                        <span>👥 수강생 32명</span>
+                                        <span>💰 정산 예정금액: ₩2,400,000</span>
+                                    </div>
+                                </div>
+                                <div class="course-status status-completed">완료</div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openSettlementModal(this)"
+                                        data-course-name="${m.courseName}"
+                                        data-account-price-="${m.accountPrice}">정산 신청</button>
                             </div>
                         </div>
-                        <div class="course-status status-completed">완료</div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openSettlementModal('course3')">정산 신청</button>
-                    </div>
-                </div>
-
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>HTML/CSS 웹 디자인 기초</h3>
-                            <div class="course-meta">
-                                <span>📅 2024.08.01 ~ 2024.09.30</span>
-                                <span>👥 수강생 28명</span>
-                                <span>💰 정산 예정금액: ₩1,680,000</span>
-                            </div>
-                        </div>
-                        <div class="course-status status-completed">완료</div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openSettlementModal('course4')">정산 신청</button>
-                    </div>
-                </div>
+                    </c:forEach>
+                </c:if>
             </div>
+            <c:if test="${section == 'settlement'}">
+                <div id="pageBar">${pageBar}</div>
+            </c:if>
         </div>
 
         <!-- 개인정보 수정 Section -->
@@ -397,11 +362,11 @@
             <div class="form-group">
                 <label class="form-label">주소</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="courseAddress" name="courseAddress" placeholder="주소를 검색해주세요" readonly required>
-                    <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode()">주소 검색</button>
+                    <input type="text" class="form-control" id="editCourseAddress" name="courseAddress" placeholder="주소를 검색해주세요" readonly required>
+                    <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcodeForEditModal()">주소 검색</button>
                 </div>
                 <label class="form-label">상세 주소</label>
-                <input type="text" class="form-control" id="courseDetailAddress" name="courseDetailAddress" placeholder="상세 주소 입력">
+                <input type="text" class="form-control" id="editCourseDetailAddress" name="courseDetailAddress" placeholder="상세 주소 입력">
 
             </div>
 
@@ -415,63 +380,11 @@
                     <input type="url" class="form-control" name="courseQaLink">
                 </div>
             </div>
-            <input type="hidden" name="memberSeq" value="1"/>
-            <input type="hidden" name="courseSeq" value="1"/>
+            <%--<input type="hidden" name="memberSeq" value="1"/>--%>
+            <input type="hidden" name="courseSeq"/>
             <div class="course-actions">
                 <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">취소</button>
                 <button type="submit" class="btn btn-primary">수정하기</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- 회차별 파일 등록 Modal -->
-<div id="fileModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">회차별 파일 등록</h2>
-            <button class="close" onclick="closeModal('fileModal')">&times;</button>
-        </div>
-        <form id="fileForm">
-            <div class="form-group">
-                <label class="form-label">강의 회차 선택</label>
-                <select class="form-select" id="sessionSelect" required>
-                    <option value="">회차를 선택하세요</option>
-                    <option value="1">1회차</option>
-                    <option value="2">2회차</option>
-                    <option value="3">3회차</option>
-                    <option value="4">4회차</option>
-                    <option value="5">5회차</option>
-                    <option value="6">6회차</option>
-                    <option value="7">7회차</option>
-                    <option value="8">8회차</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">파일 제목</label>
-                <input type="text" class="form-input" id="fileTitle" placeholder="예: 1회차 - JavaScript 기초" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">파일 설명</label>
-                <textarea class="form-textarea" id="fileDescription" placeholder="파일에 대한 설명을 입력하세요"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">파일 업로드</label>
-                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-                    <input type="file" id="fileInput" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.zip">
-                    <div>
-                        <p style="margin-bottom: 8px;">📁 클릭하여 파일을 선택하세요</p>
-                        <p style="font-size: 12px; color: #666;">PDF, PPT, DOC, ZIP 파일만 업로드 가능</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="course-actions">
-                <button type="button" class="btn btn-outline" onclick="closeModal('fileModal')">취소</button>
-                <button type="submit" class="btn btn-primary">등록하기</button>
             </div>
         </form>
     </div>
@@ -582,7 +495,18 @@
             }
         }).open();
     }
+    function execDaumPostcodeForEditModal() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var address = data.roadAddress ? data.roadAddress : data.jibunAddress;
+                document.getElementById('editCourseAddress').value = address;
+                document.getElementById('editCourseDetailAddress').focus();
+            }
+        }).open();
+    }
+
 </script>
+
 <script>
     document.querySelectorAll('.parent-category').forEach(parent => {
         parent.addEventListener('click', () => {
@@ -646,48 +570,10 @@
 </script>
 
 <script>
-    // 강의 데이터
-    const courseData = {
-        course1: {
-            name: '풀스택 웹개발 마스터 부트캠프',
-            startDate: '2025-01-15',
-            endDate: '2025-04-15',
-            time: '평일 19:00-22:00',
-            location: '강남 캠퍼스 A동 101호',
-            description: '실무 중심의 풀스택 웹개발 과정입니다.'
-        },
-        course2: {
-            name: 'React Native 모바일 앱 개발',
-            startDate: '2025-02-01',
-            endDate: '2025-03-26',
-            time: '주말 10:00-18:00',
-            location: '강남 캠퍼스 B동 201호',
-            description: 'React Native를 활용한 크로스플랫폼 앱 개발 과정입니다.'
-        },
-        course3: {
-            name: 'JavaScript 기초 완성 과정',
-            startDate: '2024-10-01',
-            endDate: '2024-12-15',
-            time: '평일 19:00-21:00',
-            location: '강남 캠퍼스 A동 102호',
-            description: 'JavaScript 기초부터 활용까지 체계적으로 학습하는 과정입니다.',
-            amount: '₩2,400,000'
-        },
-        course4: {
-            name: 'HTML/CSS 웹 디자인 기초',
-            startDate: '2024-08-01',
-            endDate: '2024-09-30',
-            time: '주말 13:00-17:00',
-            location: '홍대 캠퍼스 C동 301호',
-            description: 'HTML/CSS를 활용한 웹 디자인 기초 과정입니다.',
-            amount: '₩1,680,000'
-        }
-    };
-
     // 메뉴 네비게이션
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', function(e) {
-            e.preventDefault();
+            //e.preventDefault();
 
             // 모든 메뉴 아이템에서 active 클래스 제거
             document.querySelectorAll('.menu-item').forEach(menu => {
@@ -721,24 +607,18 @@
     }
 
     // 강의 정보 수정 모달 열기
-    function openEditModal(courseId) {
-        const course = courseData[courseId];
-        if (course) {
-            /*document.getElementById('courseName').value = course.name;
-            document.getElementById('courseAddress').value = course.startDate;
-            document.getElementById('courseDetailAddress').value = course.endDate;
-            document.getElementById('courseCurriculum').value = course.time;
-            document.getElementById('courseDiscount').value = course.location;
-            document.getElementById('courseQaLink').value = course.description;
-*/
-            openModal('editModal');
-        }
+    function openEditModal(button) {
+        document.getElementById('editCourseName').value = button.dataset.courseName;
+        document.getElementById('courseAddress').value = button.dataset.courseAddress;
+        document.getElementById('courseDetailAddress').value = button.dataset.courseDetailAddress;
+        document.querySelector('textarea[name="courseCurriculum"]').value = button.dataset.courseCurriculum;
+        document.querySelector('input[name="courseDiscount"]').value = button.dataset.courseDiscount;
+        document.querySelector('input[name="courseQaLink"]').value = button.dataset.courseQalink;
+        document.querySelector('input[name="courseSeq"]').value = button.dataset.courseSeq;
+
+        openModal('editModal');
     }
 
-    // 파일 등록 모달 열기
-    function openFileModal(courseId) {
-        openModal('fileModal');
-    }
 
     // 강의 삭제 모달 열기
     function openDeleteModal(courseId) {
@@ -753,14 +633,13 @@
     }
 
     // 정산 신청 모달 열기
-    function openSettlementModal(courseId) {
-        const course = courseData[courseId];
-        if (course) {
-            document.getElementById('settlementCourseName').value = course.name;
-            document.getElementById('settlementAmount').value = course.amount;
+    function openSettlementModal(button) {
 
-            openModal('settlementModal');
-        }
+        document.getElementById('settlementCourseName').value = button.dataset.courseName;
+        document.getElementById('settlementAmount').value = button.dataset.accountPrice;
+
+        openModal('settlementModal');
+
     }
 
     // 모달 외부 클릭 시 닫기
@@ -772,30 +651,6 @@
             }
         });
     }
-
-    // 폼 제출 이벤트
-    document.getElementById('editForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        showAlert('강의 정보가 성공적으로 수정되었습니다.');
-        closeModal('editModal');
-    });
-
-    document.getElementById('fileForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const sessionSelect = document.getElementById('sessionSelect');
-        const fileInput = document.getElementById('fileInput');
-
-        if (!fileInput.files.length) {
-            showAlert('파일을 선택해주세요.', 'error');
-            return;
-        }
-
-        showAlert(`\${sessionSelect.value}회차 파일이 성공적으로 등록되었습니다.`);
-        closeModal('fileModal');
-
-        // 폼 초기화
-        this.reset();
-    });
 
     document.getElementById('deleteForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -831,13 +686,6 @@
         showAlert('개인정보가 성공적으로 수정되었습니다.');
     });
 
-    // 파일 업로드 표시
-    document.getElementById('fileInput').addEventListener('change', function() {
-        const fileList = Array.from(this.files).map(file => file.name).join(', ');
-        if (fileList) {
-            this.parentElement.querySelector('p').textContent = `선택된 파일: \${fileList}`;
-        }
-    });
 
     // 알림 표시 함수
     function showAlert(message, type = 'success') {
