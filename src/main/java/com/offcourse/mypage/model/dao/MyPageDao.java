@@ -1,5 +1,7 @@
 package com.offcourse.mypage.model.dao;
 
+import com.offcourse.mypage.model.dto.Account;
+import com.offcourse.mypage.model.dto.DeleteCourseRequest;
 import com.offcourse.mypage.model.dto.TeacherMyPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
@@ -15,16 +17,24 @@ public class MyPageDao {
 
     private final SqlSessionTemplate session;
 
-    public List<TeacherMyPageResponse> getMyPageByTeacher(Map<String,Object> param){
-        int cPage= (int) param.get("cPage");
-        int numPerPage= (int) param.get("numPerPage");
-        long memberSeq= (long) param.get("memberSeq");
+    public List<TeacherMyPageResponse> getMyPageByTeacher(Map<String, Object> param) {
+        int cPage = (int) param.get("cPage");
+        int numPerPage = (int) param.get("numPerPage");
+        long memberSeq = (long) param.get("memberSeq");
         RowBounds rowBounds
-                =new RowBounds((cPage-1)*numPerPage,numPerPage);
-        return session.selectList("mypage.getMyPageByTeacher",memberSeq,rowBounds);
+                = new RowBounds((cPage - 1) * numPerPage, numPerPage);
+        return session.selectList("mypage.getMyPageByTeacher", memberSeq, rowBounds);
     }
 
-    public int teacherCourseCount(long memberSeq){
-        return session.selectOne("mypage.teacherCourseCount",memberSeq);
+    public int teacherCourseCount(long memberSeq) {
+        return session.selectOne("mypage.teacherCourseCount", memberSeq);
+    }
+
+    public int insertAccount(Account account) {
+        return session.insert("mypage.insertAccount", account);
+    }
+
+    public int insertDeleteCourseRequest(DeleteCourseRequest request) {
+        return session.insert("mypage.insertDeleteCourseRequest", request);
     }
 }
