@@ -26,5 +26,5 @@ public class TeacherMyPageResponse {
     private Double averageRating;
     private Integer courseSize;
     private Integer courseCurrentSize;
-    private Double accountPrice;
+    private Integer accountPrice;
 }

@@ -160,7 +160,7 @@
 
                     <!-- 카테고리 & 회원 번호는 임시로 숨김 -->
                     <input type="hidden" name="memberSeq" value="1"/>
-                    <input type="hidden" name="categorySeq" value="1"/>
+                    <%--<input type="hidden" name="categorySeq" value="1"/>--%>
 
                     <!-- 회차 수 -->
                     <div class="mb-3">
@@ -238,7 +238,9 @@
                                         data-course-discount="${m.courseDiscount}"
                                         data-course-qalink="${m.courseQaLink}"
                                         data-course-seq="${m.courseSeq}">강의 정보 수정</button>
-                                <button class="btn btn-danger btn-sm" onclick="openDeleteModal('course1')">강의 삭제 신청</button>
+                                <button class="btn btn-danger btn-sm" onclick="openDeleteModal(this)"
+                                        data-course-name="${m.courseName}"
+                                        data-course-seq="${m.courseSeq}">강의 삭제 신청</button>
                             </div>
                         </div>
                     </c:forEach>
@@ -274,7 +276,9 @@
                             <div class="course-actions">
                                 <button class="btn btn-primary btn-sm" onclick="openSettlementModal(this)"
                                         data-course-name="${m.courseName}"
-                                        data-account-price-="${m.accountPrice}">정산 신청</button>
+                                        data-account-price="${m.accountPrice}"
+                                        data-course-seq="${m.courseSeq}">정산 신청</button>
+
                             </div>
                         </div>
                     </c:forEach>
@@ -397,7 +401,7 @@
             <h2 class="modal-title">강의 삭제 신청</h2>
             <button class="close" onclick="closeModal('deleteModal')">&times;</button>
         </div>
-        <form id="deleteForm">
+        <form id="deleteForm" action="${path}/mypage/deleterequest" method="post">
             <div class="alert alert-error">
                 <strong>⚠️ 주의:</strong> 강의 삭제는 신중히 결정해주세요. 삭제된 강의는 복구할 수 없습니다.
             </div>
@@ -409,14 +413,15 @@
 
             <div class="form-group">
                 <label class="form-label">삭제 사유</label>
-                <textarea class="form-textarea" id="deleteReason" placeholder="강의를 삭제하려는 사유를 상세히 입력해주세요" required></textarea>
+                <textarea name="deleteRequestContent" class="form-textarea" id="deleteReason" placeholder="강의를 삭제하려는 사유를 상세히 입력해주세요" required></textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">확인용 강의명 입력</label>
                 <input type="text" class="form-input" id="confirmCourseName" placeholder="위 강의명을 정확히 입력하세요" required>
             </div>
-
+            <input type="hidden" name="courseSeq" id="deleteCourseSeq"/>
+            <input type="hidden" name="deleteRequestStatus" value="0"/>
             <div class="course-actions">
                 <button type="button" class="btn btn-outline" onclick="closeModal('deleteModal')">취소</button>
                 <button type="submit" class="btn btn-danger">삭제 신청</button>
@@ -432,7 +437,7 @@
             <h2 class="modal-title">강의 정산 신청</h2>
             <button class="close" onclick="closeModal('settlementModal')">&times;</button>
         </div>
-        <form id="settlementForm">
+        <form id="settlementForm" action="${path}/mypage/account" method="post">
             <div class="form-group">
                 <label class="form-label">강의명</label>
                 <input type="text" class="form-input" id="settlementCourseName" readonly>
@@ -440,12 +445,12 @@
 
             <div class="form-group">
                 <label class="form-label">정산 예정 금액</label>
-                <input type="text" class="form-input" id="settlementAmount" readonly>
+                <input name="accountPrice" type="text" class="form-input" id="settlementAmount" readonly>
             </div>
 
             <div class="form-group">
                 <label class="form-label">은행명</label>
-                <select class="form-select" id="bankName" required>
+                <select name="accountBankName" class="form-select" id="bankName" required>
                     <option value="">은행을 선택하세요</option>
                     <option value="KB국민은행">KB국민은행</option>
                     <option value="신한은행">신한은행</option>
@@ -461,18 +466,17 @@
 
             <div class="form-group">
                 <label class="form-label">계좌번호</label>
-                <input type="text" class="form-input" id="accountNumber" placeholder="계좌번호를 입력하세요 (- 없이)" required>
+                <input name="accountBankNumber" type="text" class="form-input" id="accountNumber" placeholder="계좌번호를 입력하세요 (- 없이)" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label">예금주명</label>
-                <input type="text" class="form-input" id="accountHolder" placeholder="예금주명을 입력하세요" required>
+                <label class="form-label">본인 계좌만 가능합니다</label>
             </div>
 
             <div class="alert alert-success">
                 <strong>ℹ️ 안내:</strong> 정산 신청 후 3-5 영업일 내에 검토 후 입금됩니다.
             </div>
-
+            <input type="hidden" name="courseSeq" id="settleCourseSeq"/>
             <div class="course-actions">
                 <button type="button" class="btn btn-outline" onclick="closeModal('settlementModal')">취소</button>
                 <button type="submit" class="btn btn-primary">정산 신청</button>
@@ -621,15 +625,13 @@
 
 
     // 강의 삭제 모달 열기
-    function openDeleteModal(courseId) {
-        const course = courseData[courseId];
-        if (course) {
-            document.getElementById('deleteCourseName').value = course.name;
-            document.getElementById('confirmCourseName').value = '';
-            document.getElementById('deleteReason').value = '';
+    function openDeleteModal(button) {
+        document.getElementById('deleteCourseName').value = button.dataset.courseName;
+        document.getElementById('confirmCourseName').value = '';
 
-            openModal('deleteModal');
-        }
+        document.getElementById('deleteCourseSeq').value = button.dataset.courseSeq;
+        openModal('deleteModal');
+
     }
 
     // 정산 신청 모달 열기
@@ -637,7 +639,7 @@
 
         document.getElementById('settlementCourseName').value = button.dataset.courseName;
         document.getElementById('settlementAmount').value = button.dataset.accountPrice;
-
+        document.getElementById('settleCourseSeq').value = button.dataset.courseSeq;
         openModal('settlementModal');
 
     }
@@ -653,21 +655,16 @@
     }
 
     document.getElementById('deleteForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const originalName = document.getElementById('deleteCourseName').value;
-        const confirmName = document.getElementById('confirmCourseName').value;
+        const originalName = document.getElementById('deleteCourseName').value.trim();
+        const confirmName = document.getElementById('confirmCourseName').value.trim();
 
         if (originalName !== confirmName) {
             showAlert('강의명이 일치하지 않습니다.', 'error');
             return;
         }
-
-        showAlert('강의 삭제 신청이 완료되었습니다. 검토 후 처리됩니다.');
-        closeModal('deleteModal');
     });
 
     document.getElementById('settlementForm').addEventListener('submit', function(e) {
-        e.preventDefault();
         const accountNumber = document.getElementById('accountNumber').value;
 
         // 계좌번호 유효성 검사 (간단한 예시)
@@ -675,15 +672,6 @@
             showAlert('올바른 계좌번호를 입력해주세요.', 'error');
             return;
         }
-
-        showAlert('정산 신청이 완료되었습니다. 3-5 영업일 내에 처리됩니다.');
-        closeModal('settlementModal');
-    });
-
-    // 개인정보 수정 폼
-    document.querySelector('.profile-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        showAlert('개인정보가 성공적으로 수정되었습니다.');
     });
 
 
