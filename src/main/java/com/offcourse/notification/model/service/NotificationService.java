@@ -21,7 +21,7 @@ public class NotificationService {
         //DB 저장 후 사용자에게 실시간 전송
         int result = notificationRepository.insertNotification(event);
         if (result > 0) {
-            emitterService.sendToUser(event.getMemberSeq(), event);
+            emitterService.sendToUser(event);
         }
     }
 

@@ -26,23 +26,14 @@ public class EmitterService {
     /**
      * 특정 사용자에게 알림 전송
      */
-    public void sendToUser(Long memberSeq, NotificationEvent event) {
-        SseEmitter emitter = emitterRepository.get(memberSeq);
+    public void sendToUser(NotificationEvent event) {
+        SseEmitter emitter = emitterRepository.get(event.getMemberSeq());
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event().name("notification").data(event));
             } catch (IOException e) {
-                emitterRepository.delete(memberSeq);
+                emitterRepository.delete(event.getMemberSeq());
             }
-        }
-    }
-
-    /**
-     * 여러 사용자에게 전송 (optional)
-     */
-    public void sendToMultipleUsers(Iterable<Long> memberSeqs, NotificationEvent event) {
-        for (Long memberSeq : memberSeqs) {
-            sendToUser(memberSeq, event);
         }
     }
 }
