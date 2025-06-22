@@ -1042,6 +1042,7 @@
         const video = document.getElementById('bgVideo');
         const loadingScreen = document.getElementById('loadingScreen');
         let playPromise = null;
+        let playAttempted = false; // 재생 시도 플래그 추가
 
         // 비디오 설정
         video.autoplay = true;
@@ -1049,9 +1050,21 @@
         video.muted = true; // 자동재생을 위해 음소거 필수
         video.playsInline = true; // iOS Safari 호환성
 
+        // 비디오가 재생 중인지 확인하는 함수
+        function isVideoPlaying() {
+            return !video.paused && !video.ended && video.readyState > 2;
+        }
+
         // 안전한 비디오 재생 함수
         function playVideoSafely() {
+            // 이미 재생 시도했거나 재생 중이면 중단
+            if (playAttempted || isVideoPlaying()) {
+                console.log('비디오 이미 재생 중이거나 재생 시도됨');
+                return;
+            }
+
             if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+                playAttempted = true; // 재생 시도 플래그 설정
                 playPromise = video.play();
 
                 if (playPromise !== undefined) {
@@ -1062,27 +1075,44 @@
                         }, 500);
                     }).catch(error => {
                         console.log('자동 재생 실패:', error.name, error.message);
+                        playAttempted = false; // 실패 시 플래그 리셋
                         loadingScreen.classList.add('hidden');
                     });
                 }
             }
         }
 
-        // 이벤트 리스너들
+        // 로딩 상태 체크 및 재생 시도
+        function checkAndPlay() {
+            if (!playAttempted && !isVideoPlaying()) {
+                if (video.readyState >= 3) {
+                    playVideoSafely();
+                } else {
+                    console.log('비디오 로딩 중...');
+                }
+            }
+        }
+
+        // 이벤트 리스너들 (once 옵션 사용으로 중복 실행 방지)
         video.addEventListener('loadeddata', function() {
             console.log('비디오 데이터 로드 완료');
-            playVideoSafely();
-        });
+            setTimeout(checkAndPlay, 100); // 약간의 지연 후 실행
+        }, { once: true });
 
         video.addEventListener('canplaythrough', function() {
             console.log('비디오 재생 준비 완료');
-            if (!video.playing) {
-                playVideoSafely();
-            }
-        });
+            setTimeout(checkAndPlay, 100); // 약간의 지연 후 실행
+        }, { once: true });
+
+        // 비디오가 실제로 재생 시작되었을 때
+        video.addEventListener('playing', function() {
+            console.log('비디오 재생 시작됨');
+            loadingScreen.classList.add('hidden');
+        }, { once: true });
 
         // 비디오가 끝나면 마지막 프레임에서 정지
         video.addEventListener('ended', function() {
+            console.log('비디오 재생 완료');
             // 비디오가 끝나면 마지막 프레임에서 멈춤
             video.pause();
             // 마지막 프레임 유지를 위해 currentTime을 약간 뒤로
@@ -1092,8 +1122,23 @@
         // 비디오 로드 에러 처리
         video.addEventListener('error', function() {
             console.error('비디오 로드 실패');
+            playAttempted = false;
             loadingScreen.classList.add('hidden');
         });
+
+        // 사용자 상호작용 후 재생 시도 (모바일 대응)
+        function tryPlayOnInteraction() {
+            if (!playAttempted && !isVideoPlaying()) {
+                checkAndPlay();
+            }
+            // 이벤트 리스너 제거
+            document.removeEventListener('touchstart', tryPlayOnInteraction);
+            document.removeEventListener('click', tryPlayOnInteraction);
+        }
+
+        // 모바일에서 사용자 터치/클릭 시 재생 시도
+        document.addEventListener('touchstart', tryPlayOnInteraction, { once: true });
+        document.addEventListener('click', tryPlayOnInteraction, { once: true });
 
         // 스크롤 시 비디오 페이드 효과 (선택사항)
         window.addEventListener('scroll', function() {
@@ -1116,13 +1161,19 @@
             video.remove();
             loadingScreen.classList.add('hidden');
         }
+
+        // 비디오 로드 시작
+        video.load();
     });
 
     // 페이지 로드 완료 후 로딩 화면 제거 (백업)
     window.addEventListener('load', function() {
         setTimeout(() => {
-            document.getElementById('loadingScreen').classList.add('hidden');
-        }, 2000);
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+                loadingScreen.classList.add('hidden');
+            }
+        }, 3000); // 3초 후 강제로 로딩 화면 제거
     });
 
     // 강의 필터링 함수
