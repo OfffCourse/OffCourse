@@ -67,8 +67,4 @@ public class KafkaConfig {
         return new NewTopic("offcourse-topic", 1, (short) 1);
     }
 
-
-
-
-
 }
