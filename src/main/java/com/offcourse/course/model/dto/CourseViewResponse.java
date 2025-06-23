@@ -1,18 +1,17 @@
 package com.offcourse.course.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
+@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class CourseViewResponse {
+    private Long courseSeq;
     private String courseName;
     private String memberName;
     private Date courseStartDate;
@@ -25,6 +24,7 @@ public class CourseViewResponse {
     private Double averageRating;
     private Integer courseSize;
     private Integer courseCurrentSize;
+
 
     private CourseCategory courseCategory;
     private List<CourseDay> courseDays;

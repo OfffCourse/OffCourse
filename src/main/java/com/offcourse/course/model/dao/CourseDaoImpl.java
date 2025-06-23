@@ -1,9 +1,6 @@
 package com.offcourse.course.model.dao;
 
-import com.offcourse.course.model.dto.Course;
-import com.offcourse.course.model.dto.CourseDay;
-import com.offcourse.course.model.dto.CourseListResponse;
-import com.offcourse.course.model.dto.Episode;
+import com.offcourse.course.model.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -30,26 +27,43 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public int insertCourse(Course course) {
-        return session.insert("course.insertCourse",course);
+        return session.insert("course.insertCourse", course);
     }
 
     @Override
     public int insertCourseDay(CourseDay courseDay) {
-        return session.insert("course.insertCourseDay",courseDay);
+        return session.insert("course.insertCourseDay", courseDay);
     }
 
     @Override
     public int insertEpisode(Episode episode) {
-        return session.insert("course.insertEpisode",episode);
+        return session.insert("course.insertEpisode", episode);
     }
 
     @Override
     public long getCategorySeqByType(String categoryType) {
-        return session.selectOne("course.selectCategorySeqByType",categoryType);
+        return session.selectOne("course.selectCategorySeqByType", categoryType);
     }
 
     @Override
     public int updateCourse(Course course) {
-        return session.update("course.updateCourse",course);
+        return session.update("course.updateCourse", course);
+    }
+
+    @Override
+    public CourseViewResponse getCourseBySeq(Long courseSeq) {
+        return session.selectOne("course.selectCourseBySeq", courseSeq);
+    }
+
+    @Override
+    public List<ReviewViewResponse> getReviewsBySeq(Long courseSeq, int cPage, int numPerPage) {
+        RowBounds rowBounds
+                = new RowBounds((cPage - 1) * numPerPage, numPerPage);
+        return session.selectList("course.selectReviewByCourseSeq", courseSeq, rowBounds);
+    }
+
+    @Override
+    public int getReviewCount(Long courseSeq) {
+        return session.selectOne("course.selectReviewCount", courseSeq);
     }
 }

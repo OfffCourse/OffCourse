@@ -1,9 +1,12 @@
 package com.offcourse.course.controller;
 
 import com.offcourse.common.AjaxPageFactory;
+import com.offcourse.common.PageFactory;
 import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dto.Course;
 import com.offcourse.course.model.dto.CourseListResponse;
+import com.offcourse.course.model.dto.CourseViewResponse;
+import com.offcourse.course.model.dto.ReviewViewResponse;
 import com.offcourse.course.model.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
@@ -21,6 +24,7 @@ public class CourseController {
 
     private final CourseService service;
     private final AjaxPageFactory ajaxPageFactory;
+    private final PageFactory pageFactory;
 
     @GetMapping("/listpage")
     public String courseList() {
@@ -44,14 +48,14 @@ public class CourseController {
     @PostMapping("/insert")
     public String insertEndCourse(@ModelAttribute Course course,
                                   @RequestParam("categoryType") String categoryType,
-                                  @RequestParam("episodeCount") Integer episodeCount,
+                                  //@RequestParam("episodeCount") Integer episodeCount,
                                   @RequestParam("dayList") List<String> courseDays,
                                   Model model) {
 
         long categorySeq = service.getCategorySeqByType(categoryType);
         course.setCategorySeq(categorySeq);
 
-        int result = service.insertCourse(course, episodeCount, courseDays);
+        int result = service.insertCourse(course, courseDays);//, episodeCount
         if (result > 0) {
             model.addAttribute("msg", "강의 등록 성공");
             model.addAttribute("loc", "/course/listpage");
@@ -73,6 +77,26 @@ public class CourseController {
             model.addAttribute("loc", "/mypage");
         }
         return "common/msg";
+    }
+
+    @GetMapping("/view")
+    public String courseView(@RequestParam Long courseSeq,
+                             Model model) {
+        CourseViewResponse course = service.getCourseBySeq(courseSeq);
+        model.addAttribute("course", course);
+        return "course/commonCourseView";
+    }
+
+    @GetMapping("/reviews")
+    @ResponseBody
+    public Map<String, Object> getReviews(@RequestParam Long courseSeq,
+                                          @RequestParam(defaultValue = "1") int cPage,
+                                          @RequestParam(defaultValue = "3") int numPerPage) {
+        List<ReviewViewResponse> reviews = service.getReviewsBySeq(courseSeq, cPage, numPerPage);
+        int totalCount = service.getReviewCount(courseSeq);
+        String pageBar = ajaxPageFactory.basicPageBar(cPage, numPerPage, totalCount);
+
+        return Map.of("reviews", reviews, "pagebar", pageBar);
     }
 
     @ExceptionHandler(value = CourseEpisodeMismatchException.class)

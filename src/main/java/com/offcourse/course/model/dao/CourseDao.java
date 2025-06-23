@@ -1,9 +1,6 @@
 package com.offcourse.course.model.dao;
 
-import com.offcourse.course.model.dto.Course;
-import com.offcourse.course.model.dto.CourseDay;
-import com.offcourse.course.model.dto.CourseListResponse;
-import com.offcourse.course.model.dto.Episode;
+import com.offcourse.course.model.dto.*;
 import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
@@ -17,4 +14,7 @@ public interface CourseDao {
     int insertEpisode(Episode episode);
     long getCategorySeqByType(String categoryType);
     int updateCourse(Course course);
+    CourseViewResponse getCourseBySeq(Long courseSeq);
+    List<ReviewViewResponse> getReviewsBySeq(Long courseSeq,int cPage, int numPerPage);
+    int getReviewCount(Long courseSeq);
 }
