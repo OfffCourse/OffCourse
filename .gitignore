@@ -44,6 +44,7 @@ src/main/resources/
 
 # /resources/images/ 폴더 안의 이미지 파일 무시
 /resources/images/*.jpg
+/resources/images/*.png
 /resources/images/*.jpeg
 /resources/images/*.png
 /resources/images/*.gif
@@ -53,6 +54,8 @@ src/main/resources/
 /resources/images/*.ico
 
 !/resources/images/logo.png
+!/resources/images/bell-icon.png
+
 
 # /resources/upload/ 폴더 안의 이미지, PDF, 영상 파일 무시
 /resources/upload/*.jpg
