@@ -232,7 +232,7 @@
                     const formatted = `\${date.getFullYear()}-\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
 
                     const courseCard = `
-                  <div class="course-card">
+                  <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
                       <div class="course-image">
                           <span class="course-badge">HOT</span>
                           \${c.courseName}
