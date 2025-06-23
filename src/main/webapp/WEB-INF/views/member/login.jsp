@@ -27,24 +27,31 @@
         👁
       </button>
     </div>
-
-    <div class="form-group form-check">
-      <%--사용자가 체크하면 서버에서 쿠키 저장 처리--%>
-      <input type="checkbox" class="form-check-input" id="saveId" name="saveId"
-             <c:if test="${not empty cookie.savedId}">checked</c:if>>
-      <label class="form-check-label" for="saveId">아이디 저장</label>
+    <div class="form-group d-flex justify-content-between align-items-center" style="margin-bottom: 15px;">
+      <div class="form-check">
+        <%--사용자가 체크하면 서버에서 쿠키 저장 처리--%>
+        <input type="checkbox" class="form-check-input" id="saveId" name="saveId"
+               <c:if test="${not empty cookie.savedId}">checked</c:if>>
+        <label class="form-check-label" for="saveId">아이디 저장</label>
+      </div>
+      <div class="form-check">
+        <%--Spring Security의 remember-me 키로 자동 로그인 유지 기능 동작--%>
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+        <label class="form-check-label" for="rememberMe">로그인 유지</label>
+      </div>
     </div>
 
-    <div class="form-group form-check">
-      <%--Spring Security의 remember-me 키로 자동 로그인 유지 기능 동작--%>
-      <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
-      <label class="form-check-label" for="rememberMe">로그인 유지 (2주간)</label>
+    <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+      <a href="${path}/member/find-id" style="margin-right: 10px; color: #888;">아이디 찾기</a>
+      <span style="color: #ccc;">|</span>
+      <a href="${path}/member/find-password" style="margin-left: 10px; color: #888;">비밀번호 찾기</a>
     </div>
 
     <div class="form-group" style="text-align: center;">
       <button type="submit" class="btn btn-primary">로그인</button>
     </div>
   </form>
+
 </div>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
