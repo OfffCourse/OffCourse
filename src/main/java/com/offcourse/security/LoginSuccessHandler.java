@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Slf4j
@@ -25,9 +24,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Member loginMember = userDetails.getMember();
 
-        // 세션에 로그인 정보 저장
-        HttpSession session = request.getSession();
-        session.setAttribute("loginUser", loginMember);
+//        // 세션에 로그인 정보 저장
+//        HttpSession session = request.getSession();
+//        session.setAttribute("loginMember", loginMember);
+//        // 일반회원과 강사회원 모두 이렇게 세션에 저장해주고,
+//        // loginMember의 memberType 값을 통해서 분기를 통해
+//        // 일반회원과 강사회원의 화면을 다르게 보여주거나
+//        // 마이페이지 눌렀을때 다른 화면을 보여주게 할 계획
 
         log.info("✅ 로그인 성공: {}", loginMember.getMemberId());
 

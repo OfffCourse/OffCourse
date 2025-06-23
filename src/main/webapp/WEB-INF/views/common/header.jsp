@@ -41,9 +41,43 @@
                 <li><a href="#bootcamp">국비지원</a></li>
             </ul>
         </nav>
+
+        <!-- 로그인 상태에 따른 헤더 표시 -->
         <div class="header-actions">
-            <a href="${path}/member/loginform" class="btn btn-outline">로그인</a>
-            <a href="${path}/member/enroll/select" class="btn btn-primary">회원가입</a>
+            <c:choose>
+                <%-- 로그인 안 된 경우 --%>
+                <c:when test="${empty loginMember}">
+                    <a href="${path}/member/loginform" class="btn btn-primary">로그인</a>
+                    <a href="${path}/member/enroll/select" class="btn btn-outline">회원가입</a>
+                </c:when>
+
+                <%-- 로그인 된 경우 --%>
+                <c:otherwise>
+                    <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님, 환영합니다!</span>
+                    <c:choose>
+                        <%-- 일반과 강사회원의 마이페이지 주소 다르게 --%>
+                        <c:when test="${loginMember.memberType == '0'}">
+                            <a href="${path}/member/mypage/student" class="btn btn-primary mr-2">마이페이지</a>
+                        </c:when>
+                        <c:when test="${loginMember.memberType == '1'}">
+                            <a href="${path}/member/mypage/teacher" class="btn btn-primary mr-2">마이페이지</a>
+                        </c:when>
+                    </c:choose>
+                    <%--<a href="${path}/member/logout" class="text-muted small align-self-center"
+                       style="margin-top: 4px;">로그아웃</a>
+                    <c:set var="_csrf" value="${_csrf}" />--%>
+                    <form id="logoutForm" action="${path}/member/logout" method="post" style="display:inline;">
+<%--
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        csrf 를 끄면 get 방식으로도 로그아웃이 되긴 되지만, 추후에 csrf 기능도 키려면,
+                        post 방식으로 로그아웃을 보내야 security-context 에서도 받아내고 로그아웃을 시켜줌
+--%>
+                        <button type="submit" class="btn btn-link text-muted small align-self-center"
+                                style="padding: 0; margin-top: 4px;">로그아웃</button>
+                    </form>
+
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
 </header>
