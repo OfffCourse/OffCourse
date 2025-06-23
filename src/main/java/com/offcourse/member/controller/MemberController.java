@@ -5,6 +5,8 @@ import com.offcourse.member.model.dto.Member;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -156,6 +158,13 @@ public class MemberController {
 
     @GetMapping("/member/loginform")
     public String loginForm() {
-        return "member/login";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            // 로그인된 사용자는 로그인 페이지로 접근 못 하게 막고 홈으로 보냄
+            return "redirect:/";
+        }
+
+        return "member/login"; // 로그인하지 않은 사용자만 이 페이지 사용
     }
 }
