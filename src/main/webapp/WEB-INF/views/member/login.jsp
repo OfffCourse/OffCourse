@@ -14,20 +14,31 @@
   <form action="${path}/member/login" method="post" id="loginForm">
     <div class="form-group">
       <label for="memberId">아이디</label>
-      <input type="text" id="memberId" name="memberId" class="form-control" required>
+      <input type="text" id="memberId" name="memberId"
+             value="${cookie.savedId.value}" class="form-control" required>
+      <%--아이디 저장된 쿠키에서 값을 불러옴--%>
     </div>
 
     <div class="form-group" style="position: relative;">
       <label for="memberPwd">비밀번호</label>
       <input type="password" id="memberPwd" name="memberPwd" class="form-control" required>
-      <button type="button" id="togglePwd" style="position: absolute; top: 32px; right: 10px; border: none; background: none;">
+      <button type="button" id="togglePwd"
+              style="position: absolute; top: 32px; right: 10px; border: none; background: none;">
         👁
       </button>
     </div>
 
-    <div class="form-group">
-      <input type="checkbox" id="saveId">
-      <label for="saveId">아이디 저장</label>
+    <div class="form-group form-check">
+      <%--사용자가 체크하면 서버에서 쿠키 저장 처리--%>
+      <input type="checkbox" class="form-check-input" id="saveId" name="saveId"
+             <c:if test="${not empty cookie.savedId}">checked</c:if>>
+      <label class="form-check-label" for="saveId">아이디 저장</label>
+    </div>
+
+    <div class="form-group form-check">
+      <%--Spring Security의 remember-me 키로 자동 로그인 유지 기능 동작--%>
+      <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+      <label class="form-check-label" for="rememberMe">로그인 유지 (2주간)</label>
     </div>
 
     <div class="form-group" style="text-align: center;">
@@ -35,6 +46,7 @@
     </div>
   </form>
 </div>
+
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 
 <script>
@@ -42,27 +54,5 @@
   document.getElementById('togglePwd').addEventListener('click', function () {
     const pwdField = document.getElementById('memberPwd');
     pwdField.type = pwdField.type === 'password' ? 'text' : 'password';
-  });
-
-  // ✅ 아이디 저장 기능 (localStorage 사용)
-  const memberIdInput = document.getElementById('memberId');
-  const saveIdCheckbox = document.getElementById('saveId');
-
-  // 페이지 로드 시 저장된 아이디 불러오기
-  window.addEventListener('DOMContentLoaded', () => {
-    const savedId = localStorage.getItem('savedMemberId');
-    if (savedId) {
-      memberIdInput.value = savedId;
-      saveIdCheckbox.checked = true;
-    }
-  });
-
-  // 로그인 시 아이디 저장 체크여부 확인
-  document.getElementById('loginForm').addEventListener('submit', () => {
-    if (saveIdCheckbox.checked) {
-      localStorage.setItem('savedMemberId', memberIdInput.value);
-    } else {
-      localStorage.removeItem('savedMemberId');
-    }
   });
 </script>
