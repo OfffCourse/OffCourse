@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
@@ -32,4 +35,29 @@ public class MemberServiceImpl implements MemberService {
     public int deleteMember(Long memberSeq) {
         return memberDao.deleteMember(memberSeq);
     }
+
+    @Override
+    public Member findByEmail(String memberEmail) {
+        return memberDao.findByEmail(memberEmail);
+    }
+
+    // MemberServiceImpl
+    @Override
+    public Member findByIdAndEmail(String memberId, String memberEmail) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("memberId", memberId);
+        map.put("memberEmail", memberEmail);
+        return memberDao.findByIdAndEmail(map);
+    }
+
+
+    @Override
+    @Transactional
+    public int updatePassword(String memberId, String memberPwd) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("memberId", memberId);
+        map.put("memberPwd", memberPwd);
+        return memberDao.updatePassword(map);
+    }
+
 }

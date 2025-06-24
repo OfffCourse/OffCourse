@@ -2,6 +2,7 @@
 package com.offcourse.member.controller;
 
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.member.model.service.MailService;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -22,17 +24,22 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/member")
 public class MemberController {
 
     private final MemberService memberService;
+    private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
 
-    @PostMapping("/member/enroll")
+    @PostMapping("/enroll")
     public String enrollMember(
 //            @RequestParam Map<String, Object> map,
             @Validated Member member,
@@ -139,24 +146,24 @@ public class MemberController {
     }
 
 
-    @GetMapping("/member/enroll/select")
+    @GetMapping("/enroll/select")
     public String showEnrollSelectPage() {
         return "member/enrollSelect";
     }
 
-    @GetMapping("/member/enroll/student")
+    @GetMapping("/enroll/student")
     public String showStudentEnrollPage(Model model) {
         model.addAttribute("memberType", "student");
         return "member/enrollStudent";
     }
 
-    @GetMapping("/member/enroll/instructor")
+    @GetMapping("/enroll/instructor")
     public String showInstructorEnrollPage(Model model) {
         model.addAttribute("memberType", "instructor");
         return "member/enrollInstructor";
     }
 
-    @GetMapping("/member/loginform")
+    @GetMapping("/loginform")
     public String loginForm() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -167,4 +174,92 @@ public class MemberController {
 
         return "member/login"; // 로그인하지 않은 사용자만 이 페이지 사용
     }
+
+    @GetMapping("/find-id")
+    public String findIdForm() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            return "redirect:/";
+        }
+        return "member/findId"; // /WEB-INF/views/member/findId.jsp
+    }
+
+    // 아이디 찾기 폼 제출 처리
+    @PostMapping("/find-id")
+    public String findId(@RequestParam("memberEmail") String memberEmail, Model model) {
+        Member member = memberService.findByEmail(memberEmail);
+        if (member != null) {
+            model.addAttribute("foundId", member.getMemberId());
+        } else {
+            model.addAttribute("msg", "회원가입 내역을 확인할 수 없습니다.");
+        }
+        return "member/findIdResult"; // 결과 보여줄 페이지
+    }
+
+    @GetMapping("/find-password")
+    public String findPasswordForm() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            return "redirect:/";
+        }
+        return "member/findPassword"; // /WEB-INF/views/member/findPassword.jsp
+    }
+
+    @PostMapping("/find-password")
+    public String findPassword(@RequestParam("memberId") String memberId,
+                               @RequestParam("memberEmail") String memberEmail,
+                               Model model) {
+        Member member = memberService.findByIdAndEmail(memberId, memberEmail);
+        if (member == null) {
+            model.addAttribute("msg", "일치하는 회원이 없습니다.");
+            return "member/findPasswordResult";
+        }
+
+        // 임시 비밀번호 생성, 암호화, 이메일 전송
+        String tempPwd = generateTempPassword();
+        mailService.sendEmail(memberEmail, "임시 비밀번호 발급", "임시 비밀번호: " + tempPwd);
+        // 이메일 전송이 제대로 되고 나서야 DB에서 비밀번호 업데이트를 해주어야 겠다! 일단은 계속 가자.
+        memberService.updatePassword(memberId, passwordEncoder.encode(tempPwd));
+
+        model.addAttribute("msg", "입력한 이메일로 임시 비밀번호가 전송되었습니다.");
+        return "member/findPasswordResult";
+    }
+
+    private String generateTempPassword() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "!@#$%^&*";
+
+        // 필수 조건 각각 하나씩 넣기
+        StringBuilder sb = new StringBuilder();
+        sb.append(upper.charAt((int) (Math.random() * upper.length())));
+        sb.append(lower.charAt((int) (Math.random() * lower.length())));
+        sb.append(digits.charAt((int) (Math.random() * digits.length())));
+        sb.append(special.charAt((int) (Math.random() * special.length())));
+
+        // 나머지 자리수 (10자리까지)
+        String allChars = upper + lower + digits + special;
+        while (sb.length() < 10) {
+            sb.append(allChars.charAt((int) (Math.random() * allChars.length())));
+        }
+
+        // 순서 랜덤 섞기
+        List<Character> charList = new ArrayList<>();
+        for (char c : sb.toString().toCharArray()) {
+            charList.add(c);
+        }
+        Collections.shuffle(charList);
+
+        // 최종 문자열로 변환
+        StringBuilder finalPwd = new StringBuilder();
+        for (char c : charList) {
+            finalPwd.append(c);
+        }
+
+        return finalPwd.toString();
+    }
+
 }
