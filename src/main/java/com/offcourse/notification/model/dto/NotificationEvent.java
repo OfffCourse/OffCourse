@@ -16,5 +16,7 @@ public class NotificationEvent {
     private Timestamp msgDate;
     private Timestamp msgReadTime;
     private NotificationType msgType; //Location + Msg
+    private String redirectLocation;
     private Long memberSeq;
+    private Long courseSeq;
 }

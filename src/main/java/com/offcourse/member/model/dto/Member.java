@@ -9,6 +9,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Data
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 //@Alias("member")
-public class Member {
+public class Member implements Serializable {
 
     private Long memberSeq;
 

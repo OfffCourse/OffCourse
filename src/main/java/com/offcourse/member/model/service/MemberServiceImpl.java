@@ -2,6 +2,9 @@ package com.offcourse.member.model.service;
 
 import com.offcourse.member.model.dao.MemberDao;
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.notification.model.dto.NotificationEvent;
+import com.offcourse.notification.model.dto.NotificationType;
+import com.offcourse.notification.model.service.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -20,6 +24,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberDao memberDao;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final NotificationProducer notificationProducer;
 
     @Override
     @Transactional
@@ -70,6 +75,25 @@ public class MemberServiceImpl implements MemberService {
                 deleteFile(profilePath, profileFileName);
                 deleteFile(portfolioPath, portfolioFileName);
             }
+
+            NotificationEvent event;
+            if (member.getMemberType().equals("0")) {
+                event = NotificationEvent.builder()
+                        .memberSeq(member.getMemberSeq())
+                        .msgDate(new Timestamp(System.currentTimeMillis()))
+                        .msgType(NotificationType.STUDENT_JOIN_SUCCESS)
+                        .redirectLocation(NotificationType.STUDENT_JOIN_SUCCESS.getRedirectLocation())
+                        .build();
+            } else {
+                event = NotificationEvent.builder()
+                        .memberSeq(member.getMemberSeq())
+                        .msgDate(new Timestamp(System.currentTimeMillis()))
+                        .msgType(NotificationType.STUDENT_JOIN_SUCCESS)
+                        .redirectLocation(NotificationType.STUDENT_JOIN_SUCCESS.getRedirectLocation())
+                        .build();
+            }
+            notificationProducer.send(event);
+
             return result;
         } catch (Exception e) {
             // 예외 시 저장된 파일 삭제 후 롤백
@@ -140,9 +164,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private String generateTempPassword() {
-        String upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String lower   = "abcdefghijklmnopqrstuvwxyz";
-        String digits  = "0123456789";
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
         String special = "!@#$%^&*";
 
         StringBuilder sb = new StringBuilder();

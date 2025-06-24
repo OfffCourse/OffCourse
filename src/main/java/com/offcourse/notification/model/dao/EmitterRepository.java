@@ -14,23 +14,23 @@ public class EmitterRepository {
     //DB에 저장하지 않는 이유 => SSE 연결은 끊기기 쉽고 짧은 생명주기기에 DB에 저장하기엔 부적합하고 객체를 DB에 저장하기에는 좋지않음, DB에 넣고 빼면 오히려 오버헤드 발생
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
+
+    // Emitter 저장. 기존 연결이 있다면 제거 후 새로 저장.
     public void save(Long memberSeq, SseEmitter emitter) {
+        delete(memberSeq); // 기존 emitter 제거 후 저장
         emitters.put(memberSeq, emitter);
     }
 
+    // 특정 사용자의 Emitter 조회
     public SseEmitter get(Long memberSeq) {
         return emitters.get(memberSeq);
     }
 
+    // 특정 사용자의 Emitter 제거
     public void delete(Long memberSeq) {
-        emitters.remove(memberSeq);
-    }
-
-    public boolean exists(Long memberSeq) {
-        return emitters.containsKey(memberSeq);
-    }
-
-    public Map<Long, SseEmitter> findAll() {
-        return emitters;
+        SseEmitter removedEmitter = emitters.remove(memberSeq);
+        if (removedEmitter != null) {
+            removedEmitter.complete();
+        }
     }
 }
