@@ -16,4 +16,6 @@ public class NotificationReadAllResponse {
     private int totalNotificationCount;
     private int totalReadNotificationCount;
     private int totalUnreadNotificationCount;
+    private Long lastMsgSeq;
+    private boolean isLast;
 }
