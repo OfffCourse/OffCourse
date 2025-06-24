@@ -4,11 +4,24 @@
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <link rel="stylesheet" href="${path}/resources/css/courseList.css"/>
+<style>
+    .filter-header {
+        display: flex;
+        justify-content: space-between; /* 오른쪽 정렬은 flex-end, 간격 두려면 space-between */
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+</style>
 <!-- Search Results -->
 <div class="search-results">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <h3>필터</h3>
+        <!-- 필터 헤더 영역 -->
+        <div class="filter-header">
+            <h3>필터</h3>
+            <button id="searchBtn" class="search-btn btn btn-hero btn-hero-primary">검색</button>
+        </div>
         <div class="filter-group">
             <h4>강의 제목</h4>
             <input type="text" id="courseTitle" class="price-input">
@@ -102,7 +115,6 @@
                 <input type="number" id="maxPrice" class="price-input" placeholder="최대" min="0">
             </div>
         </div>
-        <button id="searchBtn" class="search-btn btn btn-hero btn-hero-primary">검색</button>
     </aside>
 
     <!-- Main Content -->
@@ -229,7 +241,11 @@
                 data.courses.forEach(c => {
                     const discounted = Math.round(c.coursePrice * (1 - c.courseDiscount / 100));
                     const date = new Date(c.courseStartDate);
-                    const formatted = `\${date.getFullYear()}-\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
+                    const date2 = new Date(c.courseEndDate);
+                    const formatted = `\${date.getFullYear()}/\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
+                    const formatted2 = `\${(date2.getMonth()+1).toString().padStart(2, '0')}-\${date2.getDate().toString().padStart(2, '0')}`;
+                    const rating = c.averageRating;
+                    const ratingText = rating ? `⭐${rating}` : '';
 
                     const courseCard = `
                   <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
@@ -240,14 +256,15 @@
                       <div class="course-content">
                           <div class="course-meta">
                               <span>👨‍💻 \${c.courseCategory.fullCategoryName}</span>
-                              <span>⭐\${c.averageRating} \${c.reviewCount}명 수강</span>
+                              <span>\${ratingText}</span>
+                              <span>\${c.courseCurrentSize}/\${c.courseSize}명 수강</span>
                           </div>
                           <h3 class="course-title">\${c.courseName}</h3>
                           <p class="course-instructor">\${c.memberName} 강사</p>
                           <div class="course-schedule">
                               <div class="schedule-row">
-                                  <span class="schedule-label">시작일</span>
-                                  <span class="schedule-value">\${formatted}</span>
+                                  <span class="schedule-label">기간</span>
+                                  <span class="schedule-value">\${formatted}~\${formatted2}</span>
                               </div>
                               <div class="schedule-row">
                                   <span class="schedule-label">일시</span>

@@ -15,15 +15,15 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="${path}/mypage?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
+            <li><a href="${path}/mypage/teacher?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
                 <span class="icon">➕</span>
                 <span>강의 개설</span>
             </a></li>
-            <li><a href="${path}/mypage?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
+            <li><a href="${path}/mypage/teacher?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
                 <span class="icon">📚</span>
                 <span>강의 정보 수정</span>
             </a></li>
-            <li><a href="${path}/mypage?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
+            <li><a href="${path}/mypage/teacher?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
                 <span class="icon">💰</span>
                 <span>강의 정산 신청</span>
             </a></li>
@@ -148,7 +148,7 @@
 
                     <!-- QA 링크 -->
                     <div class="mb-3">
-                        <label class="form-label">Q&A 링크</label>
+                        <label class="form-label">Q&A 링크(오픈 카카오톡)</label>
                         <input type="url" class="form-control" name="courseQaLink">
                     </div>
 
@@ -486,6 +486,15 @@
         </form>
     </div>
 </div>
+<script>
+    // 오늘 날짜를 yyyy-mm-dd 형식으로 반환
+    const today = new Date().toISOString().split("T")[0];
+
+    window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("startDate").setAttribute("min", today);
+        document.getElementById("endDate").setAttribute("min", today);
+    });
+</script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
     function execDaumPostcode() {

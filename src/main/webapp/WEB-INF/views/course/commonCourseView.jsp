@@ -441,6 +441,14 @@
     color: white;
   }
 
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+
   /* Responsive */
   @media (max-width: 768px) {
     .detail-wrapper {
@@ -636,8 +644,8 @@
                 <div class="review-avatar">김</div>
                 <div class="review-meta">
                   <h5>김개발자</h5>
-                  <div class="review-date">2024년 6월 5일</div>
                 </div>
+                <div class="review-date">2024년 6월 5일</div>
               </div>
               <div class="stars" style="font-size: 14px; margin-bottom: 8px;">★★★★★</div>
               <div class="review-content">
@@ -648,6 +656,7 @@
             </div>
           </div>
         </div>
+        <div id="review-page-bar"></div>
         <%--<section class="course-reviews">
           <h3>수강생 리뷰</h3>
           <c:forEach var="r" items="${reviews}">
@@ -664,39 +673,20 @@
     <!-- Right Sidebar -->
     <div class="course-sidebar">
       <h3 class="sidebar-title">수강 신청</h3>
-<%--
-      <!-- Schedule Grid -->
-      <div class="schedule-grid">
-        <div class="day-cell day-header">월</div>
-        <div class="day-cell day-header">화</div>
-        <div class="day-cell day-header">수</div>
-        <div class="day-cell day-header">목</div>
-        <div class="day-cell day-header">금</div>
-        <div class="day-cell day-number">1</div>
-        <div class="day-cell day-number">2</div>
-        <div class="day-cell day-number">3</div>
-        <div class="day-cell day-number">4</div>
-        <div class="day-cell day-number">5</div>
-        <div class="day-cell day-number">6</div>
-        <div class="day-cell day-number">7</div>
-        <div class="day-cell day-number">8</div>
-        <div class="day-cell day-number">9</div>
-        <div class="day-cell day-number">10</div>
-      </div>--%>
 
       <!-- Course Schedule Info -->
       <div class="course-schedule-info">
-        <div class="schedule-row">
-          <span class="schedule-label">넷째 입</span>
-          <span class="schedule-value">실무강좌상황</span>
+        <div class="schedule-row" id="teacherview" onclick="location.assign('${path}/course/teacher')"><%--seq추가--%>
+          <span class="schedule-label">강사</span>
+          <span class="schedule-value">김강사</span>
         </div>
         <div class="schedule-row">
           <span class="schedule-label">개강일</span>
           <span class="schedule-value">2025-02-01</span>
         </div>
         <div class="schedule-row">
-          <span class="schedule-label">기간</span>
-          <span class="schedule-value">2개월 내용</span>
+          <span class="schedule-label">종료일</span>
+          <span class="schedule-value">2025-02-01</span>
         </div>
       </div>
 
@@ -707,7 +697,6 @@
           <div class="price-current">120,000원</div>
         </div>
         <button class="enroll-btn">수강 신청</button>
-        <button class="wishlist-btn">♡ 찜하기</button>
       </div>
     </div>
   </div>
@@ -740,5 +729,67 @@
     const heart = this.textContent.includes('♡') ? '♥' : '♡';
     this.innerHTML = heart + ' 찜하기';
   });
+</script>
+<script>
+  // 강의 상세 페이지에서 JS 내에 있는 경우 courseSeq는 서버에서 변수로 전달받는다고 가정
+  const courseSeq = ${course.courseSeq}; // EL 표현식으로 전달
+
+  function loadCourses(cPage = 1) {
+    fetch(`${path}/course/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        courseSeq: courseSeq,
+        cPage: cPage,
+        numPerPage: 3 // 페이지당 리뷰 수
+      })
+    })
+            .then(res => res.json())
+            .then(data => {
+              const container = document.getElementById('curriculum-list');
+              const pageBar = document.getElementById('review-page-bar');
+              container.innerHTML = "";
+
+              if (!data || !data.reviews || data.reviews.length === 0) {
+                container.innerHTML = "<p>리뷰가 없습니다.</p>";
+                pageBar.innerHTML = "";
+                return;
+              }
+
+              data.reviews.forEach(r => {
+                const date = new Date(r.reviewDate);
+                const formattedDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+
+                const reviewHtml = `
+          <div class="curriculum-item">
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-avatar">\${r.memberProfile)}</div>
+                <div class="review-meta">
+                  <h5>\${r.memberName}</h5>
+                </div>
+                <div class="review-date">\${formattedDate}</div>
+              </div>
+              <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
+              <div class="review-content">\${r.reviewContent}</div>
+            </div>
+          </div>
+        `;
+                container.insertAdjacentHTML("beforeend", reviewHtml);
+              });
+
+              pageBar.innerHTML = data.pageBar || "";
+            })
+            .catch(() => alert("리뷰 로딩 실패"));
+  }
+
+  // 페이징 링크 클릭 시 호출
+  function fn_paging(pageNo) {
+    loadCourses(pageNo);
+  }
+
+  // 첫 로딩 시 호출
+  document.addEventListener("DOMContentLoaded", () => loadCourses(1));
+
 </script>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
