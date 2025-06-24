@@ -1,6 +1,5 @@
 package com.offcourse.course.model.service;
 
-import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.course.model.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public int insertCourse(Course course, Integer episodeCount, List<String> courseDays) {
+    public int insertCourse(Course course, List<String> courseDays) {
         int result = dao.insertCourse(course);
         Long courseSeq = course.getCourseSeq();
 
@@ -48,7 +47,7 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        if (result > 0 && episodeCount != null) {
+        if (result > 0) {
             LocalDate start = course.getCourseStartDate().toLocalDate();
             LocalDate end = course.getCourseEndDate().toLocalDate();
 
@@ -61,17 +60,8 @@ public class CourseServiceImpl implements CourseService {
             // 가능한 날짜 계산
             List<LocalDate> possibleDates = getEpisodeDates(start, end, days);
 
-            if (episodeCount > possibleDates.size()) {
-                throw new CourseEpisodeMismatchException(
-                        String.format("선택된 기간 및 요일 내 최대 회차 수는 %d입니다.", possibleDates.size())
-                );
-            }
-
-            // 회차 수에 맞게 자르기
-            List<LocalDate> episodeDates = possibleDates.subList(0, episodeCount);
-
             int count = 1;
-            for (LocalDate date : episodeDates) {
+            for (LocalDate date : possibleDates) {
                 Episode ep = new Episode();
                 ep.setEpisodeCount(count++);
                 ep.setEpisodeDate(Date.valueOf(date));
@@ -91,6 +81,46 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public int updateCourse(Course course) {
         return dao.updateCourse(course);
+    }
+
+    @Override
+    public CourseViewResponse getCourseBySeq(Long courseSeq) {
+        return dao.getCourseBySeq(courseSeq);
+    }
+
+    @Override
+    public List<ReviewViewResponse> getReviewsBySeq(Long courseSeq, int cPage, int numPerPage) {
+        return List.of();
+    }
+
+    @Override
+    public int getReviewCount(Long courseSeq) {
+        return dao.getReviewCount(courseSeq);
+    }
+
+    @Override
+    public boolean checkStudent(Map<String, Long> param) {
+        return dao.checkStudent(param);
+    }
+
+    @Override
+    public List<AttachmentViewResponse> getAttachments(Long courseSeq) {
+        return dao.getAttachments(courseSeq);
+    }
+
+    @Override
+    public Teacher getTeacherBySeq(Long memberSeq) {
+        return dao.getTeacherBySeq(memberSeq);
+    }
+
+    @Override
+    public List<CourseListResponse> getCourseListByTeacher(Long memberSeq, int cPage, int numPerPage) {
+        return dao.getCourseListByTeacher(memberSeq, cPage, numPerPage);
+    }
+
+    @Override
+    public int getCourseCountByTeacher(Long memberSeq) {
+        return dao.getCourseCountByTeacher(memberSeq);
     }
 
     //날짜 계산용 메소드

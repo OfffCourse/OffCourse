@@ -15,15 +15,15 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="${path}/mypage?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
+            <li><a href="${path}/mypage/teacher?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
                 <span class="icon">➕</span>
                 <span>강의 개설</span>
             </a></li>
-            <li><a href="${path}/mypage?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
+            <li><a href="${path}/mypage/teacher?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
                 <span class="icon">📚</span>
                 <span>강의 정보 수정</span>
             </a></li>
-            <li><a href="${path}/mypage?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
+            <li><a href="${path}/mypage/teacher?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
                 <span class="icon">💰</span>
                 <span>강의 정산 신청</span>
             </a></li>
@@ -148,7 +148,7 @@
 
                     <!-- QA 링크 -->
                     <div class="mb-3">
-                        <label class="form-label">Q&A 링크</label>
+                        <label class="form-label">Q&A 링크(오픈 카카오톡)</label>
                         <input type="url" class="form-control" name="courseQaLink">
                     </div>
 
@@ -161,12 +161,6 @@
                     <!-- 카테고리 & 회원 번호는 임시로 숨김 -->
                     <input type="hidden" name="memberSeq" value="1"/>
                     <%--<input type="hidden" name="categorySeq" value="1"/>--%>
-
-                    <!-- 회차 수 -->
-                    <div class="mb-3">
-                        <label class="form-label">총 회차 수</label>
-                        <input type="number" id="episodeCount" class="form-control" name="episodeCount" required min="1">
-                    </div>
 
                     <!-- 요일 선택 -->
                     <div class="mb-3">
@@ -200,9 +194,17 @@
                             <label class="form-check-label" for="sat">토</label>
                         </div>
                     </div>
-
+                    <button type="button" class="btn btn-primary" onclick="episodeCount()">회차 수 계산</button>
                     <button type="submit" class="btn btn-primary">강의 등록</button>
                 </form>
+                <!-- 회차 수 -->
+                <%--<div class="mb-3">
+                    <label class="form-label">총 회차 수</label>
+                    <div class="input-group">
+                        <input type="number" id="episodeCount" class="form-control" name="episodeCount" readonly>
+                        <button type="button" class="btn btn-outline-secondary" onclick="episodeCount()">계산</button>
+                    </div>
+                </div>--%>
             </div>
         </div>
 
@@ -484,6 +486,15 @@
         </form>
     </div>
 </div>
+<script>
+    // 오늘 날짜를 yyyy-mm-dd 형식으로 반환
+    const today = new Date().toISOString().split("T")[0];
+
+    window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("startDate").setAttribute("min", today);
+        document.getElementById("endDate").setAttribute("min", today);
+    });
+</script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
     function execDaumPostcode() {
@@ -524,10 +535,10 @@
     function validateEpisodeCount() {
         const start = new Date(document.getElementById('startDate').value);
         const end = new Date(document.getElementById('endDate').value);
-        const episodeCount = parseInt(document.getElementById('episodeCount').value, 10);
+        //const episodeCount = parseInt(document.getElementById('episodeCount').value, 10);|| isNaN(episodeCount
 
-        if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(episodeCount)) {
-            alert("시작일, 종료일, 회차 수를 모두 입력해주세요.");
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            alert("시작일, 종료일을 모두 입력해주세요.");
             return false;
         }
 
@@ -564,12 +575,54 @@
             return false;
         }
 
-        if (episodeCount > validDates) {
+        /*if (episodeCount > validDates) {
             alert(`선택된 날짜 범위 내에서는 최대 \${validDates}회까지 등록 가능합니다.`);
+            return false;
+        }*/
+        //alert(`선택된 날짜 범위 내에서는 최대 \${validDates}회까지 등록 가능합니다.`);
+        return true;
+    }
+    function episodeCount(){
+        const start = new Date(document.getElementById('startDate').value);
+        const end = new Date(document.getElementById('endDate').value);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            alert("시작일, 종료일을 모두 입력해주세요.");
             return false;
         }
 
-        return true;
+        if (start > end) {
+            alert("시작일은 종료일보다 빠를 수 없습니다.");
+            return false;
+        }
+
+        const selectedDays = [...document.querySelectorAll('input[name="dayList"]:checked')]
+            .map(cb => parseInt(cb.value));
+
+        if (selectedDays.length === 0) {
+            alert("요일을 최소 하나 이상 선택해야 합니다.");
+            return false;
+        }
+
+        // 요일 변환 함수
+        const toMondayStart = (day) => (day === 0 ? 6 : day - 1);
+
+        // 날짜 범위 내에서 조건에 맞는 날짜 수 계산
+        let validDates = 0;
+        let matchDayExists = false;
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const jsDay = d.getDay();                // 일=0
+            const customDay = toMondayStart(jsDay);  // 월=0
+            if (selectedDays.includes(customDay)) {
+                validDates++;
+                matchDayExists = true;
+            }
+        }
+
+        if (!matchDayExists) {
+            alert("선택한 요일이 시작일과 종료일 사이에 포함되어 있지 않습니다.");
+            return false;
+        }
+        alert(`총 \${validDates}회까지 등록됩니다.`);
     }
 </script>
 

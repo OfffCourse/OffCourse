@@ -11,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +22,13 @@ public class MyPageController {
     private final MyPageService service;
     private final MyPageFactory pageFactory;
 
-    @GetMapping
-    public String getMyPage(Model model, HttpSession session, HttpServletRequest request,
-                            @RequestParam(defaultValue = "1") int cPage,
-                            @RequestParam(defaultValue = "3") int numPerPage,
-                            @RequestParam(required = false) String section) {
+    @GetMapping("/teacher")
+    public String getMyPageByTeacher(Model model, HttpServletRequest request,
+                                     @RequestParam(defaultValue = "1") int cPage,
+                                     @RequestParam(defaultValue = "3") int numPerPage,
+                                     @RequestParam(required = false) String section) {
         //회원 세션 저장되면 학생 마이페이지 이동 추가
-        String url = request.getContextPath() + "/mypage?section=" + section;
+        String url = request.getContextPath() + "/mypage/teacher?section=" + section;
         List<TeacherMyPageResponse> myPageResponses = service.getMyPageByTeacher(Map.of("memberSeq", 1L, "cPage", cPage, "numPerPage", numPerPage));
         model.addAttribute("myPageResponses", myPageResponses);
         model.addAttribute("pageBar",
@@ -41,7 +40,7 @@ public class MyPageController {
 
     //임의 학생마이페이지 이동
     @GetMapping("/student")
-    public String mypagestu() {
+    public String getMyPageByStudent() {
         return "mypage/studentMyPage";
     }
 

@@ -13,6 +13,7 @@ public class CourseListResponse {
     private Long courseSeq;
     private String courseName;
     private String memberName;
+    private Long memberSeq;
     private Date courseStartDate;
     private Date courseEndDate;
     private String courseAddress;
