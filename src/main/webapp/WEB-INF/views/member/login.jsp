@@ -6,9 +6,19 @@
 <div style="max-width: 400px; margin: 100px auto;">
   <h2 style="text-align: center;">로그인</h2>
 
-  <!-- 🔴 에러 메시지 -->
-  <c:if test="${not empty param.error}">
-    <p style="color:red; text-align:center;">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+  <!-- 아이디/비번 오류 -->
+  <c:if test="${loginError}">
+    <p style="color:red; text-align:center;">
+      아이디 또는 비밀번호가 올바르지 않습니다.
+    </p>
+  </c:if>
+
+  <!-- 세션 만료 안내 -->
+  <c:if test="${sessionExpired}">
+    <p style="color:orange; text-align:center;">
+      세션이 만료되었습니다.<br/>
+      다른 곳에서 동일 계정으로 로그인하셨습니다.
+    </p>
   </c:if>
 
   <form action="${path}/member/login" method="post" id="loginForm">

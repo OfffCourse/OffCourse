@@ -86,13 +86,26 @@ public class MemberController {
     }
 
     @GetMapping("/loginform")
-    public String loginForm() {
+    public String loginForm(
+            @RequestParam(value="error",   required=false) String error,
+            @RequestParam(value="expired", required=false) String expired,
+            Model model) {
+        // 이미 로그인된 상태면 홈으로
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "redirect:/";
         }
+        // 로그인 실패 에러
+        if (error != null) {
+            model.addAttribute("loginError", true);
+        }
+        // 세션 만료(동시 로그인 제어에 의해 강제 로그아웃)
+        if (expired != null) {
+            model.addAttribute("sessionExpired", true);
+        }
         return "member/login";
     }
+
 
     @GetMapping("/find-id")
     public String findIdForm() {
