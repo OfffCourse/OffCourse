@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class CourseViewResponse {
     private Long courseSeq;
+    private Long memberSeq;
     private String courseName;
     private String memberName;
     private Date courseStartDate;

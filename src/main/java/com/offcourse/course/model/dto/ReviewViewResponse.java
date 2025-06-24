@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @Builder
 public class ReviewViewResponse {
     private Long reviewSeq;
+    private String memberProfile;
     private String reviewContent;
     private Integer reviewRate;
     private String memberName;

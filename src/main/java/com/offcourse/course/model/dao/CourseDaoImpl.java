@@ -66,4 +66,31 @@ public class CourseDaoImpl implements CourseDao {
     public int getReviewCount(Long courseSeq) {
         return session.selectOne("course.selectReviewCount", courseSeq);
     }
+
+    @Override
+    public boolean checkStudent(Map<String, Long> param) {
+        return session.selectOne("course.checkStudent", param);
+    }
+
+    @Override
+    public List<AttachmentViewResponse> getAttachments(Long courseSeq) {
+        return session.selectList("course.selectAttachmentsByCourseSeq", courseSeq);
+    }
+
+    @Override
+    public Teacher getTeacherBySeq(Long memberSeq) {
+        return session.selectOne("course.selectTeacherBySeq", memberSeq);
+    }
+
+    @Override
+    public List<CourseListResponse> getCourseListByTeacher(Long memberSeq, int cPage, int numPerPage) {
+        RowBounds rowBounds
+                = new RowBounds((cPage - 1) * numPerPage, numPerPage);
+        return session.selectList("course.selectCourseListByTeacherSeq", memberSeq, rowBounds);
+    }
+
+    @Override
+    public int getCourseCountByTeacher(Long memberSeq) {
+        return session.selectOne("course.selectCourseByTeacherCount", memberSeq);
+    }
 }
