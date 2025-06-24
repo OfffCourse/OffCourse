@@ -5,6 +5,9 @@ import com.offcourse.member.model.dto.Member;
 import java.util.Map;
 
 public interface MemberDao {
+    int existsById(String memberId);
+
+    int existsByEmail(String memberEmail);
 
     int insertMember(Member member);
 

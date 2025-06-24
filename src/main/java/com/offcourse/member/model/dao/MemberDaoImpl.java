@@ -16,6 +16,12 @@ public class MemberDaoImpl implements MemberDao {
     private static final String NAMESPACE = "member.";
 
     @Override
+    public int existsById(String memberId) { return sqlSession.selectOne(NAMESPACE + "existsById", memberId); }
+
+    @Override
+    public int existsByEmail(String memberEmail) { return sqlSession.selectOne(NAMESPACE + "existsByEmail", memberEmail); }
+
+    @Override
     public int insertMember(Member member) {
         return sqlSession.insert(NAMESPACE + "insertMember", member);
     }

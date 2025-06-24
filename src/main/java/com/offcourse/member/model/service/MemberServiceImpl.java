@@ -27,6 +27,15 @@ public class MemberServiceImpl implements MemberService {
                             MultipartFile profileFile,
                             MultipartFile portfolioFile,
                             HttpSession session) {
+
+        //ID/EMAIL 중복 체크
+        if (memberDao.existsById(member.getMemberId()) > 0) {
+            throw new DuplicateMemberException("이미 사용 중인 아이디입니다.");
+        }
+        if (memberDao.existsByEmail(member.getMemberEmail()) > 0) {
+            throw new DuplicateMemberException("이미 등록된 이메일입니다.");
+        }
+
         String profileFileName = null;
         String portfolioFileName = null;
         String profilePath = "";

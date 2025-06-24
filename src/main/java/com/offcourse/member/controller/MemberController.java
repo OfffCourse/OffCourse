@@ -1,6 +1,7 @@
 package com.offcourse.member.controller;
 
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.member.model.service.DuplicateMemberException;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,12 +35,14 @@ public class MemberController {
             @RequestParam(value ="profileFile", required = false) MultipartFile profileFile,
             @RequestParam(value = "portfolioFile", required = false) MultipartFile portfolioFile,
             HttpSession session,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
+        // 유효성 검사 에러
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> log.warn("Validation failed: {}", error.getDefaultMessage()));
-            redirectAttributes.addFlashAttribute("msg", "입력값 검증 실패");
-            return "redirect:/member/enroll/student";
+            model.addAttribute("msg", "입력값을 다시 확인해주세요.");
+            model.addAttribute("member", member);
+            return "member/enroll" + ("0".equals(member.getMemberType()) ? "Student" : "Instructor");
         }
 
         try {
@@ -48,14 +51,17 @@ public class MemberController {
                 redirectAttributes.addFlashAttribute("msg", "회원가입 성공!");
                 return "redirect:/member/loginform";
             } else {
-                redirectAttributes.addFlashAttribute("msg", "회원가입 실패. 다시 시도해주세요.");
-                return "redirect:/member/enroll/select";
+                model.addAttribute("msg", "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
+        } catch (DuplicateMemberException dup) {
+            model.addAttribute("msg", dup.getMessage());
         } catch (Exception e) {
             log.error("회원가입 중 예외 발생", e);
-            redirectAttributes.addFlashAttribute("msg", "오류가 발생했습니다.");
-            return "redirect:/member/enroll/select";
+            model.addAttribute("msg", "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
+        // 실패 시엔 폼으로 되돌아가기
+        model.addAttribute("member", member);
+        return "member/enroll" + ("0".equals(member.getMemberType()) ? "Student" : "Instructor");
     }
 
     @GetMapping("/enroll/select")
@@ -65,13 +71,17 @@ public class MemberController {
 
     @GetMapping("/enroll/student")
     public String showStudentEnrollPage(Model model) {
-        model.addAttribute("memberType", "student");
+        if (!model.containsAttribute("member")) {
+            model.addAttribute("member", new Member());
+        }
         return "member/enrollStudent";
     }
 
     @GetMapping("/enroll/instructor")
     public String showInstructorEnrollPage(Model model) {
-        model.addAttribute("memberType", "instructor");
+        if (!model.containsAttribute("member")) {
+            model.addAttribute("member", new Member());
+        }
         return "member/enrollInstructor";
     }
 
