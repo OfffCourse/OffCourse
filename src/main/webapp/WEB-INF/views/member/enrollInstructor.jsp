@@ -3,6 +3,22 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 
+<!-- 전체 화면 오버레이 스피너 -->
+<div id="loadingOverlay" style="
+     display: none;
+     position: fixed;
+     top: 0; left: 0;
+     width: 100%; height: 100%;
+     background: rgba(255,255,255,0.7);
+     z-index: 9999;
+     justify-content: center;
+     align-items: center;
+">
+  <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
+
 <div style="margin-top: 100px; max-width: 700px; margin: auto; padding: 20px;">
   <h2 style="text-align:center; margin-bottom:30px;">강사 회원가입</h2>
 
@@ -37,6 +53,15 @@
                required
                title="영문자, 숫자, 특수문자를 포함한 8자 이상">
         <span class="toggle-password" onclick="togglePassword('password', this)">&#128065;</span>
+      </div>
+      <!-- 복합성 체크 -->
+      <div id="pwdCriteria" style="font-size:0.9em; margin-top:6px;">
+        <ul style="list-style:none; padding:0;">
+          <li id="crit-length">• 8자 이상</li>
+          <li id="crit-letter">• 영문자 최소 1개</li>
+          <li id="crit-number">• 숫자 최소 1개</li>
+          <li id="crit-special">• 특수문자 최소 1개 (!@#$%^&*()_+=-)</li>
+        </ul>
       </div>
     </div>
 
@@ -117,18 +142,25 @@
       <small class="form-text text-muted">숫자만 입력해주세요. 예: 01012345678</small>
     </div>
 
+    <!-- 기본 프로필(hidden) -->
+    <input type="hidden"
+           name="memberProfile"
+           value="default_profile_instructor.png"/>
     <div class="form-group">
       <label>프로필 이미지</label>
       <input type="file"
              name="profileFile"
+             id="profileFile"
              class="form-control-file">
     </div>
 
     <div class="form-group">
-      <label>포트폴리오 파일 (선택)</label>
+      <label>포트폴리오 파일 </label>
       <input type="file"
              name="portfolioFile"
-             class="form-control-file">
+             id="portfolioFile"
+             class="form-control-file"
+             required>
     </div>
 
     <div class="form-group" style="text-align:center; margin-top:30px;">
@@ -180,17 +212,75 @@
 
   // 최종 유효성 검사 + 주소 합치기
   function validateForm() {
+    // ① 비밀번호 일치 체크
     const pwd     = document.getElementById("password").value;
     const confirm = document.getElementById("confirmPassword").value;
     if (pwd !== confirm) {
       alert("비밀번호가 일치하지 않습니다.");
       return false;
     }
+    // ② 복합성 체크
+    const ok = pwd.length>=8
+            && /[A-Za-z]/.test(pwd)
+            && /\d/.test(pwd)
+            && /[!@#$%^&*()_+=-]/.test(pwd);
+    if (!ok) {
+      alert("비밀번호는 8자 이상, 영문자·숫자·특수문자를 최소 1개씩 포함해야 합니다.");
+      return false;
+    }
+    // ③ 강사 포트폴리오 필수
+    const portfolio = document.getElementById('portfolioFile').files;
+    if (portfolio.length === 0) {
+      alert('강사 회원은 포트폴리오 파일을 반드시 첨부해야 합니다.');
+      return false;
+    }
+    // ④ 주소 합치기
     const road   = document.getElementById("roadAddress").value;
     const detail = document.getElementById("memberAddress").value;
     document.getElementById("memberAddress").value = road + " " + detail;
     return true;
   }
+
+  document.getElementById('profileFile')
+          .addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              document.getElementById('profilePreview').src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+          });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('loadingOverlay');
+    document.getElementById('instructorEnrollForm').addEventListener('submit', function() {
+      overlay.style.display = 'flex';
+    });
+  });
+
+  // 비밀번호 입력 시 실시간 체크
+  document.getElementById('password')
+          .addEventListener('input', function() {
+            const v = this.value;
+            const checks = {
+              'crit-length': v.length >= 8,
+              'crit-letter': /[A-Za-z]/.test(v),
+              'crit-number': /\d/.test(v),
+              'crit-special': /[!@#$%^&*()_+=-]/.test(v)
+            };
+            for (let id in checks) {
+              const el = document.getElementById(id);
+              if (checks[id]) {
+                el.style.color = 'green';
+                el.style.textDecoration = 'line-through';
+              } else {
+                el.style.color = 'black';
+                el.style.textDecoration = 'none';
+              }
+            }
+          });
+
 </script>
 
 <style>
