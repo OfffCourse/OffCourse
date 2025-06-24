@@ -8,12 +8,14 @@
   <div style="display: flex; justify-content: center; gap: 40px; margin-top: 40px;">
     <a href="${path}/member/enroll/student" class="member-card">
       <div class="card">
+        <img src="${path}/resources/images/student.png" alt="학생 아이콘" class="card-icon"/>
         <h3>일반 회원</h3>
         <p>수강생으로 가입합니다</p>
       </div>
     </a>
     <a href="${path}/member/enroll/instructor" class="member-card">
       <div class="card">
+        <img src="${path}/resources/images/instructor.png" alt="강사 아이콘" class="card-icon"/>
         <h3>강사 회원</h3>
         <p>강사로 가입합니다</p>
       </div>
@@ -48,5 +50,10 @@
   .card h3 {
     font-size: 22px;
     margin-bottom: 8px;
+  }
+  .card-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
   }
 </style>

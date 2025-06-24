@@ -22,6 +22,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         log.warn("❌ 로그인 실패: {}", exception.getMessage());
 
         // 로그인 실패 시 로그인 페이지로 리다이렉트 (에러 표시)
-        response.sendRedirect(request.getContextPath() + "/member/login?error=true");
+        response.sendRedirect(request.getContextPath() + "/member/loginform?error=true");
+
     }
 }
