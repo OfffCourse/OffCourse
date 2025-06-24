@@ -1,12 +1,12 @@
 package com.offcourse.notification.controller;
 
-import com.offcourse.member.model.dto.Member;
 import com.offcourse.notification.exception.NotificationBatchUpdateException;
 import com.offcourse.notification.exception.NotificationDeleteMismatchException;
 import com.offcourse.notification.exception.NotificationUpdateMismatchException;
 import com.offcourse.notification.model.dto.NotificationReadAllResponse;
 import com.offcourse.notification.model.service.EmitterService;
 import com.offcourse.notification.model.service.NotificationService;
+import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +27,7 @@ public class NotificationController {
     // SSE 연결 (실시간 알림 구독)
     @GetMapping("/subscribe")
     public SseEmitter subscribe(Authentication authentication) {
-        Member member = (Member) authentication.getPrincipal();
-        return emitterService.connect(member.getMemberSeq());
+        return emitterService.connect(((CustomUserDetails) authentication.getPrincipal()).getMemberSeq());
     }
 
     // NoOffset 페이징 처리
@@ -40,20 +39,20 @@ public class NotificationController {
             @RequestParam(required = false) Long lastMsgSeq,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return notificationService.getNotificationsNoOffset(((Member) authentication.getPrincipal()).getMemberSeq(), filter, lastMsgSeq, size);
+        return notificationService.getNotificationsNoOffset(((CustomUserDetails) authentication.getPrincipal()).getMemberSeq(), filter, lastMsgSeq, size);
     }
 
     // 전체 알림 읽음 처리
     @PostMapping("/read/all")
     public ResponseEntity<String> markAllAsRead(Authentication authentication) {
-        notificationService.markAllAsRead(((Member) authentication.getPrincipal()).getMemberSeq());
+        notificationService.markAllAsRead(((CustomUserDetails) authentication.getPrincipal()).getMemberSeq());
         return ResponseEntity.ok("알림이 정상적으로 읽음 처리되었습니다.");
     }
 
     // 선택 알림 읽음 처리
     @PostMapping("/read/select")
-    public ResponseEntity<String> markSelectedAsRead(@RequestBody List<Long> msgSeqList, Authentication authentication) {
-        notificationService.markSelectedAsRead(((Member) authentication.getPrincipal()).getMemberSeq(), msgSeqList);
+    public ResponseEntity<String> markSelectedAsRead(@RequestBody List<Long> msgSeqList) {
+        notificationService.markSelectedAsRead(msgSeqList);
         return ResponseEntity.ok("알림이 정상적으로 읽음 처리되었습니다.");
     }
 

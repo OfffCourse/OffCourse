@@ -11,6 +11,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,15 +28,33 @@ public class NotificationRepository {
     }
 
     public List<NotificationEvent> findReadNotificationNoOffset(Long memberSeq, Long lastMsgSeq, int size) {
-        return session.selectList("notification.findReadNotificationNoOffset", Map.of("memberSeq", memberSeq, "lastMsgSeq", lastMsgSeq, "size", size));
+        Map<String, Object> param = new HashMap<>();
+        param.put("memberSeq", memberSeq);
+        param.put("size", size);
+        if (lastMsgSeq != null) {
+            param.put("lastMsgSeq", lastMsgSeq);
+        }
+        return session.selectList("notification.findReadNotificationNoOffset", param);
     }
 
     public List<NotificationEvent> findUnreadNotificationNoOffset(Long memberSeq, Long lastMsgSeq, int size) {
-        return session.selectList("notification.findUnreadNotificationNoOffset", Map.of("memberSeq", memberSeq, "lastMsgSeq", lastMsgSeq, "size", size));
+        Map<String, Object> param = new HashMap<>();
+        param.put("memberSeq", memberSeq);
+        param.put("size", size);
+        if (lastMsgSeq != null) {
+            param.put("lastMsgSeq", lastMsgSeq);
+        }
+        return session.selectList("notification.findUnreadNotificationNoOffset", param);
     }
 
     public List<NotificationEvent> findAllNotificationNoOffset(Long memberSeq, Long lastMsgSeq, int size) {
-        return session.selectList("notification.findAllNotificationNoOffset", Map.of("memberSeq", memberSeq, "lastMsgSeq", lastMsgSeq, "size", size));
+        Map<String, Object> param = new HashMap<>();
+        param.put("memberSeq", memberSeq);
+        param.put("size", size);
+        if (lastMsgSeq != null) {
+            param.put("lastMsgSeq", lastMsgSeq);
+        }
+        return session.selectList("notification.findAllNotificationNoOffset", param);
     }
 
     public int countUnreadNotificationAllByMemberSeq(Long memberSeq) {
@@ -48,6 +67,10 @@ public class NotificationRepository {
 
     public int countReadNotificationAllByMemberSeq(Long memberSeq) {
         return session.selectOne("notification.countReadNotificationAllByMemberSeq", memberSeq);
+    }
+
+    public int countUnreadNotificationByMsgSeqs(List<Long> msgSeqList) {
+        return session.selectOne("notification.countUnreadNotificationByMsgSeqs", msgSeqList);
     }
 
     public int markAllAsRead(Long memberSeq) {

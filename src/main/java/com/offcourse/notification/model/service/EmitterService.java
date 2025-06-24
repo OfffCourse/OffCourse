@@ -29,6 +29,12 @@ public class EmitterService {
         emitter.onTimeout(() -> emitterRepository.delete(memberSeq));
         emitter.onError((e) -> emitterRepository.delete(memberSeq));
 
+        try {
+            emitter.send(SseEmitter.event().name("connect").data("connected"));
+        } catch (IOException e) {
+            log.error("SSE 연결 알림 전송 실패", e);
+        }
+
         //SSE 연결 복구 시 Redis 재전송 시도
         redisService.retryBackupNotifications(memberSeq, event -> {
             try {
