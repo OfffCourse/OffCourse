@@ -1,14 +1,11 @@
-// MemberController.java
 package com.offcourse.member.controller;
 
 import com.offcourse.member.model.dto.Member;
-import com.offcourse.member.model.service.MailService;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,13 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,12 +26,9 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
-    private final MailService mailService;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/enroll")
     public String enrollMember(
-//            @RequestParam Map<String, Object> map,
             @Validated Member member,
             BindingResult bindingResult,
             @RequestParam(value ="profileFile", required = false) MultipartFile profileFile,
@@ -49,102 +36,27 @@ public class MemberController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        System.out.println("🔥 컨트롤러 메서드 진입!");
-
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> System.out.println("❗️" + error.getDefaultMessage()));
+            bindingResult.getAllErrors().forEach(error -> log.warn("Validation failed: {}", error.getDefaultMessage()));
             redirectAttributes.addFlashAttribute("msg", "입력값 검증 실패");
-            System.out.println("바인딩 실패");
             return "redirect:/member/enroll/student";
         }
 
-        String profileFileName = null;
-        String portfolioFileName = null;
-        String profilePath="";
-        String portfolioPath="";
         try {
-//            map.forEach((k,v)-> System.out.println(k + " = " + v));
-            log.info("📌 member = {}", member);
-            System.out.println(member.toString());
-            System.out.println(profileFile);
-            // 🔐 비밀번호 암호화
-            System.out.println("🔥 컨트롤러 메서드 진입!");
-            member.setMemberPwd(passwordEncoder.encode(member.getMemberPwd()));
-
-
-            // 🔽 파일 저장 경로 설정
-            profilePath = session.getServletContext().getRealPath(
-                    member.getMemberType().equals("1") ? "/resources/upload/instructor/profile" :
-                            "/resources/upload/student/profile");
-
-            portfolioPath = session.getServletContext().getRealPath("/resources/upload/instructor/portfolio");
-            // 🔽 프로필 파일 저장
-            if (profileFile != null && !profileFile.isEmpty()) {
-                profileFileName = saveFile(profileFile, profilePath);
-                member.setMemberProfile(profileFileName);
-            }
-
-
-            // 🔽 포트폴리오 파일 저장 (강사 전용)
-            if ("1".equals(member.getMemberType()) && portfolioFile != null && !portfolioFile.isEmpty()) {
-                portfolioFileName = saveFile(portfolioFile, portfolioPath);
-                member.setPortfolioFileName(portfolioFileName);
-            }
-
-            // 🔽 DB 저장 (트랜잭션 적용된 서비스)
-            int result = memberService.insertMember(member);
-//            int result = 1;
+            int result = memberService.insertMember(member, profileFile, portfolioFile, session);
             if (result > 0) {
                 redirectAttributes.addFlashAttribute("msg", "회원가입 성공!");
                 return "redirect:/member/loginform";
             } else {
-                deleteFile(profilePath, profileFileName);
-                deleteFile(portfolioPath, portfolioFileName);
                 redirectAttributes.addFlashAttribute("msg", "회원가입 실패. 다시 시도해주세요.");
-                System.out.println("디비 저장이 안 된건가");
-
                 return "redirect:/member/enroll/select";
             }
-
         } catch (Exception e) {
             log.error("회원가입 중 예외 발생", e);
-            deleteFile(profilePath, profileFileName);
-            deleteFile(portfolioPath, portfolioFileName);
             redirectAttributes.addFlashAttribute("msg", "오류가 발생했습니다.");
-            System.out.println("회원가입 중 예외 발생..ㅜㅜ");
-
             return "redirect:/member/enroll/select";
         }
     }
-
-    private String saveFile(MultipartFile file, String path) throws IOException {
-        String oriName = file.getOriginalFilename();
-        String ext = oriName.substring(oriName.lastIndexOf("."));
-        int rnd = (int) (Math.random() * 1000) + 1;
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
-        String rename = "offcourse_" + timeStamp + "_" + rnd + ext;
-
-        File dir = new File(path);
-        if (!dir.exists()) dir.mkdirs();
-
-        file.transferTo(new File(dir, rename));
-        return rename;
-    }
-
-    private void deleteFile(String path, String fileName) {
-        if (fileName != null) {
-            File file = new File(path, fileName);
-            if (file.exists()) {
-                boolean deleted = file.delete();
-                if (deleted) {
-                    log.info("🗑️ 삭제된 파일: {}", file.getAbsolutePath());
-                } else {
-                    log.warn("⚠️ 파일 삭제 실패: {}", file.getAbsolutePath());
-                }
-            }
-        }
-    }
-
 
     @GetMapping("/enroll/select")
     public String showEnrollSelectPage() {
@@ -166,26 +78,21 @@ public class MemberController {
     @GetMapping("/loginform")
     public String loginForm() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-            // 로그인된 사용자는 로그인 페이지로 접근 못 하게 막고 홈으로 보냄
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "redirect:/";
         }
-
-        return "member/login"; // 로그인하지 않은 사용자만 이 페이지 사용
+        return "member/login";
     }
 
     @GetMapping("/find-id")
     public String findIdForm() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "redirect:/";
         }
-        return "member/findId"; // /WEB-INF/views/member/findId.jsp
+        return "member/findId";
     }
 
-    // 아이디 찾기 폼 제출 처리
     @PostMapping("/find-id")
     public String findId(@RequestParam("memberEmail") String memberEmail, Model model) {
         Member member = memberService.findByEmail(memberEmail);
@@ -194,72 +101,28 @@ public class MemberController {
         } else {
             model.addAttribute("msg", "회원가입 내역을 확인할 수 없습니다.");
         }
-        return "member/findIdResult"; // 결과 보여줄 페이지
+        return "member/findIdResult";
     }
 
     @GetMapping("/find-password")
     public String findPasswordForm() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "redirect:/";
         }
-        return "member/findPassword"; // /WEB-INF/views/member/findPassword.jsp
+        return "member/findPassword";
     }
 
     @PostMapping("/find-password")
     public String findPassword(@RequestParam("memberId") String memberId,
                                @RequestParam("memberEmail") String memberEmail,
                                Model model) {
-        Member member = memberService.findByIdAndEmail(memberId, memberEmail);
-        if (member == null) {
+        boolean success = memberService.resetPassword(memberId, memberEmail);
+        if (!success) {
             model.addAttribute("msg", "일치하는 회원이 없습니다.");
-            return "member/findPasswordResult";
+        } else {
+            model.addAttribute("msg", "입력한 이메일로 임시 비밀번호가 전송되었습니다.");
         }
-
-        // 임시 비밀번호 생성, 암호화, 이메일 전송
-        String tempPwd = generateTempPassword();
-        mailService.sendEmail(memberEmail, "임시 비밀번호 발급", "임시 비밀번호: " + tempPwd);
-        // 이메일 전송이 제대로 되고 나서야 DB에서 비밀번호 업데이트를 해주어야 겠다! 일단은 계속 가자.
-        memberService.updatePassword(memberId, passwordEncoder.encode(tempPwd));
-
-        model.addAttribute("msg", "입력한 이메일로 임시 비밀번호가 전송되었습니다.");
         return "member/findPasswordResult";
     }
-
-    private String generateTempPassword() {
-        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String lower = "abcdefghijklmnopqrstuvwxyz";
-        String digits = "0123456789";
-        String special = "!@#$%^&*";
-
-        // 필수 조건 각각 하나씩 넣기
-        StringBuilder sb = new StringBuilder();
-        sb.append(upper.charAt((int) (Math.random() * upper.length())));
-        sb.append(lower.charAt((int) (Math.random() * lower.length())));
-        sb.append(digits.charAt((int) (Math.random() * digits.length())));
-        sb.append(special.charAt((int) (Math.random() * special.length())));
-
-        // 나머지 자리수 (10자리까지)
-        String allChars = upper + lower + digits + special;
-        while (sb.length() < 10) {
-            sb.append(allChars.charAt((int) (Math.random() * allChars.length())));
-        }
-
-        // 순서 랜덤 섞기
-        List<Character> charList = new ArrayList<>();
-        for (char c : sb.toString().toCharArray()) {
-            charList.add(c);
-        }
-        Collections.shuffle(charList);
-
-        // 최종 문자열로 변환
-        StringBuilder finalPwd = new StringBuilder();
-        for (char c : charList) {
-            finalPwd.append(c);
-        }
-
-        return finalPwd.toString();
-    }
-
 }
