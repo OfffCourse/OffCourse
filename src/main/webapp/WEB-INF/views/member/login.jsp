@@ -3,6 +3,22 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 
+<!-- 전체 화면 오버레이 스피너 -->
+<div id="loadingOverlay" style="
+     display: none;
+     position: fixed;
+     top: 0; left: 0;
+     width: 100%; height: 100%;
+     background: rgba(255,255,255,0.7);
+     z-index: 9999;
+     justify-content: center;
+     align-items: center;
+">
+  <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
+
 <div style="max-width: 400px; margin: 100px auto;">
   <h2 style="text-align: center;">로그인</h2>
 
@@ -57,7 +73,7 @@
       <a href="${path}/member/find-password" style="margin-left: 10px; color: #888;">비밀번호 찾기</a>
     </div>
 
-    <div class="form-group" style="text-align: center;">
+    <div class="form-group" style="text-align:center;">
       <button type="submit" class="btn btn-primary">로그인</button>
     </div>
   </form>
@@ -67,9 +83,16 @@
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 
 <script>
-  // 👁 비밀번호 보기 토글
-  document.getElementById('togglePwd').addEventListener('click', function () {
-    const pwdField = document.getElementById('memberPwd');
-    pwdField.type = pwdField.type === 'password' ? 'text' : 'password';
+  document.addEventListener('DOMContentLoaded', function () {
+    const overlay = document.getElementById('loadingOverlay');
+    // 로그인 폼 제출 시 오버레이 보이기
+    document.getElementById('loginForm').addEventListener('submit', function () {
+      overlay.style.display = 'flex';
+    });
+    // 👁 비밀번호 토글
+    document.getElementById('togglePwd').addEventListener('click', function () {
+      const pwd = document.getElementById('memberPwd');
+      pwd.type = pwd.type === 'password' ? 'text' : 'password';
+    });
   });
 </script>
