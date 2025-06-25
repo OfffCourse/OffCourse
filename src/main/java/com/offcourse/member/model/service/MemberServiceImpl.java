@@ -2,6 +2,7 @@ package com.offcourse.member.model.service;
 
 import com.offcourse.member.model.dao.MemberDao;
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.member.model.exception.DuplicateMemberException;
 import com.offcourse.notification.model.dto.NotificationEvent;
 import com.offcourse.notification.model.dto.NotificationType;
 import com.offcourse.notification.model.service.NotificationProducer;
@@ -25,6 +26,47 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final NotificationProducer notificationProducer;
+    private static final String ATTR_EMAIL    = "authEmail";
+    private static final String ATTR_CODE     = "authCode";
+    private static final String ATTR_EXPIRE   = "authExpire";
+    private static final String ATTR_VERIFIED = "emailVerified";
+
+    @Override
+    public void sendAuthCode(String email, HttpSession session) {
+        // 6자리 랜덤 코드 생성
+        String code = String.format("%06d", new Random().nextInt(1_000_000));
+        // 이메일 발송
+        mailService.sendEmail(email, "회원가입 인증번호", "인증번호: " + code);
+        // 세션에 저장 (이메일, 코드, 만료시간)
+        session.setAttribute(ATTR_EMAIL,    email);
+        session.setAttribute(ATTR_CODE,     code);
+        session.setAttribute(ATTR_EXPIRE,   System.currentTimeMillis() + 5 * 60 * 1000);
+        session.setAttribute(ATTR_VERIFIED, false);
+    }
+    @Override
+    public boolean verifyAuthCode(String code, HttpSession session) {
+        String sessEmail = (String) session.getAttribute(ATTR_EMAIL);
+        String sessCode  = (String) session.getAttribute(ATTR_CODE);
+        Long   expire    = (Long)   session.getAttribute(ATTR_EXPIRE);
+
+        if (sessEmail == null || sessCode == null || expire == null) {
+            throw new IllegalStateException("인증요청이 없습니다.");
+        }
+        if (System.currentTimeMillis() > expire) {
+            return false;
+        }
+        boolean ok = sessCode.equals(code);
+        if (ok) {
+            session.setAttribute(ATTR_VERIFIED, true);
+        }
+        return ok;
+    }
+    @Override
+    public boolean isEmailVerified(String email, HttpSession session) {
+        Boolean verified = (Boolean) session.getAttribute(ATTR_VERIFIED);
+        String  sessEmail= (String)  session.getAttribute(ATTR_EMAIL);
+        return Boolean.TRUE.equals(verified) && email.equals(sessEmail);
+    }
 
     @Override
     @Transactional
@@ -102,6 +144,27 @@ public class MemberServiceImpl implements MemberService {
             throw new RuntimeException("회원가입 처리 중 오류 발생", e);
         }
     }
+
+    private String saveFile(MultipartFile file, String path) throws IOException {
+        String oriName = file.getOriginalFilename();
+        String ext = oriName.substring(oriName.lastIndexOf('.'));
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
+        int rnd = (int) (Math.random() * 1000) + 1;
+        String rename = "offcourse_" + timeStamp + "_" + rnd + ext;
+
+        File dir = new File(path);
+        if (!dir.exists()) dir.mkdirs();
+        file.transferTo(new File(dir, rename));
+        return rename;
+    }
+
+    private void deleteFile(String path, String fileName) {
+        if (fileName != null) {
+            File file = new File(path, fileName);
+            if (file.exists()) file.delete();
+        }
+    }
+
 
     @Override
     public Member selectMemberById(String memberId) {
@@ -188,23 +251,5 @@ public class MemberServiceImpl implements MemberService {
         return pwd.toString();
     }
 
-    private String saveFile(MultipartFile file, String path) throws IOException {
-        String oriName = file.getOriginalFilename();
-        String ext = oriName.substring(oriName.lastIndexOf('.'));
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
-        int rnd = (int) (Math.random() * 1000) + 1;
-        String rename = "offcourse_" + timeStamp + "_" + rnd + ext;
 
-        File dir = new File(path);
-        if (!dir.exists()) dir.mkdirs();
-        file.transferTo(new File(dir, rename));
-        return rename;
-    }
-
-    private void deleteFile(String path, String fileName) {
-        if (fileName != null) {
-            File file = new File(path, fileName);
-            if (file.exists()) file.delete();
-        }
-    }
 }

@@ -1,7 +1,7 @@
 package com.offcourse.member.controller;
 
 import com.offcourse.member.model.dto.Member;
-import com.offcourse.member.model.service.DuplicateMemberException;
+import com.offcourse.member.model.exception.DuplicateMemberException;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,6 +27,27 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @PostMapping("/sendAuthCode")
+    @ResponseBody
+    public String sendAuthCode(@RequestParam String email, HttpSession session) {
+        memberService.sendAuthCode(email, session);
+        return "인증번호가 " + email + " 로 전송되었습니다.";
+    }
+
+    @PostMapping("/verifyAuthCode")
+    @ResponseBody
+    public Map<String, Object> verifyAuthCode(@RequestParam String code, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean ok = memberService.verifyAuthCode(code, session);
+            response.put("success", ok);
+            response.put("error", ok ? null : "인증번호가 일치하지 않거나 만료되었습니다.");
+        } catch (IllegalStateException e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
     @PostMapping("/enroll")
     public String enrollMember(
             @Validated Member member,
@@ -44,6 +64,17 @@ public class MemberController {
             model.addAttribute("member", member);
             return "member/enroll" + ("0".equals(member.getMemberType()) ? "Student" : "Instructor");
         }
+
+        // 이메일 인증 확인
+        if (!memberService.isEmailVerified(member.getMemberEmail(), session)) {
+            model.addAttribute("msg", "이메일 인증을 완료해주세요.");
+            model.addAttribute("member", member);
+            return "member/enroll" + ("0".equals(member.getMemberType())? "Student":"Instructor");
+        }
+        session.removeAttribute("authEmail");
+        session.removeAttribute("authCode");
+        session.removeAttribute("authExpire");
+        session.removeAttribute("emailVerified");
 
         try {
             int result = memberService.insertMember(member, profileFile, portfolioFile, session);
@@ -86,13 +117,26 @@ public class MemberController {
     }
 
     @GetMapping("/loginform")
-    public String loginForm() {
+    public String loginForm(
+            @RequestParam(value="error",   required=false) String error,
+            @RequestParam(value="expired", required=false) String expired,
+            Model model) {
+        // 이미 로그인된 상태면 홈으로
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "redirect:/";
         }
+        // 로그인 실패 에러
+        if (error != null) {
+            model.addAttribute("loginError", true);
+        }
+        // 세션 만료(동시 로그인 제어에 의해 강제 로그아웃)
+        if (expired != null) {
+            model.addAttribute("sessionExpired", true);
+        }
         return "member/login";
     }
+
 
     @GetMapping("/find-id")
     public String findIdForm() {
