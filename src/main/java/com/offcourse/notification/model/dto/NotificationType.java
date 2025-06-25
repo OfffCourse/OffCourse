@@ -52,7 +52,7 @@ public enum NotificationType {
      * 학생용 마이페이지중 수강 신청 내역로 이동
      */
     CERTIFICATE_ISSUED(
-            "수료증이 발급되었습니다.",
+            "강의 수료를 축하합니다!! 수료증이 발급되었습니다.",
             "/mypage/student"
     ),
 
