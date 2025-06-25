@@ -123,6 +123,21 @@ public class CourseServiceImpl implements CourseService {
         return dao.getCourseCountByTeacher(memberSeq);
     }
 
+    @Override
+    public List<Long> getCourseSeqsInProgress(LocalDate localDate) {
+        return dao.getCourseSeqsInProgress(Date.valueOf(localDate));
+    }
+
+    @Override
+    public List<CourseStudentDto> getCourseSeqsByEndDate(LocalDate localDate) {
+        return dao.getCourseSeqsByEndDate(Date.valueOf(localDate));
+    }
+
+    @Override
+    public int countEpisodeByCourseSeq(Long courseSeq) {
+        return dao.countEpisodeByCourseSeq(courseSeq);
+    }
+
     //날짜 계산용 메소드
     private List<LocalDate> getEpisodeDates(LocalDate start, LocalDate end,
                                             List<DayOfWeek> days) {

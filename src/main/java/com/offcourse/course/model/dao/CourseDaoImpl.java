@@ -6,6 +6,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -92,5 +93,20 @@ public class CourseDaoImpl implements CourseDao {
     @Override
     public int getCourseCountByTeacher(Long memberSeq) {
         return session.selectOne("course.selectCourseByTeacherCount", memberSeq);
+    }
+
+    @Override
+    public List<Long> getCourseSeqsInProgress(Date date) {
+        return session.selectList("course.selectCourseSeqsInProgress", date);
+    }
+
+    @Override
+    public List<CourseStudentDto> getCourseSeqsByEndDate(Date date) {
+        return session.selectList("course.selectCourseSeqsByEndDate", date);
+    }
+
+    @Override
+    public int countEpisodeByCourseSeq(Long courseSeq) {
+        return session.selectOne("course.countEpisodeByCourseSeq", courseSeq);
     }
 }
