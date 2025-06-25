@@ -2,7 +2,7 @@ package com.offcourse.member.model.service;
 
 import com.offcourse.member.model.dao.MemberDao;
 import com.offcourse.member.model.dto.Member;
-import com.offcourse.member.model.exception.DuplicateMemberException;
+import com.offcourse.member.exception.DuplicateMemberException;
 import com.offcourse.notification.model.dto.NotificationEvent;
 import com.offcourse.notification.model.dto.NotificationType;
 import com.offcourse.notification.model.service.NotificationProducer;

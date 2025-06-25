@@ -1,7 +1,7 @@
 package com.offcourse.member.controller;
 
 import com.offcourse.member.model.dto.Member;
-import com.offcourse.member.model.exception.DuplicateMemberException;
+import com.offcourse.member.exception.DuplicateMemberException;
 import com.offcourse.member.model.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
