@@ -44,38 +44,38 @@ src/main/resources/
 .idea/sqldialects.xml
 
 # /resources/images/ 폴더 안의 이미지 파일 무시
-/resources/images/*.jpg
-/resources/images/*.png
-/resources/images/*.jpeg
-/resources/images/*.png
-/resources/images/*.gif
-/resources/images/*.bmp
-/resources/images/*.webp
-/resources/images/*.svg
-/resources/images/*.ico
+src/main/webapp/resources/images/*.jpg
+src/main/webapp/resources/images/*.png
+src/main/webapp/resources/images/*.jpeg
+src/main/webapp/resources/images/*.gif
+src/main/webapp/resources/images/*.bmp
+src/main/webapp/resources/images/*.webp
+src/main/webapp/resources/images/*.svg
+src/main/webapp/resources/images/*.ico
 
-!/resources/images/logo.png
-!/resources/images/bell-icon.png
-
+!src/main/webapp/resources/images/logo.png
+!src/main/webapp/resources/images/bell-icon.png
+!src/main/webapp/resources/upload/instructor/profile/default_profile_instructor.png
+!src/main/webapp/resources/upload/student/profile/default_profile_student.png
 
 # /resources/upload/ 폴더 안의 이미지, PDF, 영상 파일 무시
-/resources/upload/*.jpg
-/resources/upload/*.jpeg
-/resources/upload/*.png
-/resources/upload/*.gif
-/resources/upload/*.bmp
-/resources/upload/*.webp
-/resources/upload/*.svg
-/resources/upload/*.ico
+src/main/webapp/resources/upload/*.jpg
+src/main/webapp/resources/upload/*.jpeg
+src/main/webapp/resources/upload/*.png
+src/main/webapp/resources/upload/*.gif
+src/main/webapp/resources/upload/*.bmp
+src/main/webapp/resources/upload/*.webp
+src/main/webapp/resources/upload/*.svg
+src/main/webapp/resources/upload/*.ico
 
-/resources/upload/*.pdf
+src/main/webapp/resources/upload/*.pdf
 
-/resources/upload/*.mp4
-/resources/upload/*.avi
-/resources/upload/*.mov
-/resources/upload/*.mkv
-/resources/upload/*.flv
-/resources/upload/*.wmv
-/resources/upload/*.webm
+src/main/webapp/resources/upload/*.mp4
+src/main/webapp/resources/upload/*.avi
+src/main/webapp/resources/upload/*.mov
+src/main/webapp/resources/upload/*.mkv
+src/main/webapp/resources/upload/*.flv
+src/main/webapp/resources/upload/*.wmv
+src/main/webapp/resources/upload/*.webm
 
-!/resources/upload/main.mp4
+!src/main/webapp/resources/upload/main.mp4
