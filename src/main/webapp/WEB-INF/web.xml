@@ -15,6 +15,11 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <!-- 세션 타임아웃 설정 (단위: 분) -->
+    <session-config>
+        <session-timeout>60</session-timeout>
+    </session-config>
+
   <!--  &lt;!&ndash; 세션 이벤트 퍼블리셔 (세션 만료 감지용) &ndash;&gt;
     <listener>
         <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>

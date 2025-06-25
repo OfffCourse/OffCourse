@@ -97,11 +97,30 @@
 
     <div class="form-group">
       <label>이메일</label>
-      <input type="email"
-             name="memberEmail"
-             class="form-control"
-             required
-             value="${member.memberEmail}"/>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="email"
+               name="memberEmail"
+               id="memberEmail"
+               class="form-control"
+               required
+               value="${member.memberEmail}"/>
+        <button type="button"
+                id="sendCodeBtn"
+                class="btn btn-outline-secondary">인증번호요청</button>
+      </div>
+      <!-- 인증번호 입력 섹션 (초기엔 숨김) -->
+      <div id="codeSection" style="display:none; margin-top:8px; gap:8px; align-items:center;">
+        <input type="text"
+               id="authCode"
+               placeholder="6자리 인증번호"
+               class="form-control"
+               style="width:150px;"/>
+        <button type="button"
+                id="verifyCodeBtn"
+                class="btn btn-outline-secondary">확인</button>
+        <span id="timer">05:00</span>
+      </div>
+      <small id="emailMsg" class="form-text"></small>
     </div>
 
     <div class="form-group">
@@ -281,6 +300,95 @@
             }
           });
 
+  document.addEventListener('DOMContentLoaded', function() {
+    const path = '${path}';
+    const overlay      = document.getElementById('loadingOverlay');
+    const sendBtn    = document.getElementById('sendCodeBtn');
+    const verifyBtn  = document.getElementById('verifyCodeBtn');
+    const emailInput = document.getElementById('memberEmail');
+    const codeInput  = document.getElementById('authCode');
+    const emailMsg   = document.getElementById('emailMsg');
+    const codeSection= document.getElementById('codeSection');
+    const timerEl    = document.getElementById('timer');
+    let timerInterval;
+
+    // 1) 인증번호 전송
+    sendBtn.addEventListener('click', function() {
+      const email = emailInput.value.trim();
+      if (!email) {
+        alert('이메일을 입력해주세요.');
+        return;
+      }
+      emailMsg.textContent = '';
+      overlay.style.display = 'flex';
+
+      fetch(path + '/member/sendAuthCode', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'email=' + encodeURIComponent(email)
+      })
+              .then(res => {
+                overlay.style.display = 'none';
+                if (!res.ok) throw new Error(res.status);
+                return res.text();
+              })
+              .then(msg => {
+                codeSection.style.display  = 'flex';
+                emailInput.readOnly      = true;
+                sendBtn.textContent = '재요청';
+                startTimer(300);
+              })
+              .catch(err => {
+                overlay.style.display = 'none';
+                console.error(err);
+                alert('인증번호 전송에 실패했습니다.');
+              });
+    });
+
+    // 2) 인증번호 확인
+    verifyBtn.addEventListener('click', function() {
+      const code = codeInput.value;
+      fetch(path + '/member/verifyAuthCode', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'code=' + encodeURIComponent(code)
+      })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  clearInterval(timerInterval);
+                  emailMsg.textContent = '✅ 이메일 인증 완료';
+                  emailInput.readOnly  = true;
+                  codeInput.readOnly  = true;
+                  sendBtn.disabled     = true;
+                  verifyBtn.disabled   = true;
+                } else {
+                  emailMsg.textContent = data.error;
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert('인증번호 확인 중 오류가 발생했습니다.');
+              });
+    });
+
+    // 3) 타이머 로직
+    function startTimer(sec) {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        if (sec <= 0) {
+          clearInterval(timerInterval);
+          emailMsg.textContent = '⏰ 인증시간 만료. 다시 요청해주세요.';
+          return;
+        }
+        sec--;
+        const m = String(Math.floor(sec/60)).padStart(2,'0');
+        const s = String(sec % 60).padStart(2,'0');
+        timerEl.textContent = m + ':' + s;
+      }, 1000);
+    }
+
+  });
 </script>
 
 <style>

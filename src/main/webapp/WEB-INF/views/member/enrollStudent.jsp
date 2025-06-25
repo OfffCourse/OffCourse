@@ -94,12 +94,32 @@
 
         <div class="form-group">
             <label>이메일</label>
-            <input type="email"
-                   name="memberEmail"
-                   class="form-control"
-                   required
-                   value="${member.memberEmail}"/>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="email"
+                       name="memberEmail"
+                       id="memberEmail"
+                       class="form-control"
+                       required
+                       value="${member.memberEmail}"/>
+                <button type="button"
+                        id="sendCodeBtn"
+                        class="btn btn-outline-secondary">인증번호요청</button>
+            </div>
+            <!-- 인증번호 입력 섹션 -->
+            <div id="codeSection" style="display:none; margin-top:8px; gap:8px; align-items:center;">
+                <input type="text"
+                       id="authCode"
+                       placeholder="6자리 인증번호"
+                       class="form-control"
+                       style="width:150px;"/>
+                <button type="button"
+                        id="verifyCodeBtn"
+                        class="btn btn-outline-secondary">확인</button>
+                <span id="timer">05:00</span>
+            </div>
+            <small id="emailMsg" class="form-text"></small>
         </div>
+
 
         <div class="form-group">
             <label>주소</label>
@@ -163,7 +183,7 @@
 <script>
     function execDaumPostcode() {
         new daum.Postcode({
-            oncomplete: function(data) {
+            oncomplete: function (data) {
                 document.getElementById('postcode').value = data.zonecode;
                 document.getElementById('roadAddress').value = data.roadAddress;
                 document.getElementById('memberAddress').focus();
@@ -173,13 +193,13 @@
 
     // 주소 합치기, 비밀번호 복합성 최종 검증
     document.getElementById("studentEnrollForm")
-        .addEventListener("submit", function() {
+        .addEventListener("submit", function () {
             const road = document.getElementById("roadAddress").value;
             const detail = document.getElementById("memberAddress").value;
             document.getElementById("memberAddress").value = road + " " + detail;
 
             const v = document.getElementById("password").value;
-            const ok = v.length>=8
+            const ok = v.length >= 8
                 && /[A-Za-z]/.test(v)
                 && /\d/.test(v)
                 && /[!@#$%^&*()_+=-]/.test(v);
@@ -203,10 +223,10 @@
 
     // 비밀번호 확인
     document.getElementById("studentConfirmPwd")
-        .addEventListener("input", function() {
-            const pwd     = document.getElementById("password").value;
+        .addEventListener("input", function () {
+            const pwd = document.getElementById("password").value;
             const confirm = this.value;
-            const msg     = document.getElementById("studentPwdCheckMsg");
+            const msg = document.getElementById("studentPwdCheckMsg");
             if (pwd === confirm) {
                 msg.textContent = "비밀번호가 일치합니다.";
                 msg.style.color = "green";
@@ -217,26 +237,26 @@
         });
 
     document.getElementById('profileFile')
-        .addEventListener('change', function(e) {
+        .addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = function (evt) {
                 document.getElementById('profilePreview').src = evt.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const overlay = document.getElementById('loadingOverlay');
-        document.getElementById('studentEnrollForm').addEventListener('submit', function() {
+        document.getElementById('studentEnrollForm').addEventListener('submit', function () {
             overlay.style.display = 'flex';
         });
     });
 
     // 비밀번호 입력 시 실시간 체크
     document.getElementById('password')
-        .addEventListener('input', function() {
+        .addEventListener('input', function () {
             const v = this.value;
             const checks = {
                 'crit-length': v.length >= 8,
@@ -255,6 +275,96 @@
                 }
             }
         });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const path = '${path}';
+        const overlay      = document.getElementById('loadingOverlay');
+        const sendBtn    = document.getElementById('sendCodeBtn');
+        const verifyBtn  = document.getElementById('verifyCodeBtn');
+        const emailInput = document.getElementById('memberEmail');
+        const codeInput  = document.getElementById('authCode');
+        const emailMsg   = document.getElementById('emailMsg');
+        const codeSection= document.getElementById('codeSection');
+        const timerEl    = document.getElementById('timer');
+        let timerInterval;
+
+        // 1) 인증번호 전송
+        sendBtn.addEventListener('click', function() {
+            const email = emailInput.value.trim();
+            if (!email) {
+                alert('이메일을 입력해주세요.');
+                return;
+            }
+            emailMsg.textContent = '';
+            overlay.style.display = 'flex';
+
+            fetch(path + '/member/sendAuthCode', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: 'email=' + encodeURIComponent(email)
+            })
+                .then(res => {
+                    overlay.style.display = 'none';     // 응답 오면 스피너 숨기기
+                    if (!res.ok) throw new Error(res.status);
+                    return res.text();
+                })
+                .then(msg => {
+                    codeSection.style.display  = 'flex';
+                    emailInput.readOnly      = true;
+                    sendBtn.textContent = '재요청';
+                    startTimer(300);
+                })
+                .catch(err => {
+                    overlay.style.display = 'none';
+                    console.error(err);
+                    alert('인증번호 전송에 실패했습니다.');
+                });
+        });
+
+        // 2) 인증번호 확인
+        verifyBtn.addEventListener('click', function() {
+            const code = codeInput.value;
+            fetch(path + '/member/verifyAuthCode', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: 'code=' + encodeURIComponent(code)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        clearInterval(timerInterval);
+                        emailMsg.textContent = '✅ 이메일 인증 완료';
+                        emailInput.readOnly  = true;
+                        codeInput.readOnly  = true;
+                        sendBtn.disabled     = true;
+                        verifyBtn.disabled   = true;
+                    } else {
+                        emailMsg.textContent = data.error;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('인증번호 확인 중 오류가 발생했습니다.');
+                });
+        });
+
+        // 3) 타이머 로직
+        function startTimer(sec) {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(function() {
+                if (sec <= 0) {
+                    clearInterval(timerInterval);
+                    emailMsg.textContent = '⏰ 인증시간 만료. 다시 요청해주세요.';
+                    return;
+                }
+                sec--;
+                const m = String(Math.floor(sec/60)).padStart(2,'0');
+                const s = String(sec % 60).padStart(2,'0');
+                timerEl.textContent = m + ':' + s;
+            }, 1000);
+        }
+
+    });
 </script>
 
 <style>
@@ -265,7 +375,8 @@
         transform: translateY(-50%);
         cursor: pointer;
     }
+
     #pwdCriteria {
-        font-size: 0.3rem;  /* 16px 기준으로 약 9.6px */
+        font-size: 0.3rem; /* 16px 기준으로 약 9.6px */
     }
 </style>
