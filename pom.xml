@@ -227,11 +227,6 @@
             <artifactId>spring-data-redis</artifactId>
             <version>2.7.2</version>
         </dependency>
-        <!--            <dependency>-->
-        <!--                <groupId>redis.clients</groupId>-->
-        <!--                <artifactId>jedis</artifactId>-->
-        <!--                <version>3.8.0</version>-->
-        <!--            </dependency>-->
         <!-- Lettuce 의존성 (Jedis 대신) -->
         <dependency>
             <groupId>io.lettuce</groupId>
@@ -244,12 +239,12 @@
             <artifactId>commons-pool2</artifactId>
             <version>2.11.1</version>
         </dependency>
+        <!-- Jackson (JSON 직렬화용) -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.13.3</version>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
         </dependency>
-
         <!-- JavaMail API -->
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -257,7 +252,22 @@
             <version>1.6.2</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-core</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+        <!-- PDFBox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.1</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>offcourse</finalName>

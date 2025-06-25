@@ -9,7 +9,8 @@ package com.offcourse.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,11 +24,16 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import java.time.Duration;
 
 @Configuration
 @PropertySource("classpath:properties/application.properties")
+@EnableRedisHttpSession(
+        maxInactiveIntervalInSeconds = 1800, // 30분 (기본값)
+        redisNamespace = "offcourse:session" // 네임스페이스 분리
+)
 public class RedisConfig {
 
     @Value("${spring.redis.host}")
@@ -109,10 +115,13 @@ public class RedisConfig {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
+//        objectMapper.activateDefaultTyping(
+//                LaissezFaireSubTypeValidator.instance,
+//                ObjectMapper.DefaultTyping.NON_FINAL
+//        );
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
 
         // 직렬화 설정 적용
