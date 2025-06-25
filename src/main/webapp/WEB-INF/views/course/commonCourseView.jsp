@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: parks
-  Date: 2025-06-23
-  Time: 오후 2:24
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -619,7 +612,7 @@
               <span>Java 기초와 개발환경 설정</span>
             </div>
             <div class="curriculum-actions">
-              <button class="action-btn">영상보기</button>
+              <button onclick="openVideoPopup()">영상 보기</button>
               <button class="action-btn">자료받기</button>
             </div>
           </div>
@@ -701,7 +694,16 @@
     </div>
   </div>
 </div>
-
+<script>
+  function openVideoPopup() {
+    const lectureId = 7; // 실제 강의 ID에 따라 바인딩하세요
+    const popup = window.open(
+            '${pageContext.request.contextPath}/popup/videoPlayer.jsp?lectureId=' + lectureId,
+            'lectureVideoPopup',
+            'width=900,height=600,scrollbars=no'
+    );
+  }
+</script>
 <script>
   // Day selection functionality
   document.querySelectorAll('.day-number').forEach(day => {

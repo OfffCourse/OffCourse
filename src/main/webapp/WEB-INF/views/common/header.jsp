@@ -462,10 +462,10 @@
                     <c:choose>
                         <%-- 일반과 강사회원의 마이페이지 주소 다르게 --%>
                         <c:when test="${loginMember.memberType == '0'}">
-                            <a href="${path}/member/mypage/student" class="btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/student" class="btn btn-primary mr-2">마이페이지</a>
                         </c:when>
                         <c:when test="${loginMember.memberType == '1'}">
-                            <a href="${path}/member/mypage/teacher" class="btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/teacher" class="btn btn-primary mr-2">마이페이지</a>
                         </c:when>
                     </c:choose>
                     <%--<a href="${path}/member/logout" class="text-muted small align-self-center"
