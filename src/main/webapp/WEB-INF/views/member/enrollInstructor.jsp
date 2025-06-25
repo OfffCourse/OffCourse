@@ -55,14 +55,14 @@
         <span class="toggle-password" onclick="togglePassword('password', this)">&#128065;</span>
       </div>
       <!-- 복합성 체크 -->
-      <div id="pwdCriteria" style="font-size:0.9em; margin-top:6px;">
+      <small id="pwdCriteria" style="color:red; margin-top:6px;">
         <ul style="list-style:none; padding:0;">
+          <li id="crit-letter">• 영문자 사용</li>
+          <li id="crit-number">• 숫자 사용</li>
+          <li id="crit-special">• 특수문자 사용</li>
           <li id="crit-length">• 8자 이상</li>
-          <li id="crit-letter">• 영문자 최소 1개</li>
-          <li id="crit-number">• 숫자 최소 1개</li>
-          <li id="crit-special">• 특수문자 최소 1개 (!@#$%^&*()_+=-)</li>
         </ul>
-      </div>
+      </small>
     </div>
 
     <div class="form-group">
@@ -273,9 +273,9 @@
               const el = document.getElementById(id);
               if (checks[id]) {
                 el.style.color = 'green';
-                el.style.textDecoration = 'line-through';
+                el.style.textDecoration = 'none';
               } else {
-                el.style.color = 'black';
+                el.style.color = 'red';
                 el.style.textDecoration = 'none';
               }
             }
@@ -291,5 +291,8 @@
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 18px;
+  }
+  #pwdCriteria {
+    font-size: 0.3rem;  /* 16px 기준으로 약 9.6px */
   }
 </style>
