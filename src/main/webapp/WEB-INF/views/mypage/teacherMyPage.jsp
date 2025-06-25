@@ -159,7 +159,7 @@
                     </div>
 
                     <!-- 카테고리 & 회원 번호는 임시로 숨김 -->
-                    <input type="hidden" name="memberSeq" value="1"/>
+                    <input type="hidden" name="memberSeq" value="${loginMember.memberSeq}"/>
                     <%--<input type="hidden" name="categorySeq" value="1"/>--%>
 
                     <!-- 요일 선택 -->
