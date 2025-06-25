@@ -1,5 +1,6 @@
 package com.offcourse.present.model.dao;
 
+import com.offcourse.present.model.dto.CheckPresentCode;
 import lombok.RequiredArgsConstructor;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,9 @@ public class PresentDao {
 
     public int countPresentByCourseAndStudent(Long courseSeq, Long studentSeq) {
         return session.selectOne("present.countPresentByCourseAndStudent", Map.of("courseSeq", courseSeq, "studentSeq", studentSeq));
+    }
+
+    public int insertPresent(CheckPresentCode checkPresentCode) {
+        return session.insert("present.insertPresent", checkPresentCode);
     }
 }
