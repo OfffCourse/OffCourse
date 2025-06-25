@@ -11,6 +11,9 @@ public interface MemberService {
                      MultipartFile profileFile,
                      MultipartFile portfolioFile,
                      HttpSession session);
+    void sendAuthCode(String email, HttpSession session);
+    boolean verifyAuthCode(String code, HttpSession session);
+    boolean isEmailVerified(String email, HttpSession session);
 
     Member selectMemberById(String memberId);
 
