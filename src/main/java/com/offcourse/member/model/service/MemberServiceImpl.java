@@ -7,6 +7,7 @@ import com.offcourse.notification.model.dto.NotificationEvent;
 import com.offcourse.notification.model.dto.NotificationType;
 import com.offcourse.notification.model.service.NotificationProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberServiceImpl implements MemberService {
     private final MemberDao memberDao;
     private final PasswordEncoder passwordEncoder;
@@ -134,7 +136,12 @@ public class MemberServiceImpl implements MemberService {
                         .redirectLocation(NotificationType.STUDENT_JOIN_SUCCESS.getRedirectLocation())
                         .build();
             }
-            notificationProducer.send(event);
+
+            try {
+                notificationProducer.send(event);
+            } catch (Exception kafkaEx) {
+                log.warn("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
+            }
 
             return result;
         } catch (Exception e) {

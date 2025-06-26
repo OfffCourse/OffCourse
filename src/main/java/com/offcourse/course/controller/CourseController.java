@@ -7,6 +7,7 @@ import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dto.*;
 import com.offcourse.course.model.service.CourseService;
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.present.model.service.PresentService;
 import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ import java.util.Map;
 public class CourseController {
 
     private final CourseService service;
+    private final PresentService presentService;
     private final AjaxPageFactory ajaxPageFactory;
     private final AttachmentService attachmentService;
 
@@ -94,7 +98,7 @@ public class CourseController {
         model.addAttribute("attachments", attachments);
         //에피소드 가져오기
         List<EpisodeAttachmentGroup> episodeAttachment = attachmentService.getEpisodeAttachment(courseSeq);
-        model.addAttribute("episodeAttachments",episodeAttachment);
+        model.addAttribute("episodeAttachments", episodeAttachment);
         // 강사
         if (course.getMemberSeq().equals(member.getMemberSeq())) {
             return "course/teacherCourseView";
@@ -107,6 +111,9 @@ public class CourseController {
         boolean isEnrolled = service.checkStudent(param);
 
         if (isEnrolled) {
+            //출석 여부 확인
+            boolean isPresent = presentService.checkPresent(Map.of("memberSeq", member.getMemberSeq(), "courseSeq", courseSeq, "date", Date.valueOf(LocalDate.now())));
+            model.addAttribute("isPresent", isPresent);
             return "course/studentCourseView";
         }
         return "course/commonCourseView";

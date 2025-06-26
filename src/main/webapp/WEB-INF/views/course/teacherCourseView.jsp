@@ -42,7 +42,7 @@
         backdrop-filter: blur(10px);
         z-index: 1000;
         padding: 20px 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .header-container {
@@ -54,8 +54,8 @@
         align-items: center;
     }
 
-    .header-container a{
-        text-decoration:none;
+    .header-container a {
+        text-decoration: none;
     }
 
     .header-actions {
@@ -673,48 +673,99 @@
 
         <!-- Right Sidebar -->
         <div class="course-sidebar">
-            <h3 class="sidebar-title">수강 신청</h3>
-
-            <!-- Course Schedule Info -->
-            <div class="course-schedule-info">
-                <div class="schedule-row" id="teacherview" onclick="location.assign('${path}/course/teacher')"><%--seq추가--%>
-                    <span class="schedule-label">강사</span>
-                    <span class="schedule-value">김강사</span>
-                </div>
-                <div class="schedule-row">
-                    <span class="schedule-label">개강일</span>
-                    <span class="schedule-value">2025-02-01</span>
-                </div>
-                <div class="schedule-row">
-                    <span class="schedule-label">종료일</span>
-                    <span class="schedule-value">2025-02-01</span>
-                </div>
+            <button class="action-btn" id="showAttendanceBtn" data-course-seq="${course.courseSeq}">출석 코드 보기</button>
+        </div>
+    </div>
+</div>
+<!-- 출석 코드 모달 -->
+<div class="modal fade" id="attendanceCodeModal" tabindex="-1" role="dialog" aria-labelledby="attendanceCodeModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-center">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attendanceCodeModalLabel">출석 코드</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-
-            <!-- Enrollment -->
-            <div class="enroll-section">
-                <div class="price-info">
-                    <div class="price-original">150,000원</div>
-                    <div class="price-current">120,000원</div>
-                </div>
-                <button class="enroll-btn">수강 신청</button>
+            <div class="modal-body">
+                <p>학생에게 공유할 출석 코드는 아래와 같습니다.</p>
+                <h2 id="generatedCode" class="font-weight-bold">------</h2>
+                <small class="text-muted" id="countdownText">※ 유효 시간: 10분</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
             </div>
         </div>
     </div>
 </div>
 <script>
+    $('#showAttendanceBtn').on('click', function () {
+        const courseSeq = $(this).data('course-seq');
+        const now = new Date();
+        const availableMinTime = new Date();
+        availableMinTime.setHours(9, 0, 0, 0);
+        const availableMaxTime = new Date();
+        availableMaxTime.setHours(9, 30, 0, 0);
+        $.ajax({
+            url: `${path}/present/\${courseSeq}`,
+            method: 'GET',
+            success: function (response) {
+                console.log(response);
+                $('#generatedCode').text(response);
+
+                const now = new Date();
+                const availableMinTime = new Date();
+                availableMinTime.setHours(9, 0, 0, 0);
+                const availableMaxTime = new Date();
+                availableMaxTime.setHours(9, 30, 0, 0);
+
+                if (now < availableMinTime || now > availableMaxTime) {
+                    alert("출석 코드는 9시부터 9시 30분에만 조회가 가능합니다.");
+                } else {
+                    // 모달 표시
+                    $('#attendanceCodeModal').modal('show');
+
+                    // 기존 타이머가 있다면 제거
+                    if (window.attendanceTimer) clearInterval(window.attendanceTimer);
+
+                    // 매초 남은 시간 업데이트
+                    window.attendanceTimer = setInterval(() => {
+                        const now = new Date();
+                        const remainingMs = availableMaxTime - now;
+
+                        if (remainingMs <= 0) {
+                            $('#countdownText').text(`※ 출석 가능 시간이 종료되었습니다.`);
+                            clearInterval(window.attendanceTimer);
+                            return;
+                        }
+
+                        const remainingMin = Math.floor(remainingMs / 60000);
+                        const remainingSec = Math.floor((remainingMs % 60000) / 1000);
+                        const paddedSec = remainingSec.toString().padStart(2, '0');
+
+                        $('#countdownText').text(`※ 출석 가능 시간 남은 시간: \${remainingMin}분 \${paddedSec}초`);
+                    }, 1000);
+                }
+            },
+            error: function () {
+                alert("출석 코드를 가져오는 데 실패했습니다.");
+            }
+        });
+    });
+
     let mediaRecorder;
     let chunks = [];
     let videoBlob;
 
     document.getElementById("start").onclick = async () => {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        const stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: true});
         mediaRecorder = new MediaRecorder(stream);
 
         mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
         mediaRecorder.onstop = async () => {
-            videoBlob = new Blob(chunks, { type: 'video/webm' });
+            videoBlob = new Blob(chunks, {type: 'video/webm'});
             await uploadInChunks(videoBlob);
             alert("업로드 완료");
         };
@@ -740,14 +791,14 @@
             formData.append("total", totalChunks);
             formData.append("lectureId", lectureId);
 
-            await fetch("${path}/uploadChunk", { method: "POST", body: formData });
+            await fetch("${path}/uploadChunk", {method: "POST", body: formData});
         }
     }
 </script>
 <script>
     // Day selection functionality
     document.querySelectorAll('.day-number').forEach(day => {
-        day.addEventListener('click', function() {
+        day.addEventListener('click', function () {
             document.querySelectorAll('.day-number').forEach(d => d.classList.remove('day-selected'));
             this.classList.add('day-selected');
         });
@@ -755,19 +806,19 @@
 
     /*// Category checkbox toggle
     document.querySelectorAll('.category-item').forEach(item => {
-      item.addEventListener('click', function() {
-        const checkbox = this.querySelector('.category-checkbox');
-        checkbox.classList.toggle('checked');
-      });
+    item.addEventListener('click', function() {
+    const checkbox = this.querySelector('.category-checkbox');
+    checkbox.classList.toggle('checked');
+    });
     });*/
 
     // Enroll button
-    document.querySelector('.enroll-btn').addEventListener('click', function() {
+    document.querySelector('.enroll-btn').addEventListener('click', function () {
         alert('수강 신청이 완료되었습니다!');
     });
 
     // Wishlist button
-    document.querySelector('.wishlist-btn').addEventListener('click', function() {
+    document.querySelector('.wishlist-btn').addEventListener('click', function () {
         const heart = this.textContent.includes('♡') ? '♥' : '♡';
         this.innerHTML = heart + ' 찜하기';
     });
@@ -779,7 +830,7 @@
     function loadCourses(cPage = 1) {
         fetch(`${path}/course/reviews`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 courseSeq: courseSeq,
                 cPage: cPage,

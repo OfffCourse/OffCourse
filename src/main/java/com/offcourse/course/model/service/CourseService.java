@@ -3,6 +3,7 @@ package com.offcourse.course.model.service;
 import com.offcourse.course.model.dto.*;
 import org.apache.ibatis.session.RowBounds;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -32,4 +33,10 @@ public interface CourseService {
     List<CourseListResponse> getCourseListByTeacher(Long memberSeq, int cPage, int numPerPage);
 
     int getCourseCountByTeacher(Long memberSeq);
+
+    List<Long> getCourseSeqsInProgress(LocalDate localDate);
+
+    List<CourseStudentDto> getCourseSeqsByEndDate(LocalDate localDate);
+
+    int countEpisodeByCourseSeq(Long courseSeq);
 }
