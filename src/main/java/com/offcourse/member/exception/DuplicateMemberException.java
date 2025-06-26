@@ -1,4 +1,4 @@
-package com.offcourse.member.model.exception;
+package com.offcourse.member.exception;
 
 public class DuplicateMemberException extends RuntimeException {
     public DuplicateMemberException(String message) {
