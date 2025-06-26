@@ -23,6 +23,8 @@
   <form action="${path}/payment/refund" method="post" class="form">
     <input type="hidden" name="paymentSeq" value="${paymentSeq}" />
     <input type="hidden" name="enrSeq" value="${enrSeq}" />
+    <input type="hidden" name="impUid" value="${impUid}" />
+    <input type="hidden" name="amount" value="${amount}" />
 
     <div class="form-group">
       <label class="form-label">환불 요청 강의</label>
