@@ -23,4 +23,5 @@ public interface MemberDao {
 
     int updatePassword(Map<String, Object> paramMap);
 
+    long countMemberAll();
 }

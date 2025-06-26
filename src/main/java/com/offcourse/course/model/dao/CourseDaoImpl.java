@@ -109,4 +109,9 @@ public class CourseDaoImpl implements CourseDao {
     public int countEpisodeByCourseSeq(Long courseSeq) {
         return session.selectOne("course.countEpisodeByCourseSeq", courseSeq);
     }
+
+    @Override
+    public long countInProgressCourseAll() {
+        return session.selectOne("course.countInProgressCourseAll");
+    }
 }

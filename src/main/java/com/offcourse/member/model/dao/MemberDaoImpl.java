@@ -16,10 +16,14 @@ public class MemberDaoImpl implements MemberDao {
     private static final String NAMESPACE = "member.";
 
     @Override
-    public int existsById(String memberId) { return sqlSession.selectOne(NAMESPACE + "existsById", memberId); }
+    public int existsById(String memberId) {
+        return sqlSession.selectOne(NAMESPACE + "existsById", memberId);
+    }
 
     @Override
-    public int existsByEmail(String memberEmail) { return sqlSession.selectOne(NAMESPACE + "existsByEmail", memberEmail); }
+    public int existsByEmail(String memberEmail) {
+        return sqlSession.selectOne(NAMESPACE + "existsByEmail", memberEmail);
+    }
 
     @Override
     public int insertMember(Member member) {
@@ -58,6 +62,11 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public int updatePassword(Map<String, Object> paramMap) {
         return sqlSession.update(NAMESPACE + "updatePassword", paramMap);
+    }
+
+    @Override
+    public long countMemberAll() {
+        return sqlSession.selectOne(NAMESPACE + "countMemberAll");
     }
 
 }

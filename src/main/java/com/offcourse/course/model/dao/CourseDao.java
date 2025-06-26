@@ -43,4 +43,6 @@ public interface CourseDao {
     List<CourseStudentDto> getCourseSeqsByEndDate(Date date);
 
     int countEpisodeByCourseSeq(Long courseSeq);
+
+    long countInProgressCourseAll();
 }
