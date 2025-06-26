@@ -25,4 +25,10 @@ public class PaymentHistoryDaoImpl implements PaymentHistoryDao {
     public int updatePaymentStatus(Map<String, Object> param) {
         return sqlSession.update(NAMESPACE + "updatePaymentStatus", param);
     }
+
+    @Override
+    public PaymentHistory selectBySeq(Long paymentSeq) {
+        return sqlSession.selectOne(NAMESPACE + "selectBySeq", paymentSeq);
+    }
+
 }

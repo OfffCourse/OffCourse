@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .memberSeq(memberSeq)
                 .build();
         int eResult = enrollmentDao.insertEnrollment(enrollment);
-        if (eResult < 1) throw new IllegalStateException("Enrollment insert failed");
+        if (eResult < 1) throw new IllegalStateException("ENROLLMENT INSERT 실패");
 
         PaymentHistory ph = PaymentHistory.builder()
                 .paymentPrice(paymentPrice)
@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .enrSeq(enrollment.getEnrSeq())
                 .build();
         int pResult = paymentHistoryDao.insertPaymentHistory(ph);
-        if (pResult < 1) throw new IllegalStateException("Payment history insert failed");
+        if (pResult < 1) throw new IllegalStateException("PAYMENT_HISTORY INSERT 실패");
     }
 
     @Override
@@ -50,11 +50,17 @@ public class PaymentServiceImpl implements PaymentService {
         int pResult = paymentHistoryDao.updatePaymentStatus(
                 Map.of("paymentSeq", paymentSeq, "status", PaymentStatus.REFUND.toString())
         );
-        if (pResult < 1) throw new IllegalStateException("Payment status update failed");
+        if (pResult < 1) throw new IllegalStateException("PAYMENT_STATUS UPDATE 실패");
 
         int eResult = enrollmentDao.updateEnrollmentStatusByEnrSeq(
                 Map.of("enrSeq", enrSeq, "status", EnrollmentStatus.CANCEL.toString())
         );
-        if (eResult < 1) throw new IllegalStateException("Enrollment status update failed");
+        if (eResult < 1) throw new IllegalStateException("ENROLLMENT STATUS UPDATE 실패");
     }
+
+    @Override
+    public PaymentHistory findPaymentHistoryBySeq(Long paymentSeq) {
+        return paymentHistoryDao.selectBySeq(paymentSeq);
+    }
+
 }
