@@ -218,7 +218,7 @@
             <div class="course-list">
                 <c:if test="${not empty myPageResponses}">
                     <c:forEach var="m" items="${myPageResponses}">
-                        <div class="course-item">
+                        <div class="course-item" onclick="location.assign('${path}/course/view?courseSeq=${m.courseSeq}')">
                             <div class="course-header">
                                 <div class="course-info">
                                     <h3>${m.courseName}</h3>

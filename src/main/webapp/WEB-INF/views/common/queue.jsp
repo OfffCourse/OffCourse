@@ -379,6 +379,20 @@
       });
     },
 
+    adminCleanAll: function() {
+      $.ajax({
+        url: '${pageContext.request.contextPath}/queue/admin/clear',
+        type: 'POST',
+        success: function(response) {
+          console.log('정리 결과:', response);
+          refreshQueue();
+        },
+        error: function() {
+          alert('권한이 없거나 정리 중 오류가 발생했습니다.');
+        }
+      });
+    },
+
     adminRemoveUser: function(sessionId) {
       if (!sessionId) {
         sessionId = prompt('제거할 세션 ID를 입력하세요:');
