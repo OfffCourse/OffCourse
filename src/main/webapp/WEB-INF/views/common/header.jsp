@@ -20,7 +20,7 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="${path}/resources/css/style.css"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css"/>
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -563,6 +563,147 @@
     let isLoading = false;
     let hasMoreData = true;
     let eventSource = null;
+
+    /* 대기열 Heartbeat */
+    class QueueHeartbeatManager {
+        constructor() {
+            this.heartbeatInterval = null;
+            this.isActive = true;
+            this.failCount = 0;
+            this.maxFailCount = 3;
+            this.contextPath = window.location.pathname.split('/')[1] ? '/' + window.location.pathname.split('/')[1] : '';
+
+            this.init();
+        }
+
+        init() {
+                this.startHeartbeat();
+
+            // Visibility API로 탭 상태 감지
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    this.resumeHeartbeat();
+                } else {
+                    this.pauseHeartbeat();
+                }
+            });
+
+            // 페이지 이탈 시 정리
+            window.addEventListener('beforeunload', () => {
+                this.stopHeartbeat();
+                this.sendLeaveSignal();
+            });
+        }
+
+        startHeartbeat() {
+            if (this.heartbeatInterval) return;
+
+            // 45초마다 heartbeat 전송
+            this.heartbeatInterval = setInterval(() => {
+                this.sendHeartbeat();
+            }, 45000);
+
+            console.log('활성 사용자 Heartbeat 시작 (45초 간격)');
+        }
+
+        pauseHeartbeat() {
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+                this.heartbeatInterval = null;
+            }
+            console.log('Heartbeat 일시중지');
+        }
+
+        resumeHeartbeat() {
+                this.startHeartbeat();
+                // 즉시 한 번 전송
+                this.sendHeartbeat();
+                console.log('Heartbeat 재시작');
+        }
+
+        stopHeartbeat() {
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+                this.heartbeatInterval = null;
+            }
+            console.log('Heartbeat 중지');
+        }
+
+        async sendHeartbeat() {
+            if (!this.isActive) return;
+
+            try {
+                const response = await fetch(this.contextPath + '/queue/heartbeat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.failCount = 0; // 성공 시 실패 카운트 리셋
+
+                    console.log('Header Heartbeat 성공');
+
+                    // 정상: ALLOW 상태 유지 (활성 사용자가 계속 서비스 이용)
+                    if (data.queueStatus === 'ALLOW') {
+                        console.log('활성 상태 유지 - 세션 연장됨');
+                        // 아무 액션 없음, 계속 서비스 이용
+                    }
+                    // 예외: 갑자기 대기열 상태로 변경됨 (관리자 액션, 세션 만료 등)
+                    else if (data.queueStatus === 'WAITING') {
+                        console.log('예외 상황: 활성 사용자가 대기열로 변경됨');
+                        console.log('원인: 관리자 액션, 세션 만료, 또는 시스템 오류');
+                        alert('세션이 만료되거나 시스템 상태가 변경되었습니다. 대기열로 이동합니다.');
+                        this.redirectToQueue('SESSION_EXPIRED');
+                    }
+                } else {
+                    console.error('Header Heartbeat HTTP 오류:', response.status, response.statusText);
+                    this.handleHeartbeatFailure();
+                }
+
+            } catch (error) {
+                console.warn('Header Heartbeat 실패:', error.message);
+                this.handleHeartbeatFailure();
+            }
+        }
+
+        handleHeartbeatFailure() {
+            this.failCount++;
+            console.warn('Header Heartbeat 실패 횟수: ' + this.failCount + '/' + this.maxFailCount);
+
+            if (this.failCount >= this.maxFailCount) {
+                console.error('Header Heartbeat 연속 실패! 대기열로 강제 이동');
+                alert('네트워크 연결에 문제가 있거나 세션이 만료되었습니다. 대기열 페이지로 이동합니다.');
+                this.redirectToQueue('HEARTBEAT_FAILED');
+            }
+        }
+
+        // 대기열 페이지로 이동하는 메서드 (사유 추가)
+        redirectToQueue(reason = 'SESSION_EXPIRED') {
+            console.log('대기열 페이지로 리다이렉트 시작 - 사유:', reason);
+            this.stopHeartbeat(); // heartbeat 중지
+
+            try {
+                // 강제 대기열 진입 엔드포인트로 이동
+                window.location.href = this.contextPath + '/queue/insert?reason=' + reason;
+            } catch (error) {
+                console.error('페이지 리다이렉트 실패:', error);
+                // 폴백: 일반 대기열 페이지로 이동
+                window.location.href = this.contextPath + '/queue';
+            }
+        }
+
+        sendLeaveSignal() {
+            if (navigator.sendBeacon) {
+                const formData = new FormData();
+                navigator.sendBeacon(this.contextPath + '/queue/leave', formData);
+                console.log('활성 사용자 이탈 신호 전송');
+            }
+        }
+    } /* 대기열 Heartbeat end */
 
     $(document).ready(function () {
         // 로그인한 사용자만 알림 기능 초기화

@@ -23,6 +23,10 @@ public class QueueScheduler {
     @Scheduled(fixedDelay = 30000)
     public void processQueuePeriodically() {
         try {
+            if (!queueService.shouldProcessQueue()) {
+                return; // 조건에 맞지 않으면 종료
+            }
+
             queueService.processWaitingQueue();
         } catch (Exception e) {
             log.warn("대기열 처리 중 오류: {}" , e.getMessage());
@@ -47,6 +51,9 @@ public class QueueScheduler {
     @Scheduled(fixedRate = 300000)
     public void logSystemStatus() {
         try {
+            if (!queueService.shouldProcessQueue()) {
+                return; // 조건에 맞지 않으면 종료
+            }
             var status = queueService.getSystemStatus();
             log.debug("=== 대기열 시스템 상태 ===");
             log.debug("대기 중: {}",status.get("waitingCount"));
