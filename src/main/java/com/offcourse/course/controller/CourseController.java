@@ -1,5 +1,7 @@
 package com.offcourse.course.controller;
 
+import com.offcourse.attachment.model.dto.EpisodeAttachmentGroup;
+import com.offcourse.attachment.model.service.AttachmentService;
 import com.offcourse.common.AjaxPageFactory;
 import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dto.*;
@@ -24,6 +26,7 @@ public class CourseController {
 
     private final CourseService service;
     private final AjaxPageFactory ajaxPageFactory;
+    private final AttachmentService attachmentService;
 
     @GetMapping("/listpage")
     public String courseList() {
@@ -90,7 +93,8 @@ public class CourseController {
         model.addAttribute("course", course);
         model.addAttribute("attachments", attachments);
         //에피소드 가져오기
-
+        List<EpisodeAttachmentGroup> episodeAttachment = attachmentService.getEpisodeAttachment(courseSeq);
+        model.addAttribute("episodeAttachments",episodeAttachment);
         // 강사
         if (course.getMemberSeq().equals(member.getMemberSeq())) {
             return "course/teacherCourseView";
