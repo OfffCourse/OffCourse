@@ -19,4 +19,8 @@ public class PresentDao {
     public int insertPresent(CheckPresentCode checkPresentCode) {
         return session.insert("present.insertPresent", checkPresentCode);
     }
+
+    public int checkPresent(Map<String, Object> param) {
+        return session.selectOne("present.checkPresent", param);
+    }
 }

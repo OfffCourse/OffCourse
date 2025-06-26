@@ -24,11 +24,11 @@ public class PresentController {
 
     @PostMapping("/check")
     @ResponseBody
-    public ResponseEntity<String> checkPresentCode(@RequestBody CheckPresentCode checkPresentCode) {
+    public ResponseEntity<Void> checkPresentCode(@RequestBody CheckPresentCode checkPresentCode) {
         boolean result = service.checkPresentCode(checkPresentCode);
         if (!result) {
-            return ResponseEntity.badRequest().body("출석 코드가 일치하지 않습니다. 출석 실패!");
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok("출석 성공!");
+        return ResponseEntity.ok().build();
     }
 }

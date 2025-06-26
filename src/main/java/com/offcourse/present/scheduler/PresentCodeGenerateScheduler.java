@@ -55,7 +55,7 @@ public class PresentCodeGenerateScheduler {
                         .memberSeq(memberSeq)
                         .msgDate(new Timestamp(System.currentTimeMillis()))
                         .msgType(NotificationType.ATTENDANCE_REQUEST)
-                        .redirectLocation(NotificationType.ATTENDANCE_REQUEST.getRedirectLocation())
+                        .redirectLocation(NotificationType.ATTENDANCE_REQUEST.getRedirectLocation() + courseSeq)
                         .courseSeq(courseSeq)
                         .build();
                 notificationProducer.send(event);
@@ -69,7 +69,7 @@ public class PresentCodeGenerateScheduler {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(random.nextInt(6)));
+            sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
     }

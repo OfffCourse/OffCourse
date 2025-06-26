@@ -4,11 +4,15 @@ import com.offcourse.present.model.dao.PresentDao;
 import com.offcourse.present.model.dto.CheckPresentCode;
 import com.offcourse.redis.model.service.RedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PresentService {
     private final PresentDao dao;
     private final RedisService redisService;
@@ -24,7 +28,8 @@ public class PresentService {
     @Transactional
     public boolean checkPresentCode(CheckPresentCode checkPresentCode) {
         String presentCode = getPresentCode(checkPresentCode.getCourseSeq());
-        if (!presentCode.equals(checkPresentCode.getPresentCode())) {
+        log.info("presentCode:{}, checkPresentCode:{}", presentCode, checkPresentCode.getPresentCode());
+        if (!presentCode.equals(checkPresentCode.getPresentCode().toUpperCase())) {
             return false;
         }
 
@@ -33,5 +38,9 @@ public class PresentService {
             return false;
         }
         return true;
+    }
+
+    public boolean checkPresent(Map<String, Object> param) {
+        return dao.checkPresent(param) > 0;
     }
 }
