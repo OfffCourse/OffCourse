@@ -4,7 +4,6 @@ import com.offcourse.payment.model.dto.PaymentHistory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Repository
@@ -18,20 +17,12 @@ public class PaymentHistoryDaoImpl implements PaymentHistoryDao {
     }
 
     @Override
-    public int insertPaymentHistory(PaymentHistory ph) {
-        return sqlSession.insert(NAMESPACE + "insertPaymentHistory", ph);
+    public int insertPaymentHistory(PaymentHistory paymentHistory) {
+        return sqlSession.insert(NAMESPACE + "insertPaymentHistory", paymentHistory);
     }
 
     @Override
-    public int updatePaymentStatus(Long paymentSeq, String status) {
-        Map<String,Object> params = new HashMap<>();
-        params.put("paymentSeq", paymentSeq);
-        params.put("status", status);
-        return sqlSession.update(NAMESPACE + "updatePaymentStatus", params);
-    }
-
-    @Override
-    public PaymentHistory selectByOrderId(String orderId) {
-        return sqlSession.selectOne(NAMESPACE + "selectByOrderId", orderId);
+    public int updatePaymentStatus(Map<String, Object> param) {
+        return sqlSession.update(NAMESPACE + "updatePaymentStatus", param);
     }
 }

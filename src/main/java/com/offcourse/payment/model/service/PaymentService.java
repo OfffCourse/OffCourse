@@ -1,9 +1,8 @@
 package com.offcourse.payment.model.service;
 
-import com.offcourse.payment.model.dto.PaymentHistory;
+import java.math.BigDecimal;
 
 public interface PaymentService {
-    void recordPayment(PaymentHistory paymentHistory);
-    void changePaymentStatus(Long paymentSeq, String status);
-    PaymentHistory findByOrderId(String orderId);
+    void processEnrollmentPayment(Long courseSeq, Long memberSeq, BigDecimal paymentPrice, String orderId);
+    void refundPayment(Long paymentSeq, Long enrSeq);
 }

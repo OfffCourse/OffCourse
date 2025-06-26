@@ -1,9 +1,8 @@
 package com.offcourse.enrollment.model.service;
 
-import com.offcourse.enrollment.model.dto.Enrollment;
+import java.util.List;
 
 public interface EnrollmentService {
-    void enrollCourse(Long courseSeq, Long memberSeq);
-    void updateStatus(Long enrSeq, String status);
-    Enrollment getEnrollment(Long enrSeq);
+    List<Long> findStudentSeqsByCourseSeq(Long courseSeq);
+    boolean updateEnrollmentStatus(Long courseSeq, Long studentSeq, String status);
 }

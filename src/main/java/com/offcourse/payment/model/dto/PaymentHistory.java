@@ -1,5 +1,6 @@
 package com.offcourse.payment.model.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentHistory {
@@ -18,6 +20,6 @@ public class PaymentHistory {
     // 그런 확장성을 생각해서 BigDecimal 로 type 잡음.
     private Timestamp paymentTime;
     private String paymentOrderId;
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
     private Long enrSeq;
 }

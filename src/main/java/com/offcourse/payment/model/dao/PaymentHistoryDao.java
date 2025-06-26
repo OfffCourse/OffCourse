@@ -2,8 +2,9 @@ package com.offcourse.payment.model.dao;
 
 import com.offcourse.payment.model.dto.PaymentHistory;
 
+import java.util.Map;
+
 public interface PaymentHistoryDao {
-    int insertPaymentHistory(PaymentHistory ph);
-    int updatePaymentStatus(Long paymentSeq, String status);
-    PaymentHistory selectByOrderId(String orderId);
+    int insertPaymentHistory(PaymentHistory paymentHistory);
+    int updatePaymentStatus(Map<String, Object> param);
 }

@@ -1,7 +1,5 @@
 package com.offcourse.payment.controller;
 
-import com.offcourse.enrollment.model.service.EnrollmentService;
-import com.offcourse.payment.model.dto.PaymentHistory;
 import com.offcourse.payment.model.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,37 +10,28 @@ import java.math.BigDecimal;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/payment")
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final EnrollmentService enrollmentService;
 
-    @PostMapping("/payment/process")
-    public String processPayment(@RequestParam Long enrSeq,
+    @PostMapping("/process")
+    public String processPayment(@RequestParam Long courseSeq,
+                                 @RequestParam Long memberSeq,
                                  @RequestParam BigDecimal paymentPrice,
                                  @RequestParam String orderId,
                                  RedirectAttributes ra) {
-        PaymentHistory ph = new PaymentHistory();
-        ph.setEnrSeq(enrSeq);
-        ph.setPaymentPrice(paymentPrice);
-        ph.setPaymentOrderId(orderId);
-        ph.setPaymentStatus("0");
-        paymentService.recordPayment(ph);
-        enrollmentService.updateStatus(enrSeq, "0");
+        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId);
         ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
-        return "redirect:/my/enrollments";
+        return "redirect:/my/enrollments"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
     }
 
-    @GetMapping("/payment/callback")
-    public String paymentCallback(@RequestParam String orderId,
-                                  @RequestParam String status,
-                                  RedirectAttributes ra) {
-        PaymentHistory ph = paymentService.findByOrderId(orderId);
-        if ("2".equals(status)) {
-            paymentService.changePaymentStatus(ph.getPaymentSeq(), "2");
-            enrollmentService.updateStatus(ph.getEnrSeq(), "1");
-            ra.addFlashAttribute("msg", "환불이 완료되었습니다.");
-        }
-        return "redirect:/my/enrollments";
+    @PostMapping("/refund")
+    public String refundPayment(@RequestParam Long paymentSeq,
+                                @RequestParam Long enrSeq,
+                                RedirectAttributes ra) {
+        paymentService.refundPayment(paymentSeq, enrSeq);
+        ra.addFlashAttribute("msg", "환불이 완료되었습니다.");
+        return "redirect:/my/enrollments"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
     }
 }
