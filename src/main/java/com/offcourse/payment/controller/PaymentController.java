@@ -23,7 +23,7 @@ public class PaymentController {
                                  RedirectAttributes ra) {
         paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId);
         ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
-        return "redirect:/my/enrollments"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
+        return "redirect:/mypage/student"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
     }
 
     @PostMapping("/refund")
@@ -32,6 +32,6 @@ public class PaymentController {
                                 RedirectAttributes ra) {
         paymentService.refundPayment(paymentSeq, enrSeq);
         ra.addFlashAttribute("msg", "환불이 완료되었습니다.");
-        return "redirect:/my/enrollments"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
+        return "redirect:/mypage/student"; // TODO: 마이페이지 만들고 나서 수강 내역 항목으로 연결할 예정
     }
 }
