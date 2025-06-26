@@ -133,6 +133,9 @@
 <script>
   let isRefreshing = false;
   let autoRefreshInterval;
+  let heartbeatInterval; // Heartbeat용 인터벌 추가
+  let heartbeatFailCount = 0; // 연속 실패 카운트
+  const MAX_HEARTBEAT_FAILS = 3; // 최대 실패 허용 횟수
 
   // 페이지 로드 시 초기화
   $(document).ready(function() {
@@ -152,8 +155,67 @@
     // 자동 새로고침 시작
     startAutoRefresh();
 
+    // Heartbeat 시작
+    startHeartbeat();
+
     console.log('대기열 페이지 초기화 완료');
   });
+
+  // Heartbeat 시작
+  function startHeartbeat() {
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+    }
+
+    // 30초마다 heartbeat 전송
+    heartbeatInterval = setInterval(sendHeartbeat, 30000);
+    console.log('Heartbeat 시작 (30초 간격)');
+  }
+
+  // Heartbeat 중지
+  function stopHeartbeat() {
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
+      console.log('Heartbeat 중지');
+    }
+  }
+
+  // Heartbeat 전송
+  function sendHeartbeat() {
+    fetch("${pageContext.request.contextPath}/queue/heartbeat", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      signal: AbortSignal.timeout(30000)
+    })
+            .then(response => response.json())
+            .then(queueData => {
+              console.log('Heartbeat 성공:', queueData.status);
+              heartbeatFailCount = 0; // 성공 시 실패 카운트 리셋
+
+              // 대기열 상태가 변경되었으면 즉시 새로고침
+              if (queueData.queueStatus === 'ALLOW') {
+                console.log('서비스 이용 가능! 메인 페이지로 이동');
+                window.location.href = '${pageContext.request.contextPath}/';
+              } else if (queueData.queueStatus === 'WAITING') {
+                // 순번 변동이 있으면 화면 업데이트
+                refreshQueue();
+              }
+            })
+            .catch(error => {
+              heartbeatFailCount++;
+              console.warn(`Heartbeat 실패 (${heartbeatFailCount}/${MAX_HEARTBEAT_FAILS}):`, error.message);
+
+              if (heartbeatFailCount >= MAX_HEARTBEAT_FAILS) {
+                console.error('Heartbeat 연속 실패! 상태 새로고침 시도');
+                refreshQueue();
+                heartbeatFailCount = 0; // 리셋
+              }
+            });
+  }
 
   // 페이지 언로드 시 정리
   window.addEventListener('unload', function() {
@@ -326,18 +388,21 @@
   document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
       stopAutoRefresh();
+      stopHeartbeat(); // 탭이 숨겨지면 heartbeat 중지
     } else {
       refreshQueue();
       startAutoRefresh();
+      startHeartbeat(); // 탭이 다시 보이면 heartbeat 재시작
     }
   });
 
   // 페이지 이탈 경고 / 브라우저 종료/탭 닫기 감지
   window.addEventListener('beforeunload', function(e) {
-    e.preventDefault();
     if (navigator.sendBeacon) {
       navigator.sendBeacon("${pageContext.request.contextPath}/queue/leave", "");
       console.log('대기열 탈퇴 요청 전송');
+    }else{
+      e.preventDefault();
     }
   });
 

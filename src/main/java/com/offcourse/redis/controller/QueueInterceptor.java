@@ -23,11 +23,15 @@ public class QueueInterceptor implements HandlerInterceptor {
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
             "/queue",
-            "/static",
-            "/resources",
-            "/favicon.ico",
             "/error"
     );
+
+    // 대기열 체크는 하되 활동 업데이트는 하지 않을 경로들 (AJAX 요청 등)
+    private static final Set<String> CHECK_ONLY_PATHS = Set.of(
+            "/queue/status",
+            "/queue/admin"
+    );
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
