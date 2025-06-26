@@ -32,7 +32,7 @@ public class EmitterService {
         try {
             emitter.send(SseEmitter.event().name("connect").data("connected"));
         } catch (IOException e) {
-            log.error("SSE 연결 알림 전송 실패", e);
+            log.warn("SSE 연결 알림 전송 실패", e);
         }
 
         //SSE 연결 복구 시 Redis 재전송 시도
