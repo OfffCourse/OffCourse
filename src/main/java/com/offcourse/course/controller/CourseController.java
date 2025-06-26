@@ -1,13 +1,16 @@
 package com.offcourse.course.controller;
 
+import com.offcourse.attachment.model.dto.EpisodeAttachmentGroup;
+import com.offcourse.attachment.model.service.AttachmentService;
 import com.offcourse.common.AjaxPageFactory;
 import com.offcourse.course.exception.CourseEpisodeMismatchException;
 import com.offcourse.course.model.dto.*;
 import com.offcourse.course.model.service.CourseService;
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,7 @@ public class CourseController {
 
     private final CourseService service;
     private final AjaxPageFactory ajaxPageFactory;
+    private final AttachmentService attachmentService;
 
     @GetMapping("/listpage")
     public String courseList() {
@@ -79,13 +83,18 @@ public class CourseController {
 
     @GetMapping("/view")
     public String courseView(@RequestParam Long courseSeq,
-                             @AuthenticationPrincipal Member member,
+                             Authentication authentication,
                              Model model) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member member = userDetails.getMember();
+
         CourseViewResponse course = service.getCourseBySeq(courseSeq);
         List<AttachmentViewResponse> attachments = service.getAttachments(courseSeq);
         model.addAttribute("course", course);
         model.addAttribute("attachments", attachments);
-
+        //에피소드 가져오기
+        List<EpisodeAttachmentGroup> episodeAttachment = attachmentService.getEpisodeAttachment(courseSeq);
+        model.addAttribute("episodeAttachments",episodeAttachment);
         // 강사
         if (course.getMemberSeq().equals(member.getMemberSeq())) {
             return "course/teacherCourseView";

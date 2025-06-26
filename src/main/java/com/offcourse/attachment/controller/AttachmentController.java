@@ -1,0 +1,209 @@
+package com.offcourse.attachment.controller;
+
+import com.offcourse.attachment.model.dto.Attachment;
+import com.offcourse.attachment.model.service.AttachmentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class AttachmentController {
+
+    private final AttachmentService service;
+
+    @PostMapping("/uploadChunk")
+    public ResponseEntity<?> uploadChunk(
+            @RequestParam("chunk") MultipartFile chunk,
+            @RequestParam("index") int index,
+            @RequestParam("total") int total,
+            @RequestParam("lectureId") Long lectureId,
+            HttpSession session) {
+
+        // 1. 실제 경로 얻기 (webapp 아래에 저장)
+        String tempPath = session.getServletContext().getRealPath("/resources/upload/lecture/temp/");
+        String finalPath = session.getServletContext().getRealPath("/resources/upload/lecture/video/");
+        System.out.println("실제 temp 경로: " + tempPath);
+
+        // 2. 디렉토리 생성
+        File tempDir = new File(tempPath);
+        if (!tempDir.exists()) tempDir.mkdirs();
+        File finalDir = new File(finalPath);
+        if (!finalDir.exists()) finalDir.mkdirs();
+
+        try {
+            // 3. 청크 저장
+            String tempChunkName = lectureId + "_" + index + ".part";
+            File tempChunkFile = new File(tempDir, tempChunkName);
+            chunk.transferTo(tempChunkFile);
+
+            // 4. 마지막 청크일 경우 병합
+            if (index == total - 1) {
+                String mergedFileName = "lecture_" + lectureId + ".webm";
+                File mergedFile = new File(finalDir, mergedFileName);
+                try (FileOutputStream fos = new FileOutputStream(mergedFile, true)) {
+                    for (int i = 0; i < total; i++) {
+                        File part = new File(tempDir, lectureId + "_" + i + ".part");
+                        Files.copy(part.toPath(), fos);
+                        part.delete(); // 청크 파일 삭제
+                    }
+                }
+
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                int rnd = (int) (Math.random() * 1000) + 1;
+                //String renamedFileName = "lecture_" + lectureId + "_" + timeStamp + ".mp4";
+                String renamedFileName = "offcourse_" + timeStamp + "_" + rnd + ".mp4";
+                File convertedMp4File = new File(finalDir, renamedFileName);
+
+                URL exePath = getClass().getResource("/ffmpeg/bin/ffmpeg.exe");
+//                System.out.println("resources경로 :  "+exePath);
+                ProcessBuilder pb = new ProcessBuilder(exePath.getPath(),
+                        "-i", mergedFile.getAbsolutePath(),
+                        /*"-c:v", "libx264",
+                        "-c:a", "aac",
+                        "-strict", "-2",*/  // 일부 FFmpeg 버전용
+                        "-c:v", "libx264",
+                        "-preset", "fast",
+                        "-crf", "28",
+                        "-c:a", "aac",
+                        convertedMp4File.getAbsolutePath());
+
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        //System.out.println("[ffmpeg] " + line);
+                    }
+                }
+
+                int exitCode = process.waitFor();
+                if (exitCode != 0) {
+                    throw new RuntimeException("ffmpeg 변환 실패: 코드 " + exitCode);
+                }
+
+                System.out.println("변환 완료: " + convertedMp4File.getAbsolutePath());
+                mergedFile.delete();
+                // 병합 완료 후 DB 저장 처리
+                Attachment attachment = Attachment.builder()
+                        .attOriName("lecture_" + lectureId + ".mp4")
+                        .attRenamedName(renamedFileName)
+                        .attType("2")
+                        .episodeSeq(lectureId)
+                        .build();
+
+                service.insertAttachment(attachment);
+            }
+
+            return ResponseEntity.ok("청크 업로드 성공");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("청크 업로드 실패");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/uploadattach")
+    public String uploadAttachment(@RequestParam Long episodeSeq,
+                                   @RequestParam("upFile") MultipartFile[] upFiles,
+                                   HttpSession session,
+                                   Model model){
+        String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        List<Attachment> attachmentList = new ArrayList<>();
+        if (upFiles != null) {
+            for (MultipartFile upFile : upFiles) {
+                String oriName = upFile.getOriginalFilename();
+                String ext = oriName.substring(oriName.lastIndexOf("."));
+                int rnd = (int) (Math.random() * 1000) + 1;
+                Date d = new Date(System.currentTimeMillis());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
+                String rename = "offcourse_" + sdf.format(d) + "_" + rnd + ext;
+
+                File dir = new File(path);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                try {
+                    upFile.transferTo(new File(dir, rename));
+                    Attachment file = Attachment.builder().attOriName(oriName)
+                            .attRenamedName(rename).attType("1").build();
+                    attachmentList.add(file);
+
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("업로드실패!");
+                }
+            }
+        }
+        int result = 0;
+        for (Attachment file : attachmentList) {
+            result += service.insertAttachment(file);
+        }
+        if (result > 0) {
+            model.addAttribute("msg", "첨부파일 저장성공");
+            model.addAttribute("loc", "/board/boardlist.do");
+        } else {
+            model.addAttribute("msg", "첨부파일 저장실패");
+            model.addAttribute("loc", "/board/boardwrite.do");
+        }
+        return "common/msg";
+    }
+
+    @GetMapping("/downloadattach")
+    public void fileDownload(String oriname,
+                             String rename,
+                             HttpSession session,
+                             @RequestHeader("user-agent") String header,
+                             OutputStream out,
+                             HttpServletResponse response) {
+        String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        File downloadFile = new File(path, rename);
+        if (!downloadFile.exists()) {
+            throw new IllegalArgumentException("파일이 존재하지않습니다");
+        }
+        try (FileInputStream fis = new FileInputStream(downloadFile);
+             BufferedInputStream bis = new BufferedInputStream(fis);
+             BufferedOutputStream bos = new BufferedOutputStream(out);) {
+            boolean isMS = header.contains("Trident") || header.contains("MSIE");
+            String encodeName = "";
+            if (isMS) {
+                encodeName = URLEncoder.encode(oriname, "UTF-8");
+                encodeName = encodeName.replace("\\+", "%20");
+            } else {
+                encodeName = new String(oriname.getBytes("UTF-8"),
+                        "ISO-8859-1");
+            }
+            response.setContentType("application/octet-stream;charset=utf-8");
+            response.setHeader("Content-Disposition",
+                    "attachment;filename=" + encodeName);
+            int data = -1;
+            while ((data = bis.read()) != -1) {
+                bos.write(data);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+}
