@@ -20,10 +20,10 @@
         <session-timeout>30</session-timeout>
     </session-config>
 
-  <!--  &lt;!&ndash; 세션 이벤트 퍼블리셔 (세션 만료 감지용) &ndash;&gt;
+    <!-- 세션 이벤트 리스너 등록 (SessionDestroyedEvent 발생을 위해 필수) -->
     <listener>
         <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
-    </listener>-->
+    </listener>
 
     <!--DispatcherServlet-->
     <servlet>
