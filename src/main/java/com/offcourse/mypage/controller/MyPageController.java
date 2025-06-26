@@ -1,11 +1,14 @@
 package com.offcourse.mypage.controller;
 
 import com.offcourse.common.MyPageFactory;
+import com.offcourse.member.model.dto.Member;
 import com.offcourse.mypage.model.dto.Account;
 import com.offcourse.mypage.model.dto.DeleteCourseRequest;
 import com.offcourse.mypage.model.dto.TeacherMyPageResponse;
 import com.offcourse.mypage.model.service.MyPageService;
+import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,16 +27,21 @@ public class MyPageController {
 
     @GetMapping("/teacher")
     public String getMyPageByTeacher(Model model, HttpServletRequest request,
+                                     Authentication authentication,
                                      @RequestParam(defaultValue = "1") int cPage,
                                      @RequestParam(defaultValue = "3") int numPerPage,
                                      @RequestParam(required = false) String section) {
-        //회원 세션 저장되면 학생 마이페이지 이동 추가
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member loginMember = userDetails.getMember();
+        Long memberSeq = loginMember.getMemberSeq();
+
         String url = request.getContextPath() + "/mypage/teacher?section=" + section;
-        List<TeacherMyPageResponse> myPageResponses = service.getMyPageByTeacher(Map.of("memberSeq", 1L, "cPage", cPage, "numPerPage", numPerPage));
+        List<TeacherMyPageResponse> myPageResponses = service.getMyPageByTeacher(Map.of("memberSeq", memberSeq
+                , "cPage", cPage, "numPerPage", numPerPage));
         model.addAttribute("myPageResponses", myPageResponses);
         model.addAttribute("pageBar",
                 pageFactory.basicPageBar(cPage, numPerPage,
-                        service.teacherCourseCount(1L), url));
+                        service.teacherCourseCount(memberSeq), url));
         model.addAttribute("section", section == null ? "create-course" : section);
         return "mypage/teacherMyPage";
     }
