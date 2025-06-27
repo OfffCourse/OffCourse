@@ -36,7 +36,6 @@ public class PaymentController {
         model.addAttribute("courseSeq", courseSeq);
         model.addAttribute("memberSeq", memberSeq);
         model.addAttribute("paymentPrice", paymentPrice);
-        // orderId는 실제 PG 연동 시 생성되므로 여기서는 placeholder
         model.addAttribute("orderId", "OFFCOURSE_ORDER_ID_" + System.currentTimeMillis());
         model.addAttribute("impCode", portOneConfig.getImpCode());
         return "payment/paymentForm";  // /WEB-INF/views/payment/paymentForm.jsp

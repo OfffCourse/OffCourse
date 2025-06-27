@@ -21,11 +21,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentHistoryDao paymentHistoryDao;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void processEnrollmentPayment(Long courseSeq, Long memberSeq, BigDecimal paymentPrice, String orderId) {
-
-
-
         Enrollment enrollment = Enrollment.builder()
                 .enrStatus(EnrollmentStatus.ENROLL)
                 .courseSeq(courseSeq)

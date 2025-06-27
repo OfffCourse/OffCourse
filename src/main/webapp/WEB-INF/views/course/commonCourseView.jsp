@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <style>
@@ -683,14 +684,53 @@
         </div>
       </div>
 
+      <!-- 할인 계산: (coursePrice * (100 - courseDiscount) / 100)을 소수점 없이 반올림 -->
+      <fmt:formatNumber
+              var="discounted"
+              value="${course.coursePrice * (100 - course.courseDiscount) / 100}"
+              pattern="#,##0"/>
       <!-- Enrollment -->
       <div class="enroll-section">
         <div class="price-info">
-          <div class="price-original">150,000원</div>
-          <div class="price-current">120,000원</div>
+          <div class="price-original">
+            <del><fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원</del>
+          </div>
+          <div class="price-current">
+            <fmt:formatNumber value="${discounted}" pattern="#,##0"/>원
+          </div>
         </div>
-        <button class="enroll-btn">수강 신청</button>
+
+
+        <!-- 로그인하지 않은 익명 사용자 -->
+        <sec:authorize access="isAnonymous()">
+          <button class="enroll-btn" onclick="alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                          location.href='${path}/member/loginform';">
+            수강 신청
+          </button>
+        </sec:authorize>
+
+        <!-- 로그인했지만 강사회원(ROLE_INSTRUCTOR)인 경우 -->
+        <sec:authorize access="hasAuthority('ROLE_INSTRUCTOR')">
+          <button class="enroll-btn" onclick="alert('강사회원은 수강 신청이 불가합니다.\n일반회원으로 가입 및 로그인 후 다시 시도해주세요.');">
+            수강 신청
+          </button>
+        </sec:authorize>
+
+        <!-- 로그인한 일반회원(ROLE_USER)인 경우 -->
+        <sec:authorize access="hasAuthority('ROLE_USER')">
+          <c:url var="paymentUrl" value="/payment/form">
+            <c:param name="courseSeq" value="${course.courseSeq}"/>
+            <c:param name="memberSeq" value="${loginMember.memberSeq}"/>
+            <c:param name="paymentPrice" value="${discounted}"/>
+          </c:url>
+          <button class="enroll-btn" onclick="location.href='${paymentUrl}';">
+            수강 신청
+          </button>
+        </sec:authorize>
       </div>
+
+
+
     </div>
   </div>
 </div>
@@ -721,10 +761,11 @@
     });
   });*/
 
+  // 서영님이 만든거라, 삭제하기 보다는 그냥 주석으로 처리해놓았어요~
   // Enroll button
-  document.querySelector('.enroll-btn').addEventListener('click', function() {
-    alert('수강 신청이 완료되었습니다!');
-  });
+  // document.querySelector('.enroll-btn').addEventListener('click', function() {
+  //   alert('수강 신청이 완료되었습니다!');
+  // });
 
   // Wishlist button
   document.querySelector('.wishlist-btn').addEventListener('click', function() {
