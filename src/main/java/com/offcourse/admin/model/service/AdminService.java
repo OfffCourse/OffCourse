@@ -10,6 +10,7 @@ import com.offcourse.member.model.dao.MemberDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,5 +41,23 @@ public class AdminService {
 
     public int countDeleteRequestAllByStatus(DeleteRequestStatus enumStatus) {
         return requestDao.countDeleteRequestAllByStatus(enumStatus);
+    }
+
+    public boolean handleDeleteRequest(Long deleteRequestId, String action, Long courseSeq) {
+        HashMap param = new HashMap();
+        param.put("deleteRequestSeq", deleteRequestId);
+        param.put("action", action);
+        param.put("courseSeq", courseSeq);
+        int result = requestDao.updateDeleteRequestStatus(param);
+        if (result > 0) {
+            if (action.equals("approve")) {
+                int result2 = courseDao.deleteCourse(courseSeq);
+                if (result2 == 0) {
+                    throw new IllegalStateException("삭제 요청 처리 실패");
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

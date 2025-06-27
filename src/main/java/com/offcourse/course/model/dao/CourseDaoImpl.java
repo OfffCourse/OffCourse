@@ -114,4 +114,9 @@ public class CourseDaoImpl implements CourseDao {
     public long countInProgressCourseAll() {
         return session.selectOne("course.countInProgressCourseAll");
     }
+
+    @Override
+    public int deleteCourse(Long courseSeq) {
+        return session.update("course.deleteCourse", courseSeq);
+    }
 }

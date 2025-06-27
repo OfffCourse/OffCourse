@@ -1,15 +1,49 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page buffer="16kb" %>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <script>
-    // ✅ 전역 함수 정의 (섹션/탭에서 사용할 수 있음)
+    // ✅ 먼저 이 두 함수 정의
+    function getStatusClass(status) {
+        switch (status) {
+            case 'pending':
+                return 'status-pending';
+            case 'approved':
+                return 'status-approved';
+            case 'rejected':
+                return 'status-rejected';
+            default:
+                return 'status-pending';
+        }
+    }
+
+    function getStatusText(status) {
+        switch (status) {
+            case 'pending':
+                return '대기중';
+            case 'approved':
+                return '승인됨';
+            case 'rejected':
+                return '거부됨';
+            default:
+                return '대기중';
+        }
+    }
+
+    // ✅ 그 다음 메인 함수 정의
     function loadAdminDeleteRequests(status = 'pending', cPage = 1) {
-        fetch(`${path}/admin/delete-requests?status=\${status}&cPage=\${cPage}`)
+        const tabName = status.charAt(0).toUpperCase() + status.slice(1);
+        fetch(`${path}/admin/delete-requests?status=\${status}&page=\${cPage}`)
             .then(res => res.json())
             .then(data => {
-                const $container = $(`#delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`);
+                let $container;
+                if (tabName === 'Pending') {
+                    $container = $("#deletePendingTab");
+                } else if (tabName === 'Approved') {
+                    $container = $("#deleteApprovedTab");
+                } else {
+                    $container = $("#deleteRejectedTab");
+                }
                 $container.empty();
 
                 if (!data.courseList || data.courseList.length === 0) {
@@ -19,27 +53,33 @@
                 }
 
                 data.courseList.forEach(req => {
+                    const isPending = status === 'pending';
+
+                    const buttonsHtml = isPending ? `
+                        <div class="request-actions">
+                            <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'approve','\${req.courseSeq}')">승인</button>
+                            <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'reject','\${req.courseSeq}')">거부</button>
+                        </div>
+                    ` : '';
+
                     $container.append(`
-                      <div class="request-item">
-                          <div class="request-header">
-                              <div class="request-info">
-                                  <h3>\${req.courseName}</h3>
-                                  <div class="request-meta">
-                                      <span>👤 요청자: \${req.teacherName}</span>
-                                      <span>👥 수강생: \${req.enrollStudentsCount}명</span>
-                                  </div>
-                              </div>
-                              <div class="request-status status-pending">대기중</div>
-                          </div>
-                          <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent}</div>
-                          <div class="request-actions">
-                              <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'approve')">승인</button>
-                              <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'reject')">거부</button>
-                              <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>
-                          </div>
-                      </div>
-                  `);
+                        <div class="request-item">
+                            <div class="request-header">
+                                <div class="request-info">
+                                    <h3>\${req.courseName}</h3>
+                                    <div class="request-meta">
+                                        <span>👤 요청자: \${req.teacherName}</span>
+                                        <span>👥 수강생: \${req.enrollStudentsCount}명</span>
+                                    </div>
+                                </div>
+                                <div class="request-status \${getStatusClass(status)}">\${getStatusText(status)}</div>
+                            </div>
+                            <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent}</div>
+                            \${buttonsHtml}
+                        </div>
+                    `);
                 });
+
 
                 $('#pageBarContainer').html(data.pageBar || '');
             })
@@ -49,11 +89,22 @@
             });
     }
 
-    // ✅ 탭 로딩용 래퍼
-    function loadDeleteRequests(status) {
-        loadAdminDeleteRequests(status, 1);
-    }
+    // ✅ 페이지 로드 시 실행
+    $(document).ready(() => {
+        loadAdminDeleteRequests('pending', 1);
+    });
+
+    // ✅ 페이지바 클릭 이벤트
+    $('#pageBarContainer').on('click', 'a.page-link', function (e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        const status = $('.tab-btn.active').data('tab').replace('delete-', '');
+        if (page) {
+            loadAdminDeleteRequests(status, page);
+        }
+    });
 </script>
+
 
 <style>
     * {
@@ -672,22 +723,6 @@
         </div>
     </main>
 </div>
-<!-- 스크립트 섹션 -->
-
-<!-- 기존 HTML 구조 마지막에 추가할 모달 -->
-<div class="modal-overlay" id="detailModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h2 class="modal-title" id="modalTitle">상세 정보</h2>
-        </div>
-        <div class="modal-content" id="modalContent">
-            <!-- 동적으로 채워질 내용 -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-outline" onclick="closeModal()">닫기</button>
-        </div>
-    </div>
-</div>
 
 <!-- 추가 CSS 스타일 -->
 <style>
@@ -925,69 +960,6 @@
             });
     }
 
-    <%--// 강의 삭제 요청 데이터 로드--%>
-    <%--function loadDeleteRequests(status = 'pending') {--%>
-    <%--    fetch(`<%=request.getContextPath()%>/admin/delete-requests?status=\${status}`)--%>
-    <%--        .then(r => {--%>
-    <%--            if (!r.ok) throw new Error('Network response was not ok');--%>
-    <%--            return r.json();--%>
-    <%--        })--%>
-    <%--        .then(data => {--%>
-    <%--            const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;--%>
-    <%--            const container = document.getElementById(containerId);--%>
-
-    <%--            if (!container) {--%>
-    <%--                console.error(`Container \${containerId} not found`);--%>
-    <%--                return;--%>
-    <%--            }--%>
-
-    <%--            container.innerHTML = '';--%>
-
-    <%--            if (!data || data.length === 0) {--%>
-    <%--                container.innerHTML = '<div class="no-data">해당 상태의 요청이 없습니다.</div>';--%>
-    <%--                return;--%>
-    <%--            }--%>
-
-    <%--            data.forEach(req => {--%>
-    <%--                const statusClass = getStatusClass(status);--%>
-    <%--                const statusText = getStatusText(status);--%>
-    <%--                const actionsHtml = status === 'pending' ?--%>
-    <%--                    `<div class="request-actions">--%>
-    <%--                    <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}','approve')">승인</button>--%>
-    <%--                    <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}','reject')">거부</button>--%>
-    <%--                    <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>--%>
-    <%--                </div>` :--%>
-    <%--                    `<div class="request-actions">--%>
-    <%--                    <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>--%>
-    <%--                </div>`;--%>
-
-    <%--                container.insertAdjacentHTML('beforeend', `--%>
-    <%--                <div class="request-item">--%>
-    <%--                    <div class="request-header">--%>
-    <%--                        <div class="request-info">--%>
-    <%--                            <h3>\${req.courseName || '제목 없음'}</h3>--%>
-    <%--                            <div class="request-meta">--%>
-    <%--                                <span>👤 요청자: \${req.teacherName || '알 수 없음'}</span>--%>
-    <%--                                <span>👥 수강생: \${req.enrollStudentsCount || 0}명</span>--%>
-    <%--                            </div>--%>
-    <%--                        </div>--%>
-    <%--                        <div class="request-status \${statusClass}">\${statusText}</div>--%>
-    <%--                    </div>--%>
-    <%--                    <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent || '사유 없음'}</div>--%>
-    <%--                    \${actionsHtml}--%>
-    <%--                </div>--%>
-    <%--            `);--%>
-    <%--            });--%>
-    <%--        })--%>
-    <%--        .catch(error => {--%>
-    <%--            console.error('강의 삭제 요청 데이터 로드 실패:', error);--%>
-    <%--            const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;--%>
-    <%--            const container = document.getElementById(containerId);--%>
-    <%--            if (container) {--%>
-    <%--                container.innerHTML = '<div class="error-message">데이터를 불러오는데 실패했습니다.</div>';--%>
-    <%--            }--%>
-    <%--        });--%>
-    <%--}--%>
 
     // 정산 요청 데이터 로드
     function loadSettlementRequests(status = 'pending') {
@@ -1019,11 +991,7 @@
                         `<div class="request-actions">
                         <button class="btn btn-success" onclick="handleSettlementRequest('\${req.id}','approve')">승인</button>
                         <button class="btn btn-danger" onclick="handleSettlementRequest('\${req.id}','reject')">거부</button>
-                        <button class="btn btn-outline" onclick="getSettlementDetail('\${req.id}')">상세보기</button>
-                    </div>` :
-                        `<div class="request-actions">
-                        <button class="btn btn-outline" onclick="getSettlementDetail('\${req.id}')">상세보기</button>
-                    </div>`;
+                    </div>` : ``;
 
                     container.insertAdjacentHTML('beforeend', `
                     <div class="request-item">
@@ -1085,44 +1053,17 @@
             });
     }
 
-    // 상태에 따른 CSS 클래스 반환
-    function getStatusClass(status) {
-        switch (status) {
-            case 'pending':
-                return 'status-pending';
-            case 'approved':
-                return 'status-approved';
-            case 'rejected':
-                return 'status-rejected';
-            default:
-                return 'status-pending';
-        }
-    }
-
-    // 상태에 따른 텍스트 반환
-    function getStatusText(status) {
-        switch (status) {
-            case 'pending':
-                return '대기중';
-            case 'approved':
-                return '승인됨';
-            case 'rejected':
-                return '거부됨';
-            default:
-                return '대기중';
-        }
-    }
 
     // 강의 삭제 요청 처리
-    function handleDeleteRequest(id, action) {
-        if (!confirm(`정말로 이 요청을 ${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
+    function handleDeleteRequest(id, action, courseSeq) {
+        if (!confirm(`정말로 이 요청을 \${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
             return;
         }
 
         fetch(`${path}/admin/course/delete`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({requestId: id, action})
+            body: JSON.stringify({deleteRequestSeq: id, action, courseSeq})
         })
             .then(r => {
                 if (!r.ok) throw new Error('Network response was not ok');
@@ -1140,15 +1081,15 @@
     }
 
     // 정산 요청 처리
-    function handleSettlementRequest(id, action) {
-        if (!confirm(`정말로 이 요청을 ${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
+    function handleSettlementRequest(id, action, courseId) {
+        if (!confirm(`정말로 이 요청을 \${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
             return;
         }
 
         fetch(`${path}/admin/settlement`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({requestId: id, action})
+            body: JSON.stringify({requestId: id, action, courseId})
         })
             .then(r => {
                 if (!r.ok) throw new Error('Network response was not ok');
@@ -1164,54 +1105,6 @@
                 alert('처리 중 오류가 발생했습니다.');
             });
     }
-
-    // 강의 삭제 요청 상세보기
-    function getDeleteDetail(id) {
-        fetch(`${path}/admin/delete-request/detail?courseId=\${id}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(d => {
-                document.getElementById('modalTitle').textContent = (d.courseName || '강의명 없음') + ' - 삭제 요청';
-                document.getElementById('modalContent').innerHTML = d.detailHtml || '상세 정보가 없습니다.';
-                document.getElementById('detailModal').classList.add('active');
-            })
-            .catch(error => {
-                console.error('강의 삭제 요청 상세보기 실패:', error);
-                alert('상세 정보를 불러오는데 실패했습니다.');
-            });
-    }
-
-    // 정산 요청 상세보기
-    function getSettlementDetail(id) {
-        fetch(`${path}/admin/settlement/detail?requestId=\${id}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(d => {
-                document.getElementById('modalTitle').textContent = (d.title || '제목 없음') + ' - 정산 요청';
-                document.getElementById('modalContent').innerHTML = d.detailHtml || '상세 정보가 없습니다.';
-                document.getElementById('detailModal').classList.add('active');
-            })
-            .catch(error => {
-                console.error('정산 요청 상세보기 실패:', error);
-                alert('상세 정보를 불러오는데 실패했습니다.');
-            });
-    }
-
-    // 모달 닫기
-    function closeModal() {
-        document.getElementById('detailModal').classList.remove('active');
-    }
-
-    // 모달 오버레이 클릭 시 닫기
-    document.getElementById('detailModal')?.addEventListener('click', e => {
-        if (e.target === document.getElementById('detailModal')) {
-            closeModal();
-        }
-    });
 
     // 시스템 설정 저장
     function saveSystemSettings() {

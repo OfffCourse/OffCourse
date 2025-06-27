@@ -31,4 +31,8 @@ public class DeleteRequestDao {
     public int countDeleteRequestAllByStatus(DeleteRequestStatus enumStatus) {
         return session.selectOne("deleteCourseRequest.countDeleteRequestAllByStatus", enumStatus);
     }
+
+    public int updateDeleteRequestStatus(Map<String, Object> param) {
+        return session.update("deleteCourseRequest.updateDeleteRequestStatus", param);
+    }
 }
