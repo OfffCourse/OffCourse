@@ -11,6 +11,17 @@ public enum DeleteRequestStatus {
         this.value = value;
     }
 
+    public static DeleteRequestStatus toEnum(String status) {
+        switch (status) {
+            case "0":
+                return DeleteRequestStatus.REQUEST;
+            case "1":
+                return DeleteRequestStatus.ACCEPT;
+            default:
+                return DeleteRequestStatus.REJECT;
+        }
+    }
+
     @Override
     public String toString() {
         return this.value;

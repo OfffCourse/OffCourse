@@ -4,12 +4,13 @@ import com.offcourse.acccount.model.dao.AccountDao;
 import com.offcourse.admin.model.dto.DashboardStat;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.deleterequest.model.dao.DeleteRequestDao;
+import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
 import com.offcourse.member.model.dao.MemberDao;
-import com.offcourse.mypage.model.dto.DeleteCourseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +19,6 @@ public class AdminService {
     private final AccountDao accountDao;
     private final MemberDao memberDao;
     private final CourseDao courseDao;
-
-    public List<DeleteCourseRequest> getDeleteRequestAll() {
-        return requestDao.getDeleteRequestAll();
-    }
 
     public DashboardStat getDashboardStat() {
         long deleteCourseRequestCount = requestDao.countDeleteRequestAll();
@@ -34,5 +31,13 @@ public class AdminService {
                 .memberCount(memberCount)
                 .inProgressCourseCount(inProgressCourseCount)
                 .build();
+    }
+
+    public List<DeleteCourseRequestAll> getDeleteRequestAll(Map<String, Object> param) {
+        return requestDao.getDeleteRequestAll(param);
+    }
+
+    public int countDeleteRequestAllByStatus(int status) {
+        return requestDao.countDeleteRequestAllByStatus(status);
     }
 }

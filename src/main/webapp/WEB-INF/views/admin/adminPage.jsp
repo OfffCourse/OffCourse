@@ -3,6 +3,58 @@
 <%@ page buffer="16kb" %>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
+<script>
+    // ✅ 전역 함수 정의 (섹션/탭에서 사용할 수 있음)
+    function loadAdminDeleteRequests(status = 'pending', cPage = 1) {
+        fetch(`${path}/admin/delete-requests?status=\${status}&cPage=\${cPage}`)
+            .then(res => res.json())
+            .then(data => {
+                const $container = $(`#delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`);
+                $container.empty();
+
+                if (!data.courseList || data.courseList.length === 0) {
+                    $container.append('<div class="no-data">삭제 요청이 없습니다.</div>');
+                    $('#pageBarContainer').empty();
+                    return;
+                }
+
+                data.courseList.forEach(req => {
+                    $container.append(`
+                      <div class="request-item">
+                          <div class="request-header">
+                              <div class="request-info">
+                                  <h3>\${req.courseName}</h3>
+                                  <div class="request-meta">
+                                      <span>👤 요청자: \${req.teacherName}</span>
+                                      <span>👥 수강생: \${req.enrollStudentsCount}명</span>
+                                  </div>
+                              </div>
+                              <div class="request-status status-pending">대기중</div>
+                          </div>
+                          <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent}</div>
+                          <div class="request-actions">
+                              <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'approve')">승인</button>
+                              <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'reject')">거부</button>
+                              <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>
+                          </div>
+                      </div>
+                  `);
+                });
+
+                $('#pageBarContainer').html(data.pageBar || '');
+            })
+            .catch(err => {
+                console.error("삭제 요청 로드 실패", err);
+                $('#deletePendingTab').html('<div class="error-message">데이터를 불러오는데 실패했습니다.</div>');
+            });
+    }
+
+    // ✅ 탭 로딩용 래퍼
+    function loadDeleteRequests(status) {
+        loadAdminDeleteRequests(status, 1);
+    }
+</script>
+
 <style>
     * {
         margin: 0;
@@ -544,6 +596,7 @@
             <div class="request-list" id="deletePendingTab"></div>
             <div class="request-list" id="deleteApprovedTab" style="display:none;"></div>
             <div class="request-list" id="deleteRejectedTab" style="display:none;"></div>
+            <div id="pageBarContainer" style="margin-top:20px;"></div>
         </div>
 
         <!-- 정산 요청 -->
@@ -872,70 +925,69 @@
             });
     }
 
-    // 강의 삭제 요청 데이터 로드
-    function loadDeleteRequests(status = 'pending') {
-        fetch(`<%=request.getContextPath()%>/admin/delete-requests?status=\${status}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(data => {
-                const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;
-                const container = document.getElementById(containerId);
+    <%--// 강의 삭제 요청 데이터 로드--%>
+    <%--function loadDeleteRequests(status = 'pending') {--%>
+    <%--    fetch(`<%=request.getContextPath()%>/admin/delete-requests?status=\${status}`)--%>
+    <%--        .then(r => {--%>
+    <%--            if (!r.ok) throw new Error('Network response was not ok');--%>
+    <%--            return r.json();--%>
+    <%--        })--%>
+    <%--        .then(data => {--%>
+    <%--            const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;--%>
+    <%--            const container = document.getElementById(containerId);--%>
 
-                if (!container) {
-                    console.error(`Container \${containerId} not found`);
-                    return;
-                }
+    <%--            if (!container) {--%>
+    <%--                console.error(`Container \${containerId} not found`);--%>
+    <%--                return;--%>
+    <%--            }--%>
 
-                container.innerHTML = '';
+    <%--            container.innerHTML = '';--%>
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div class="no-data">해당 상태의 요청이 없습니다.</div>';
-                    return;
-                }
+    <%--            if (!data || data.length === 0) {--%>
+    <%--                container.innerHTML = '<div class="no-data">해당 상태의 요청이 없습니다.</div>';--%>
+    <%--                return;--%>
+    <%--            }--%>
 
-                data.forEach(req => {
-                    const statusClass = getStatusClass(status);
-                    const statusText = getStatusText(status);
-                    const actionsHtml = status === 'pending' ?
-                        `<div class="request-actions">
-                        <button class="btn btn-success" onclick="handleDeleteRequest('\${req.id}','approve')">승인</button>
-                        <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.id}','reject')">거부</button>
-                        <button class="btn btn-outline" onclick="getDeleteDetail('\${req.id}')">상세보기</button>
-                    </div>` :
-                        `<div class="request-actions">
-                        <button class="btn btn-outline" onclick="getDeleteDetail('\${req.id}')">상세보기</button>
-                    </div>`;
+    <%--            data.forEach(req => {--%>
+    <%--                const statusClass = getStatusClass(status);--%>
+    <%--                const statusText = getStatusText(status);--%>
+    <%--                const actionsHtml = status === 'pending' ?--%>
+    <%--                    `<div class="request-actions">--%>
+    <%--                    <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}','approve')">승인</button>--%>
+    <%--                    <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}','reject')">거부</button>--%>
+    <%--                    <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>--%>
+    <%--                </div>` :--%>
+    <%--                    `<div class="request-actions">--%>
+    <%--                    <button class="btn btn-outline" onclick="getDeleteDetail('\${req.deleteRequestSeq}')">상세보기</button>--%>
+    <%--                </div>`;--%>
 
-                    container.insertAdjacentHTML('beforeend', `
-                    <div class="request-item">
-                        <div class="request-header">
-                            <div class="request-info">
-                                <h3>\${req.courseName || '제목 없음'}</h3>
-                                <div class="request-meta">
-                                    <span>👤 요청자: \${req.instructorName || '알 수 없음'}</span>
-                                    <span>📅 요청일: \${req.requestDate || '날짜 없음'}</span>
-                                    <span>👥 수강생: \${req.studentCount || 0}명</span>
-                                </div>
-                            </div>
-                            <div class="request-status \${statusClass}">\${statusText}</div>
-                        </div>
-                        <div class="request-details"><strong>삭제 사유:</strong><br>\${req.reason || '사유 없음'}</div>
-                        \${actionsHtml}
-                    </div>
-                `);
-                });
-            })
-            .catch(error => {
-                console.error('강의 삭제 요청 데이터 로드 실패:', error);
-                const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = '<div class="error-message">데이터를 불러오는데 실패했습니다.</div>';
-                }
-            });
-    }
+    <%--                container.insertAdjacentHTML('beforeend', `--%>
+    <%--                <div class="request-item">--%>
+    <%--                    <div class="request-header">--%>
+    <%--                        <div class="request-info">--%>
+    <%--                            <h3>\${req.courseName || '제목 없음'}</h3>--%>
+    <%--                            <div class="request-meta">--%>
+    <%--                                <span>👤 요청자: \${req.teacherName || '알 수 없음'}</span>--%>
+    <%--                                <span>👥 수강생: \${req.enrollStudentsCount || 0}명</span>--%>
+    <%--                            </div>--%>
+    <%--                        </div>--%>
+    <%--                        <div class="request-status \${statusClass}">\${statusText}</div>--%>
+    <%--                    </div>--%>
+    <%--                    <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent || '사유 없음'}</div>--%>
+    <%--                    \${actionsHtml}--%>
+    <%--                </div>--%>
+    <%--            `);--%>
+    <%--            });--%>
+    <%--        })--%>
+    <%--        .catch(error => {--%>
+    <%--            console.error('강의 삭제 요청 데이터 로드 실패:', error);--%>
+    <%--            const containerId = `delete\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;--%>
+    <%--            const container = document.getElementById(containerId);--%>
+    <%--            if (container) {--%>
+    <%--                container.innerHTML = '<div class="error-message">데이터를 불러오는데 실패했습니다.</div>';--%>
+    <%--            }--%>
+    <%--        });--%>
+    <%--}--%>
 
     // 정산 요청 데이터 로드
     function loadSettlementRequests(status = 'pending') {
@@ -1193,5 +1245,11 @@
         // 대시보드 초기 로드
         loadDashboardData();
     });
+
+    // Wrapper 함수 정의 (탭 전환 시 사용될 함수)
+    function loadDeleteRequests(status) {
+        loadAdminDeleteRequests(status, 1);
+    }
+
 </script>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
