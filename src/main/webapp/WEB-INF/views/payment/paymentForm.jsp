@@ -120,15 +120,26 @@
   </div>
 
   <!-- 결제 버튼 영역 -->
-  <div class="form-group">
-    <button type="button" class="btn btn-primary btn-block" onclick="requestPay()">
-      결제하기
+  <div class="form-group text-center">
+    <!-- 카카오페이 제휴사 문구 -->
+    <p class="mb-2">
+      <img src="${path}/resources/images/kakaopay.png" alt="카카오페이" style="height:40px;">
+    </p>
+    <p class="text-muted" style="font-size:0.9em;">
+      카카오페이 제휴사
+    </p>
+
+    <button type="button" class="btn btn-warning btn-block" onclick="requestPay()" style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold;">
+      <img src="${path}/resources/images/kakaopay.png" alt="카카오페이" style="height:24px; vertical-align:middle; margin-right:8px;">
+      카카오페이로 결제하기
     </button>
+
     <a href="${path}/course/view?courseSeq=${courseSeq}"
        class="btn btn-outline-secondary btn-block mt-2">
       취소
     </a>
   </div>
+
 </div>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
