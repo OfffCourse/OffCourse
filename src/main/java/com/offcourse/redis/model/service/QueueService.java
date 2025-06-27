@@ -619,4 +619,60 @@ public class QueueService {
         }
         return result;
     }
+
+    /**
+     * 세션 ID 변경 시 대기열 정보 이전 (로그인 시 사용)
+     * QueueService.java에 추가할 메서드
+     */
+    public boolean transferQueueSession(String oldSessionId, String newSessionId) {
+        // 분산 락으로 동시성 제어
+        String lockKey = LOCK_KEY + oldSessionId;
+        Boolean lockAcquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5, TimeUnit.SECONDS);
+
+        if (Boolean.FALSE.equals(lockAcquired)) {
+            log.warn("세션 이전 락 획득 실패: {} -> {}", oldSessionId, newSessionId);
+            return false;
+        }
+
+        try {
+            boolean transferred = false;
+
+            // 1. 활성 사용자에서 이전
+            Boolean wasActive = stringRedisTemplate.opsForSet().isMember(ACTIVE_SET_KEY, oldSessionId);
+            if (Boolean.TRUE.equals(wasActive)) {
+                stringRedisTemplate.opsForSet().remove(ACTIVE_SET_KEY, oldSessionId);
+                stringRedisTemplate.opsForSet().add(ACTIVE_SET_KEY, newSessionId);
+                transferred = true;
+                log.info("활성 사용자 세션 이전: {} -> {}", oldSessionId, newSessionId);
+            }
+
+            // 2. 대기열에서 이전
+            Double score = stringRedisTemplate.opsForZSet().score(WAITING_QUEUE_KEY, oldSessionId);
+            if (score != null) {
+                stringRedisTemplate.opsForZSet().remove(WAITING_QUEUE_KEY, oldSessionId);
+                stringRedisTemplate.opsForZSet().add(WAITING_QUEUE_KEY, newSessionId, score);
+                transferred = true;
+                log.info("대기열 사용자 세션 이전: {} -> {} (score: {})", oldSessionId, newSessionId, score);
+            }
+
+            // 3. 활동 기록 이전
+            String lastActivity = stringRedisTemplate.opsForValue().get(LAST_ACTIVITY_KEY + oldSessionId);
+            if (lastActivity != null) {
+                stringRedisTemplate.delete(LAST_ACTIVITY_KEY + oldSessionId);
+                int timeout = wasActive ? activeTimeout : waitingTimeout;
+                stringRedisTemplate.opsForValue().set(
+                        LAST_ACTIVITY_KEY + newSessionId,
+                        lastActivity,
+                        timeout * 2,
+                        TimeUnit.SECONDS
+                );
+            }
+
+            return transferred;
+
+        } finally {
+            // 락 해제
+            stringRedisTemplate.delete(lockKey);
+        }
+    }
 }

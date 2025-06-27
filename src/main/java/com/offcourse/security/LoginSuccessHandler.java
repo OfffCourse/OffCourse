@@ -1,7 +1,10 @@
 package com.offcourse.security;
 
 import com.offcourse.member.model.dto.Member;
+import com.offcourse.redis.model.service.QueueService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -10,11 +13,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Slf4j
 @Component
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    private QueueService queueService;
+
+    // Lazy 로딩으로 순환 참조 및 빈 찾기 문제 해결
+    @Autowired
+    @Lazy
+    public void setQueueService(QueueService queueService) {
+        this.queueService = queueService;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -49,7 +62,68 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.addCookie(cookie);
         }
 
-        // 로그인 성공 후 메인 페이지로 이동
-        response.sendRedirect(request.getContextPath() + "/");
+        // URL에서 세션 파라미터 제거하여 리다이렉트
+        String targetUrl = request.getContextPath() + "/";
+
+        // 이전 페이지가 있다면 그곳으로 리다이렉트 (세션 파라미터 제거)
+        String redirectUrl = request.getParameter("redirect");
+        if (redirectUrl != null && !redirectUrl.isEmpty()) {
+            targetUrl = cleanUrl(redirectUrl);
+        }
+
+        response.sendRedirect(targetUrl);
     }
+
+    /**
+     * 세션 변경 시 대기열 정보 이전 처리
+     */
+    private void handleSessionChange(HttpServletRequest request, Authentication authentication) {
+        try {
+            // 이전 세션 ID 가져오기
+//            String oldSessionId = null;
+//            WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
+//            if (details != null) {
+//                oldSessionId = details.getSessionId();
+//            }
+            String oldSessionId = request.getRequestedSessionId();
+
+            // 현재 세션 ID
+            HttpSession session = request.getSession();
+            String newSessionId = session.getId();
+
+            // 세션이 변경되었다면 대기열 정보 이전
+            if (oldSessionId != null && !oldSessionId.equals(newSessionId)) {
+                log.info("세션 변경 감지 - 이전: {}, 새: {}", oldSessionId, newSessionId);
+
+                boolean transferred = queueService.transferQueueSession(oldSessionId, newSessionId);
+                if (transferred) {
+                    log.info("대기열 세션 정보 이전 완료");
+                }
+            }
+        } catch (Exception e) {
+            log.error("세션 변경 처리 중 오류", e);
+            // 오류가 발생해도 로그인은 계속 진행
+        }
+    }
+
+    /**
+     * URL에서 세션 관련 파라미터 제거
+     */
+    private String cleanUrl(String url) {
+        if (url == null) return "";
+
+        // sessionId 파라미터 제거
+        url = url.replaceAll("[?&]sessionId=[^&]*", "");
+        // jsessionid 제거
+        url = url.replaceAll(";jsessionid=[^?]*", "");
+        // 첫 번째 & 를 ? 로 변경
+        url = url.replaceAll("\\?&", "?");
+        // 마지막 ? 제거
+        if (url.endsWith("?")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        return url;
+    }
+
 }
