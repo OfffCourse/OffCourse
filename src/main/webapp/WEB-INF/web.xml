@@ -19,8 +19,6 @@
     <session-config>
         <!-- 세션 타임아웃 (분 단위) -->
         <session-timeout>5</session-timeout>
-        <!-- 쿠키만 사용, URL rewriting 비활성화 -->
-        <tracking-mode>COOKIE</tracking-mode>
         <!-- 쿠키 설정 -->
         <cookie-config>
             <name>OFFCOURSE_SESSION</name>
@@ -29,6 +27,8 @@
             <secure>false</secure> <!-- HTTPS 환경에서는 true -->
             <max-age>-1</max-age> <!-- 브라우저 세션 동안만 유지 -->
         </cookie-config>
+        <!-- 쿠키만 사용, URL rewriting 비활성화 -->
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
     <!-- 세션 이벤트 리스너 등록 (SessionDestroyedEvent 발생을 위해 필수) -->
