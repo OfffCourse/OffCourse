@@ -5,6 +5,7 @@ import com.offcourse.admin.model.dto.DashboardStat;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.deleterequest.model.dao.DeleteRequestDao;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
+import com.offcourse.deleterequest.model.dto.DeleteRequestStatus;
 import com.offcourse.member.model.dao.MemberDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class AdminService {
         return requestDao.getDeleteRequestAll(param);
     }
 
-    public int countDeleteRequestAllByStatus(int status) {
-        return requestDao.countDeleteRequestAllByStatus(status);
+    public int countDeleteRequestAllByStatus(DeleteRequestStatus enumStatus) {
+        return requestDao.countDeleteRequestAllByStatus(enumStatus);
     }
 }

@@ -5,6 +5,7 @@ import com.offcourse.admin.model.service.AdminService;
 import com.offcourse.common.DeleteRequestAjaxPageFactory;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
 import com.offcourse.deleterequest.model.dto.DeleteRequestAllResponse;
+import com.offcourse.deleterequest.model.dto.DeleteRequestStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,21 +38,15 @@ public class AdminController {
     public DeleteRequestAllResponse getDeleteRequestAll(
             String status,
             @RequestParam(required = false, defaultValue = "1") int cPage,
-            @RequestParam(required = false, defaultValue = "5") int numPerPage
+            @RequestParam(required = false, defaultValue = "1") int numPerPage
     ) {
-        int st = -1;
-        switch (status) {
-            case "pending":
-                st = 0;
-                break;
-            case "approved":
-                st = 1;
-                break;
-            default:
-                st = 2;
+        DeleteRequestStatus enumStatus = DeleteRequestStatus.statusToEnum(status);
+        if (enumStatus == null) {
+            throw new IllegalArgumentException("Invalid status: " + status);
         }
-        String pageBar = DeleteRequestAjaxPageFactory.basicPageBar(cPage, numPerPage, adminService.countDeleteRequestAllByStatus(st), "loadAdminDeleteRequests", status);
-        List<DeleteCourseRequestAll> deleteRequestAll = adminService.getDeleteRequestAll(Map.of("status", st, "cPage", cPage, "numPerPage", numPerPage));
+
+        String pageBar = DeleteRequestAjaxPageFactory.basicPageBar(cPage, numPerPage, adminService.countDeleteRequestAllByStatus(enumStatus), "loadAdminDeleteRequests", status);
+        List<DeleteCourseRequestAll> deleteRequestAll = adminService.getDeleteRequestAll(Map.of("status", enumStatus, "cPage", cPage, "numPerPage", numPerPage));
         return DeleteRequestAllResponse.builder()
                 .courseList(deleteRequestAll)
                 .pageBar(pageBar)

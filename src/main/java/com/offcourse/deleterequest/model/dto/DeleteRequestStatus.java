@@ -2,7 +2,9 @@ package com.offcourse.deleterequest.model.dto;
 
 public enum DeleteRequestStatus {
     REQUEST("0"),
+
     ACCEPT("1"),
+
     REJECT("2");
 
     private final String value;
@@ -11,14 +13,29 @@ public enum DeleteRequestStatus {
         this.value = value;
     }
 
-    public static DeleteRequestStatus toEnum(String status) {
+    public static DeleteRequestStatus statusToEnum(String status) {
         switch (status) {
+            case "pending":
+                return DeleteRequestStatus.REQUEST;
+            case "approved":
+                return DeleteRequestStatus.ACCEPT;
+            case "rejected":
+                return DeleteRequestStatus.REJECT;
+            default:
+                return null;
+        }
+    }
+
+    public static DeleteRequestStatus columnToEnum(String value) {
+        switch (value) {
             case "0":
                 return DeleteRequestStatus.REQUEST;
             case "1":
                 return DeleteRequestStatus.ACCEPT;
-            default:
+            case "2":
                 return DeleteRequestStatus.REJECT;
+            default:
+                return null;
         }
     }
 

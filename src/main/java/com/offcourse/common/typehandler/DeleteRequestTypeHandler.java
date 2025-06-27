@@ -18,18 +18,18 @@ public class DeleteRequestTypeHandler extends BaseTypeHandler<DeleteRequestStatu
     @Override
     public DeleteRequestStatus getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String value = rs.getString(columnName);
-        return value != null ? DeleteRequestStatus.toEnum(value) : null;
+        return value != null ? DeleteRequestStatus.columnToEnum(value) : null;
     }
 
     @Override
     public DeleteRequestStatus getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String value = rs.getString(columnIndex);
-        return value != null ? DeleteRequestStatus.toEnum(value) : null;
+        return value != null ? DeleteRequestStatus.columnToEnum(value) : null;
     }
 
     @Override
     public DeleteRequestStatus getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String value = cs.getString(columnIndex);
-        return value != null ? DeleteRequestStatus.toEnum(value) : null;
+        return value != null ? DeleteRequestStatus.columnToEnum(value) : null;
     }
 }
