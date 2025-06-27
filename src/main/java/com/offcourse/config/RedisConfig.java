@@ -24,16 +24,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import java.time.Duration;
 
 @Configuration
 @PropertySource("classpath:properties/application.properties")
-@EnableRedisHttpSession(
-        maxInactiveIntervalInSeconds = 1800, // 30분 (기본값)
-        redisNamespace = "offcourse:session" // 네임스페이스 분리
-)
 public class RedisConfig {
 
     @Value("${spring.redis.host}")

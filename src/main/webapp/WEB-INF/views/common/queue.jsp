@@ -137,6 +137,44 @@
   let heartbeatFailCount = 0; // 연속 실패 카운트
   const MAX_HEARTBEAT_FAILS = 3; // 최대 실패 허용 횟수
 
+
+  (function() {
+    // URL에서 세션 관련 파라미터 제거
+    const cleanUrl = () => {
+      const url = new URL(window.location);
+
+      // sessionId 파라미터 제거
+      url.searchParams.delete('sessionId');
+      url.searchParams.delete('jsessionid');
+
+      // URL에 ;jsessionid= 패턴이 있으면 제거
+      let cleanPath = url.pathname.replace(/;jsessionid=[^?\/]*/g, '');
+
+      // URL이 변경되었으면 히스토리 교체
+      if (url.pathname !== cleanPath || url.searchParams.has('sessionId') || url.searchParams.has('jsessionid')) {
+        const newUrl = cleanPath + (url.search ? url.search : '');
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    };
+
+    // 페이지 로드 시 실행
+    cleanUrl();
+
+    // 모든 링크에 대해 세션 파라미터 제거
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a');
+      if (link && link.href) {
+        const url = new URL(link.href);
+        if (url.searchParams.has('sessionId') || url.searchParams.has('jsessionid')) {
+          e.preventDefault();
+          url.searchParams.delete('sessionId');
+          url.searchParams.delete('jsessionid');
+          window.location.href = url.toString();
+        }
+      }
+    });
+  })();
+
   // 페이지 로드 시 초기화
   $(document).ready(function() {
     console.log('대기열 페이지 초기화 시작');
