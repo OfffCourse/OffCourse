@@ -1,9 +1,12 @@
 package com.offcourse.admin.controller;
 
+import com.offcourse.admin.model.dto.AccountRequestAll;
+import com.offcourse.admin.model.dto.AccountRequestAllResponse;
 import com.offcourse.admin.model.dto.DashboardStat;
 import com.offcourse.admin.model.dto.HandleDeleteRequest;
 import com.offcourse.admin.model.service.AdminService;
-import com.offcourse.common.DeleteRequestAjaxPageFactory;
+import com.offcourse.common.pagefactory.AccountAjaxPageFactory;
+import com.offcourse.common.pagefactory.DeleteRequestAjaxPageFactory;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
 import com.offcourse.deleterequest.model.dto.DeleteRequestAllResponse;
 import com.offcourse.deleterequest.model.dto.DeleteRequestStatus;
@@ -38,7 +41,7 @@ public class AdminController {
     public DeleteRequestAllResponse getDeleteRequestAll(
             String status,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "1") int numPerPage
+            @RequestParam(required = false, defaultValue = "5") int numPerPage
     ) {
         DeleteRequestStatus enumStatus = DeleteRequestStatus.statusToEnum(status);
         if (enumStatus == null) {
@@ -60,4 +63,18 @@ public class AdminController {
         return adminService.handleDeleteRequest(handleDeleteRequest.getDeleteRequestSeq(), handleDeleteRequest.getAction(), handleDeleteRequest.getCourseSeq());
     }
 
+    @GetMapping("/account-requests")
+    @ResponseBody
+    public AccountRequestAllResponse getAccountRequestAll(
+            String status,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "1") int numPerPage
+    ) {
+        List<AccountRequestAll> accountRequestAllList = adminService.getAccountRequestAll(Map.of("status", status, "cPage", page, "numPerPage", numPerPage));
+        String pageBar = AccountAjaxPageFactory.basicPageBar(page, numPerPage, adminService.countAccountRequestsAllByStatus(status), "loadSettlementRequests", status);
+        return AccountRequestAllResponse.builder()
+                .accountRequestAllList(accountRequestAllList)
+                .pageBar(pageBar)
+                .build();
+    }
 }

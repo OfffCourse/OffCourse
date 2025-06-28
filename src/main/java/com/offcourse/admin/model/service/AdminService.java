@@ -1,6 +1,7 @@
 package com.offcourse.admin.model.service;
 
 import com.offcourse.acccount.model.dao.AccountDao;
+import com.offcourse.admin.model.dto.AccountRequestAll;
 import com.offcourse.admin.model.dto.DashboardStat;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.deleterequest.model.dao.DeleteRequestDao;
@@ -59,5 +60,13 @@ public class AdminService {
             }
         }
         return false;
+    }
+
+    public List<AccountRequestAll> getAccountRequestAll(Map param) {
+        return accountDao.getAccountRequestAll(param);
+    }
+
+    public int countAccountRequestsAllByStatus(String status) {
+        return accountDao.countAccountRequestsAllByStatus(status);
     }
 }

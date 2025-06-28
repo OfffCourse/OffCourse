@@ -89,6 +89,101 @@
             });
     }
 
+    // 정산 요청 데이터 로드 (수정된 버전)
+    function loadSettlementRequests(status = 'pending', cPage = 1) {
+        const tabName = status.charAt(0).toUpperCase() + status.slice(1);
+        fetch(`${path}/admin/account-requests?status=\${status}&page=\${cPage}`)
+            .then(res => res.json())
+            .then(data => {
+                let $container;
+                if (tabName === 'Pending') {
+                    $container = $("#settlementPendingTab");
+                } else if (tabName === 'Approved') {
+                    $container = $("#settlementApprovedTab");
+                } else {
+                    $container = $("#settlementRejectedTab");
+                }
+                $container.empty();
+
+                if (!data.accountRequestAllList || data.accountRequestAllList.length === 0) {
+                    $container.append('<div class="no-data">정산 요청이 없습니다.</div>');
+                    // 정산 요청 탭에서는 별도의 페이지바 컨테이너 사용
+                    $('#settlementPageBarContainer').empty();
+                    return;
+                }
+
+                data.accountRequestAllList.forEach(req => {
+                    const isPending = status === 'pending';
+
+                    const buttonsHtml = isPending ? `
+                    <div class="request-actions">
+                        <button class="btn btn-success" onclick="handleAccountRequest('\${req.accountSeq}', 'approve','\${req.courseSeq}')">승인</button>
+                        <button class="btn btn-danger" onclick="handleAccountRequest('\${req.accountSeq}', 'reject','\${req.courseSeq}')">거부</button>
+                    </div>
+                ` : '';
+
+                    $container.append(`
+                    <div class="request-item">
+                        <div class="request-header">
+                            <div class="request-info">
+                                <h3>\${req.courseName}</h3>
+                                <div class="request-meta">
+                                    <span>🏦 은행: \${req.bankName}</span>
+                                    <span>💰 정산 금액: ₩\${(req.accountPrice || 0).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div class="request-status \${getStatusClass(status)}">\${getStatusText(status)}</div>
+                        </div>
+                        <div class="request-details"><strong>계좌 정보:</strong><br>\${req.bankName} \${req.bankNumber}</div>
+                        \${buttonsHtml}
+                    </div>
+                `);
+                });
+
+                $('#settlementPageBarContainer').html(data.pageBar || '');
+            })
+            .catch(err => {
+                console.error("정산 요청 로드 실패", err);
+                $('#settlementPendingTab').html('<div class="error-message">데이터를 불러오는데 실패했습니다.</div>');
+            });
+    }
+
+    // 정산 요청 처리 함수 (수정된 버전)
+    function handleAccountRequest(accountSeq, action, courseSeq) {
+        if (!confirm(`정말로 이 요청을 \${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
+            return;
+        }
+
+        fetch(`${path}/admin/account/handle`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({accountSeq: accountSeq, action, courseSeq})
+        })
+            .then(r => {
+                if (!r.ok) throw new Error('Network response was not ok');
+                return r.json();
+            })
+            .then(result => {
+                alert(result.message || '처리가 완료되었습니다.');
+                loadSettlementRequests('pending', 1); // 대기중 탭 새로고침
+                loadDashboardData(); // 대시보드 통계 업데이트
+            })
+            .catch(error => {
+                console.error('정산 요청 처리 실패:', error);
+                alert('처리 중 오류가 발생했습니다.');
+            });
+    }
+
+    // 정산 요청 페이지바 클릭 이벤트 핸들러 추가 (기존 페이지바 이벤트 핸들러 아래에 추가)
+    $('#settlementPageBarContainer').on('click', 'a.page-link', function (e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        const status = $('.tab-btn.active').data('tab').replace('settlement-', '');
+        if (page) {
+            loadSettlementRequests(status, page);
+        }
+    });
+
     // ✅ 페이지 로드 시 실행
     $(document).ready(() => {
         loadAdminDeleteRequests('pending', 1);
@@ -651,6 +746,7 @@
         </div>
 
         <!-- 정산 요청 -->
+        <!-- 정산 요청 섹션 수정 버전 -->
         <div class="admin-section" id="settlement">
             <div class="page-header">
                 <h1 class="page-title">정산 요청</h1>
@@ -664,6 +760,8 @@
             <div class="request-list" id="settlementPendingTab"></div>
             <div class="request-list" id="settlementApprovedTab" style="display:none;"></div>
             <div class="request-list" id="settlementRejectedTab" style="display:none;"></div>
+            <!-- 정산 요청용 페이지바 컨테이너 추가 -->
+            <div id="settlementPageBarContainer" style="margin-top:20px;"></div>
         </div>
 
         <!-- 회원 관리 -->
@@ -960,68 +1058,6 @@
             });
     }
 
-
-    // 정산 요청 데이터 로드
-    function loadSettlementRequests(status = 'pending') {
-        fetch(`${path}/admin/settlement-requests?status=\${status}`)
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(data => {
-                const containerId = `settlement\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;
-                const container = document.getElementById(containerId);
-
-                if (!container) {
-                    console.error(`Container \${containerId} not found`);
-                    return;
-                }
-
-                container.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div class="no-data">해당 상태의 요청이 없습니다.</div>';
-                    return;
-                }
-
-                data.forEach(req => {
-                    const statusClass = getStatusClass(status);
-                    const statusText = getStatusText(status);
-                    const actionsHtml = status === 'pending' ?
-                        `<div class="request-actions">
-                        <button class="btn btn-success" onclick="handleSettlementRequest('\${req.id}','approve')">승인</button>
-                        <button class="btn btn-danger" onclick="handleSettlementRequest('\${req.id}','reject')">거부</button>
-                    </div>` : ``;
-
-                    container.insertAdjacentHTML('beforeend', `
-                    <div class="request-item">
-                        <div class="request-header">
-                            <div class="request-info">
-                                <h3>\${req.title || '제목 없음'}</h3>
-                                <div class="request-meta">
-                                    <span>👤 요청자: \${req.instructorName || '알 수 없음'}</span>
-                                    <span>📅 요청일: \${req.requestDate || '날짜 없음'}</span>
-                                    <span>💰 총액: ₩\${(req.totalAmount || 0).toLocaleString()}</span>
-                                </div>
-                            </div>
-                            <div class="request-status \${statusClass}">\${statusText}</div>
-                        </div>
-                        <div class="request-details"><strong>내역:</strong><br>\${req.details || '내역 없음'}</div>
-                        \${actionsHtml}
-                    </div>
-                `);
-                });
-            })
-            .catch(error => {
-                console.error('정산 요청 데이터 로드 실패:', error);
-                const containerId = `settlement\${status.charAt(0).toUpperCase() + status.slice(1)}Tab`;
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = '<div class="error-message">데이터를 불러오는데 실패했습니다.</div>';
-                }
-            });
-    }
-
     // 회원 관리 데이터 로드
     function loadUserManagementData() {
         Promise.all([
@@ -1076,32 +1112,6 @@
             })
             .catch(error => {
                 console.error('강의 삭제 요청 처리 실패:', error);
-                alert('처리 중 오류가 발생했습니다.');
-            });
-    }
-
-    // 정산 요청 처리
-    function handleSettlementRequest(id, action, courseId) {
-        if (!confirm(`정말로 이 요청을 \${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
-            return;
-        }
-
-        fetch(`${path}/admin/settlement`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({requestId: id, action, courseId})
-        })
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(result => {
-                alert(result.message || '처리가 완료되었습니다.');
-                loadSettlementRequests('pending'); // 대기중 탭 새로고침
-                loadDashboardData(); // 대시보드 통계 업데이트
-            })
-            .catch(error => {
-                console.error('정산 요청 처리 실패:', error);
                 alert('처리 중 오류가 발생했습니다.');
             });
     }

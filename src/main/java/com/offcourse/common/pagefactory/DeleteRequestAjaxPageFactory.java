@@ -1,4 +1,4 @@
-package com.offcourse.common;
+package com.offcourse.common.pagefactory;
 
 public class DeleteRequestAjaxPageFactory {
     public static String basicPageBar(int cPage, int numPerPage, int totalData, String jsFunctionName, String statusParam) {
