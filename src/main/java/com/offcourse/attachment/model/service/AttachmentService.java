@@ -46,5 +46,12 @@ public class AttachmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<Episode> getEpisodeByCourseSeq(Long courseSeq, int cPage, int numPerPage) {
+        return dao.getEpisodeByCourseSeq(courseSeq, cPage, numPerPage);
+    }
+
+    public List<Attachment> getAttachByEpisodeSeq(Long episodeSeq) {
+        return dao.getAttachByEpisodeSeq(episodeSeq);
+    }
 
 }

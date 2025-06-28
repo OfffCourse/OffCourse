@@ -587,33 +587,35 @@
                 <div class="course-meta">
                     <span>👨‍💻 ${course.courseCategory.fullCategoryName}</span>
                     <span>⭐ ${course.averageRating}</span>
-                    <span>📚 총 12강</span>
+                    <span>📚 총 ${countEpisode}강</span>
                 </div>
             </div>
 
             <!-- Course Categories -->
             <div class="course-section">
-                <h2 class="section-title">강의 목록</h2>
+                <h2 class="section-title">강의 소개</h2>
                 <div class="category-list">
                     <div class="category-item">
                         <div class="category-checkbox checked"></div>
-                        <span class="category-text">강의 소개</span>
+                        <span class="category-text">커리큘럼</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-text">${course.courseCurriculum}</span>
                     </div>
                     <div class="category-item">
                         <div class="category-checkbox checked"></div>
-                        <span class="category-text">기본 문법</span>
+                        <span class="category-text">Q&A 링크(오픈카카오톡)</span>
                     </div>
                     <div class="category-item">
-                        <div class="category-checkbox"></div>
-                        <span class="category-text">고급 기능</span>
+                        <span class="category-text">${course.courseQaLink}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Curriculum -->
             <div class="course-section">
-                <h2 class="section-title">커리큘럼</h2>
-                <div class="curriculum-list">
+                <h2 class="section-title">강의 회차</h2>
+                <%--<div class="curriculum-list">
                     <c:forEach var="episode" items="${episodeAttachments}">
                         <div class="curriculum-item">
                             <span class="curriculum-number">${episode.episodeCount}.</span>
@@ -649,6 +651,12 @@
                 </div>
                 <div id="pageBar">
                     ${pageBar}
+                </div>--%>
+                <div class="curriculum-list" id="episode-list">
+                    <!-- JS로 렌더링 -->
+                </div>
+                <div id="episode-page-bar">
+                    <!-- JS로 페이징 바 렌더링 -->
                 </div>
             </div>
             <div class="course-section">
@@ -666,15 +674,15 @@
                 <div class="schedule-row" id="teacherview"><%--seq추가--%>
                     <span class="schedule-label">강사</span>
                     <button class="action-btn btn-secondary"
-                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">김강사</button>
+                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">${course.memberName}</button>
                 </div>
                 <div class="schedule-row">
                     <span class="schedule-label">개강일</span>
-                    <span class="schedule-value">2025-02-01</span>
+                    <span class="schedule-value">${course.courseStartDate}</span>
                 </div>
                 <div class="schedule-row">
                     <span class="schedule-label">종료일</span>
-                    <span class="schedule-value">2025-02-01</span>
+                    <span class="schedule-value">${course.courseEndDate}</span>
                 </div>
             </div>
             <button class="action-btn" id="showAttendanceBtn" data-course-seq="${course.courseSeq}">출석 코드 보기</button>
@@ -703,7 +711,7 @@
         </div>
     </div>
 </div>
-<!-- 자료 업로드 모달 -->
+<%--<!-- 자료 업로드 모달 -->
 <div class="modal fade" id="attachUploadModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <form method="post" enctype="multipart/form-data" action="${path}/lecture/uploadattach">
@@ -714,6 +722,7 @@
                 </div>
                 <div class="modal-body">
                     <input type="file" name="upFile" multiple required class="form-control"/>
+                    <ul id="uploaded-files-list"></ul>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">업로드</button>
@@ -722,7 +731,49 @@
             </div>
         </form>
     </div>
+</div>--%>
+<!-- 자료 업로드 모달 -->
+<div class="modal fade" id="attachUploadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <form method="post" enctype="multipart/form-data" action="${path}/uploadattach">
+            <input type="hidden" name="episodeSeq" id="modal-episodeSeq">
+            <input type="hidden" name="courseSeq" value="${course.courseSeq}">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">자료 업로드</h5>
+                </div>
+
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <button type="button" class="btn btn-outline-dark" onclick="addFile()">추가</button>
+                            <button type="button" class="btn btn-outline-danger" onclick="delFile()">삭제</button>
+                        </div>
+                    </div>
+
+                    <div id="basic-file-form" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">첨부파일1</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="upFile" id="upFile1" required>
+                            <label class="custom-file-label" for="upFile1">파일을 선택하세요</label>
+                        </div>
+                    </div>
+
+                    <ul id="uploaded-files-list" class="mt-2"></ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">업로드</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
 <script>
     $('#showAttendanceBtn').on('click', function () {
         const courseSeq = $(this).data('course-seq');
@@ -777,7 +828,224 @@
             }
         });
     });
+</script>
+<script>
+    // 1. courseSeq 변수 선언을 함수 외부로 이동
+    const courseSeq = "${course.courseSeq}";
 
+    // 2. DOMContentLoaded 이벤트 리스너 수정
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM 로드 완료, courseSeq:", courseSeq); // 디버깅용
+        loadEpisodes(1);
+        loadCourses(1);
+    });
+
+    // 3. 페이징 이벤트 리스너 수정 (jQuery와 vanilla JavaScript 혼용 문제 해결)
+    document.addEventListener('DOMContentLoaded', function() {
+        // jQuery 대신 vanilla JavaScript로 통일
+        document.getElementById('episode-page-bar').addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const page = e.target.getAttribute('data-page');
+                if (page) {
+                    loadEpisodes(parseInt(page));
+                }
+            }
+        });
+    });
+
+    // 4. loadEpisodes 함수 수정 (에러 핸들링 추가)
+    function loadEpisodes(cPage = 1) {
+        console.log("loadEpisodes 호출됨, cPage:", cPage, "courseSeq:", courseSeq); // 디버깅용
+
+        // courseSeq 유효성 검사
+        if (!courseSeq || courseSeq === "" || courseSeq === "null") {
+            console.error("courseSeq가 유효하지 않습니다:", courseSeq);
+            document.getElementById('episode-list').innerHTML = "<p>강의 정보를 불러올 수 없습니다.</p>";
+            return;
+        }
+
+        fetch(`${path}/course/episodes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseSeq: parseInt(courseSeq), // 숫자로 변환
+                cPage: cPage,
+                numPerPage: 5
+            })
+        })
+            .then(response => {
+                console.log("응답 상태:", response.status); // 디버깅용
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: \${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("받은 데이터:", data); // 디버깅용
+                renderEpisodes(data);
+            })
+            .catch(error => {
+                console.error("에러 발생:", error);
+                document.getElementById('episode-list').innerHTML = "<p>데이터를 불러오는 중 오류가 발생했습니다.</p>";
+            });
+    }
+
+    // 5. 렌더링 로직을 별도 함수로 분리
+    function renderEpisodes(data) {
+        const list = document.getElementById('episode-list');
+        const pageBar = document.getElementById('episode-page-bar');
+
+        if (!list || !pageBar) {
+            console.error("필요한 DOM 요소를 찾을 수 없습니다.");
+            return;
+        }
+
+        list.innerHTML = "";
+
+        if (!data.episodes || data.episodes.length === 0) {
+            list.innerHTML = "<p>등록된 회차가 없습니다.</p>";
+            pageBar.innerHTML = "";
+            return;
+        }
+
+        data.episodes.forEach(episode => {
+            const epDate = new Date(episode.episodeDate);
+            const todayStr = new Date().toISOString().split('T')[0];
+            const epDateStr = epDate.toISOString().split('T')[0];
+            const showRecordBtns = (epDateStr === todayStr);
+
+            // 녹화 버튼 HTML 생성
+            let recordButtonsHtml = '';
+            if (showRecordBtns) {
+                recordButtonsHtml = `
+                <button class="action-btn start-record" id="start" data-epseq="\${episode.episodeSeq}">녹화 시작</button>
+                <button class="action-btn stop-record" id="stop" data-epseq="\${episode.episodeSeq}">녹화 중지</button>
+            `;
+            }
+
+            const episodeHtml = `
+            <div class="curriculum-item">
+                <span class="curriculum-number">\${episode.episodeCount}.</span>
+                <div class="curriculum-content">
+                    <span>제목 없음</span>
+                    <div class="curriculum-date">\${formatDate(episode.episodeDate)}</div>
+                </div>
+                <div class="curriculum-actions">
+                    \${recordButtonsHtml}
+                    <button class="action-btn upload-attach-btn" data-episode="\${episode.episodeSeq}">자료업로드</button>
+                </div>
+            </div>
+        `;
+            list.insertAdjacentHTML("beforeend", episodeHtml);
+        });
+
+        pageBar.innerHTML = data.pageBar || "";
+
+    }
+
+    function loadCourses(cPage = 1) {
+        console.log("loadCourse 시작")
+        fetch(`${path}/course/reviews`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                courseSeq: courseSeq,
+                cPage: cPage,
+                numPerPage: 3 // 페이지당 리뷰 수
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('review-container');
+                const pageBar = document.getElementById('review-page-bar');
+                container.innerHTML = "";
+
+                if (!data || !data.reviews || data.reviews.length === 0) {
+                    container.innerHTML = "<p>리뷰가 없습니다.</p>";
+                    pageBar.innerHTML = "";
+                    return;
+                }
+
+                data.reviews.forEach(r => {
+                    // 1. 날짜 처리
+                    const date = new Date(r.reviewCreateTime); // ← 정확한 필드명
+                    let formattedDate = '날짜 오류';
+                    if (!isNaN(date)) {
+                        formattedDate = `\${date.getFullYear()}년 \${date.getMonth() + 1}월 \${date.getDate()}일`;
+                    }
+
+                    // 2. 프로필 이미지 (없으면 기본 이미지 대체)
+                    const profileImgUrl = r.memberProfile
+                        ? `${path}/resources/upload/student/profile/\${r.memberProfile}`
+                        : `${path}/resources/upload/student/profile/default_profile_student.png`;
+
+                    const reviewHtml = `
+                      <div class="curriculum-item">
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-avatar">
+                                    <img src="\${profileImgUrl}" alt="프로필" style="width:40px; height:40px; border-radius:50%;">
+                                </div>
+                                <div class="review-meta">
+                                    <h5>\${r.memberName}</h5>
+                                </div>
+                                <div class="review-date">\${formattedDate}</div>
+                            </div>
+                            <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
+                            <div class="review-content">\${r.reviewContent}</div>
+                        </div>
+                      </div>
+                    `;
+                    container.insertAdjacentHTML("beforeend", reviewHtml);
+                });
+
+                pageBar.innerHTML = data.pageBar || "";
+            })
+            .catch(() => alert("리뷰 로딩 실패"));
+    }
+
+    // 페이징 링크 클릭 시 호출
+    function fn_paging(pageNo) {
+        loadCourses(pageNo);
+    }
+
+    function formatDate(date) {
+        const d = new Date(date);
+        return d.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    }
+</script>
+
+
+
+    <%--// 첫 로딩 시 호출
+    /*document.addEventListener("DOMContentLoaded", () => {
+        console.log("🔥 리뷰 로드 시작");
+        loadCourses(1);
+    });*/
+
+
+</script>--%>
+<%--<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 업로드 버튼 클릭 시 모달 열기
+        document.querySelectorAll('.upload-attach-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const epSeq = this.dataset.episode;
+                document.getElementById('modal-episodeSeq').value = epSeq;
+                $('#attachUploadModal').modal('show');
+            });
+        });
+
+        // 녹화 시작/중지 버튼도 필요하면 여기에 event 추가
+
+    });
     let mediaRecorder;
     let chunks = [];
     let videoBlob;
@@ -818,121 +1086,184 @@
             await fetch("${path}/uploadChunk", {method: "POST", body: formData});
         }
     }
-</script>
+</script>--%>
 <script>
-    // Day selection functionality
-    document.querySelectorAll('.day-number').forEach(day => {
-        day.addEventListener('click', function () {
-            document.querySelectorAll('.day-number').forEach(d => d.classList.remove('day-selected'));
-            this.classList.add('day-selected');
-        });
-    });
+    document.addEventListener('click', function(e) {
+        // 자료 업로드 버튼
+        if (e.target.classList.contains('upload-attach-btn')) {
+            const epSeq = e.target.dataset.episode;
+            document.getElementById('modal-episodeSeq').value = epSeq;
 
-    /*// Category checkbox toggle
-    document.querySelectorAll('.category-item').forEach(item => {
-    item.addEventListener('click', function() {
-    const checkbox = this.querySelector('.category-checkbox');
-    checkbox.classList.toggle('checked');
-    });
-    });*/
+            fetch(`${path}/lecture/attachments?episodeSeq=\${epSeq}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('uploaded-files-list');
+                    list.innerHTML = "";
 
-    // Enroll button
-    document.querySelector('.enroll-btn').addEventListener('click', function () {
-        alert('수강 신청이 완료되었습니다!');
-    });
-
-    // Wishlist button
-    document.querySelector('.wishlist-btn').addEventListener('click', function () {
-        const heart = this.textContent.includes('♡') ? '♥' : '♡';
-        this.innerHTML = heart + ' 찜하기';
-    });
-</script>
-<script>
-    // 강의 상세 페이지에서 JS 내에 있는 경우 courseSeq는 서버에서 변수로 전달받는다고 가정
-    const courseSeq = "${course.courseSeq}"; // EL 표현식으로 전달
-
-    function loadCourses(cPage = 1) {
-        fetch(`${path}/course/reviews`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                courseSeq: courseSeq,
-                cPage: cPage,
-                numPerPage: 3 // 페이지당 리뷰 수
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById('review-container');
-                const pageBar = document.getElementById('review-page-bar');
-                container.innerHTML = "";
-
-                if (!data || !data.reviews || data.reviews.length === 0) {
-                    container.innerHTML = "<p>리뷰가 없습니다.</p>";
-                    pageBar.innerHTML = "";
-                    return;
-                }
-
-                data.reviews.forEach(r => {
-                    // 1. 날짜 처리
-                    const date = new Date(r.reviewCreateTime); // ← 정확한 필드명
-                    let formattedDate = '날짜 오류';
-                    if (!isNaN(date)) {
-                        formattedDate = `\${date.getFullYear()}년 \${date.getMonth() + 1}월 \${date.getDate()}일`;
-                    }
-
-                    // 2. 프로필 이미지 (없으면 기본 이미지 대체)
-                    const profileImgUrl = r.memberProfile
-                        ? `${path}/resources/upload/profile/\${r.memberProfile}`
-                        : `${path}/resources/img/default-profile.png`;
-
-                    const reviewHtml = `
-                      <div class="curriculum-item">
-                        <div class="review-item">
-                            <div class="review-header">
-                                <div class="review-avatar">
-                                    <img src="\${profileImgUrl}" alt="프로필" style="width:40px; height:40px; border-radius:50%;">
-                                </div>
-                                <div class="review-meta">
-                                    <h5>\${r.memberName}</h5>
-                                </div>
-                                <div class="review-date">\${formattedDate}</div>
-                            </div>
-                            <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
-                            <div class="review-content">\${r.reviewContent}</div>
-                        </div>
-                      </div>
+                    data.forEach(file => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                        \${file.attOriName}
+                        <button class="btn btn-sm btn-danger" onclick="deleteAttachment(\${file.attSeq})">삭제</button>
                     `;
-                    container.insertAdjacentHTML("beforeend", reviewHtml);
+                        list.appendChild(li);
+                    });
                 });
 
-                pageBar.innerHTML = data.pageBar || "";
-            })
-            .catch(() => alert("리뷰 로딩 실패"));
+            $('#attachUploadModal').modal('show');
+        }
+
+        // 녹화 시작 버튼
+        if (e.target.classList.contains('start-record')) {
+            confirm("전체화면 녹화를 원하시면 수동으로 선택해주세요. 녹화 중지 버튼을 누르고 업로드 완료 알림창이 뜰 때까지 기다려주세요. ");
+            const epSeq = e.target.dataset.epseq;
+            startRecording(epSeq);
+        }
+
+        // 녹화 중지 버튼
+        if (e.target.classList.contains('stop-record')) {
+            stopRecording();
+        }
+    });
+
+
+    let mediaRecorder;
+    let chunks = [];
+    let videoBlob;
+
+    function startRecording(epSeq) {
+        navigator.mediaDevices.getDisplayMedia({video: true, audio: true})
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+                mediaRecorder.onstop = async () => {
+                    videoBlob = new Blob(chunks, {type: 'video/webm'});
+                    await uploadInChunks(videoBlob, epSeq);
+                    alert("업로드 완료");
+                };
+
+                mediaRecorder.start();
+            });
     }
 
-    // 페이징 링크 클릭 시 호출
-    function fn_paging(pageNo) {
-        loadCourses(pageNo);
+    function stopRecording() {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+        }
     }
 
-    // 첫 로딩 시 호출
-    document.addEventListener("DOMContentLoaded", () => loadCourses(1));
+    async function uploadInChunks(blob, episodeSeq) {
+        const CHUNK_SIZE = 5 * 1024 * 1024;
+        const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
+
+        for (let i = 0; i < totalChunks; i++) {
+            const chunk = blob.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const formData = new FormData();
+            formData.append("chunk", chunk);
+            formData.append("index", i);
+            formData.append("total", totalChunks);
+            formData.append("episodeSeq", episodeSeq);
+
+            await fetch(`${path}/uploadChunk`, {
+                method: "POST",
+                body: formData
+            });
+        }
+    }
 
 </script>
+<%--자료 업로드 스크립트--%>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 업로드 버튼 클릭 시 모달 열기
-        document.querySelectorAll('.upload-attach-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const epSeq = this.dataset.episode;
-                document.getElementById('modal-episodeSeq').value = epSeq;
-                $('#attachUploadModal').modal('show');
-            });
-        });
-
-        // 녹화 시작/중지 버튼도 필요하면 여기에 event 추가
+    // 파일 선택 시 파일명 표시
+    $(document).on("change", "input[type='file']", function (e) {
+        const fileName = e.target.files[0]?.name || "파일을 선택하세요";
+        $(e.target).next("label").text(fileName);
     });
+
+    const addDelFileFunctions = (() => {
+        let count = 2;
+        const addFunc = () => {
+            if (count <= 5) {
+                const $form = $("#basic-file-form").clone(true);
+                $form.find("span.input-group-text").text(`첨부파일${count}`);
+                $form.find("label.custom-file-label")
+                    .text("파일을 선택하세요")
+                    .attr("for", `upFile${count}`);
+                $form.find("input[type='file']")
+                    .attr("id", `upFile${count}`)
+                    .val('');
+                count++;
+                $("#uploaded-files-list").before($form);
+            } else {
+                alert("첨부파일은 최대 5개까지 가능합니다.");
+            }
+        };
+        const delFunc = () => {
+            if (count > 2) {
+                $("#uploaded-files-list").prev(".input-group").remove();
+                count--;
+            }
+        };
+        return [addFunc, delFunc];
+    })();
+
+    const [addFile, delFile] = addDelFileFunctions;
+
+    /*btn.addEventListener('click', function() {
+        const epSeq = this.dataset.episode;
+        document.getElementById('modal-episodeSeq').value = epSeq;
+
+        fetch(`${path}/lecture/attachments?episodeSeq=${epSeq}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('uploaded-files-list');
+                list.innerHTML = "";
+                data.forEach(file => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                    \${file.originalFilename}
+                    <button class="btn btn-sm btn-danger" onclick="deleteAttachment(\${file.attachSeq})">삭제</button>
+                `;
+                    list.appendChild(li);
+                });
+            });
+
+        $('#attachUploadModal').modal('show');
+    });*/
+
+    /*document.querySelectorAll('.upload-attach-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const epSeq = this.dataset.episode;
+            document.getElementById('modal-episodeSeq').value = epSeq;
+
+            fetch(`${path}/lecture/attachments?episodeSeq=${epSeq}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('uploaded-files-list');
+                    list.innerHTML = "";
+
+                    data.forEach(file => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                        ${file.originalFilename}
+                        <button class="btn btn-sm btn-danger" onclick="deleteAttachment(${file.attachSeq})">삭제</button>
+                    `;
+                        list.appendChild(li);
+                    });
+                });
+
+            $('#attachUploadModal').modal('show');
+        });
+    });*/
+
+
+    function deleteAttachment(attachSeq) {
+        fetch(`${path}/lecture/attachment/\${attachSeq}`, { method: 'DELETE' })
+            .then(res => res.ok ? location.reload() : alert('삭제 실패'));
+    }
 </script>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
