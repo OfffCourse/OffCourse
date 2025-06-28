@@ -1,7 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
+<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy-MM-dd" var="today"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <link rel="stylesheet" href="${path}/resources/css/teacherMypage.css"/>
 <!-- Main Container -->
@@ -15,15 +17,18 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="${path}/mypage/teacher?section=create-course" class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
+            <li><a href="${path}/mypage/teacher?section=create-course"
+                   class="menu-item ${section == 'create-course' ? 'active' : ''}" data-section="create-course">
                 <span class="icon">➕</span>
                 <span>강의 개설</span>
             </a></li>
-            <li><a href="${path}/mypage/teacher?section=manage-courses" class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
+            <li><a href="${path}/mypage/teacher?section=manage-courses"
+                   class="menu-item ${section == 'manage-courses' ? 'active' : ''}" data-section="manage-courses">
                 <span class="icon">📚</span>
                 <span>강의 정보 수정</span>
             </a></li>
-            <li><a href="${path}/mypage/teacher?section=settlement" class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
+            <li><a href="${path}/mypage/teacher?section=settlement"
+                   class="menu-item ${section == 'settlement' ? 'active' : ''}" data-section="settlement">
                 <span class="icon">💰</span>
                 <span>강의 정산 신청</span>
             </a></li>
@@ -48,7 +53,8 @@
             </div>
 
             <div class="course-form">
-                <form action="${pageContext.request.contextPath}/course/insert" method="post" onsubmit="return validateEpisodeCount();">
+                <form action="${pageContext.request.contextPath}/course/insert" method="post"
+                      onsubmit="return validateEpisodeCount();">
 
                     <!-- 강의명 -->
                     <div class="mb-3">
@@ -65,8 +71,10 @@
                             <div class="category-group">
                                 <div class="parent-category" data-target="backend-sub">백엔드 ▼</div>
                                 <div class="sub-category" id="backend-sub" style="display: none;">
-                                    <div><input type="radio" name="categoryType" id="java" value="Java" required><label for="java">Java</label></div>
-                                    <div><input type="radio" name="categoryType" id="python" value="Python"><label for="python">Python</label></div>
+                                    <div><input type="radio" name="categoryType" id="java" value="Java" required><label
+                                            for="java">Java</label></div>
+                                    <div><input type="radio" name="categoryType" id="python" value="Python"><label
+                                            for="python">Python</label></div>
                                 </div>
                             </div>
 
@@ -74,8 +82,10 @@
                             <div class="category-group">
                                 <div class="parent-category" data-target="frontend-sub">프론트엔드 ▼</div>
                                 <div class="sub-category" id="frontend-sub" style="display: none;">
-                                    <div><input type="radio" name="categoryType" id="react" value="React"><label for="react">React</label></div>
-                                    <div><input type="radio" name="categoryType" id="vue" value="Vue.js"><label for="vue">Vue.js</label></div>
+                                    <div><input type="radio" name="categoryType" id="react" value="React"><label
+                                            for="react">React</label></div>
+                                    <div><input type="radio" name="categoryType" id="vue" value="Vue.js"><label
+                                            for="vue">Vue.js</label></div>
                                 </div>
                             </div>
 
@@ -83,8 +93,10 @@
                             <div class="category-group">
                                 <div class="parent-category" data-target="business-sub">비즈니스 ▼</div>
                                 <div class="sub-category" id="business-sub" style="display: none;">
-                                    <div><input type="radio" name="categoryType" id="marketing" value="Marketing"><label for="marketing">마케팅</label></div>
-                                    <div><input type="radio" name="categoryType" id="startup" value="Startup"><label for="startup">스타트업</label></div>
+                                    <div><input type="radio" name="categoryType" id="marketing" value="Marketing"><label
+                                            for="marketing">마케팅</label></div>
+                                    <div><input type="radio" name="categoryType" id="startup" value="Startup"><label
+                                            for="startup">스타트업</label></div>
                                 </div>
                             </div>
 
@@ -92,8 +104,10 @@
                             <div class="category-group">
                                 <div class="parent-category" data-target="design-sub">디자인 ▼</div>
                                 <div class="sub-category" id="design-sub" style="display: none;">
-                                    <div><input type="radio" name="categoryType" id="ux" value="UX/UI"><label for="ux">UX/UI</label></div>
-                                    <div><input type="radio" name="categoryType" id="photoshop" value="Photoshop"><label for="photoshop">Photoshop</label></div>
+                                    <div><input type="radio" name="categoryType" id="ux" value="UX/UI"><label for="ux">UX/UI</label>
+                                    </div>
+                                    <div><input type="radio" name="categoryType" id="photoshop" value="Photoshop"><label
+                                            for="photoshop">Photoshop</label></div>
                                 </div>
                             </div>
                         </div>
@@ -110,15 +124,18 @@
                     <div class="mb-3">
                         <label class="form-label">주소</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="courseAddress" name="courseAddress" placeholder="주소를 검색해주세요" readonly required>
-                            <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode()">주소 검색</button>
+                            <input type="text" class="form-control" id="courseAddress" name="courseAddress"
+                                   placeholder="주소를 검색해주세요" readonly required>
+                            <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode()">주소 검색
+                            </button>
                         </div>
                     </div>
 
                     <!-- 상세 주소 입력 -->
                     <div class="mb-3">
                         <label class="form-label">상세 주소</label>
-                        <input type="text" class="form-control" id="courseDetailAddress" name="courseDetailAddress" placeholder="상세 주소 입력">
+                        <input type="text" class="form-control" id="courseDetailAddress" name="courseDetailAddress"
+                               placeholder="상세 주소 입력">
                     </div>
 
 
@@ -197,14 +214,6 @@
                     <button type="button" class="btn btn-primary" onclick="episodeCount()">회차 수 계산</button>
                     <button type="submit" class="btn btn-primary">강의 등록</button>
                 </form>
-                <!-- 회차 수 -->
-                <%--<div class="mb-3">
-                    <label class="form-label">총 회차 수</label>
-                    <div class="input-group">
-                        <input type="number" id="episodeCount" class="form-control" name="episodeCount" readonly>
-                        <button type="button" class="btn btn-outline-secondary" onclick="episodeCount()">계산</button>
-                    </div>
-                </div>--%>
             </div>
         </div>
 
@@ -218,13 +227,14 @@
             <div class="course-list">
                 <c:if test="${not empty myPageResponses}">
                     <c:forEach var="m" items="${myPageResponses}">
-                        <div class="course-item" onclick="location.assign('${path}/course/view?courseSeq=${m.courseSeq}')">
+                        <div class="course-item"
+                             onclick="location.assign('${path}/course/view?courseSeq=${m.courseSeq}')">
                             <div class="course-header">
                                 <div class="course-info">
                                     <h3>${m.courseName}</h3>
                                     <div class="course-meta">
                                         <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
-                                        <%--<span>⏰ 평일 19:00-22:00</span>--%>
+                                            <%--<span>⏰ 평일 19:00-22:00</span>--%>
                                         <span>📍 ${m.courseAddress}</span>
                                         <span>👥 수강생 ${courseSize}명</span>
                                     </div>
@@ -232,17 +242,21 @@
                                 <div class="course-status status-progress">진행중</div>
                             </div>
                             <div class="course-actions">
-                                <button class="btn btn-primary btn-sm" onclick="openEditModal(this)"
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(this)"
                                         data-course-name="${m.courseName}"
                                         data-course-curriculum="${m.courseCurriculum}"
                                         data-course-address="${m.courseAddress}"
                                         data-course-detail-address="${m.courseDetailAddress}"
                                         data-course-discount="${m.courseDiscount}"
                                         data-course-qalink="${m.courseQaLink}"
-                                        data-course-seq="${m.courseSeq}">강의 정보 수정</button>
-                                <button class="btn btn-danger btn-sm" onclick="openDeleteModal(this)"
-                                        data-course-name="${m.courseName}"
-                                        data-course-seq="${m.courseSeq}">강의 삭제 신청</button>
+                                        data-course-seq="${m.courseSeq}">강의 정보 수정
+                                </button>
+                                <c:if test="${m.courseStartDate > today and m.courseCurrentSize == 0 and empty m.deleteRequestStatus}">
+                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); openDeleteModal(this)"
+                                            data-course-name="${m.courseName}"
+                                            data-course-seq="${m.courseSeq}">강의 삭제 신청
+                                    </button>
+                                </c:if>
                             </div>
                         </div>
                     </c:forEach>
@@ -263,24 +277,41 @@
             <div class="course-list">
                 <c:if test="${not empty myPageResponses}">
                     <c:forEach var="m" items="${myPageResponses}">
-                        <div class="course-item">
+                        <div class="course-item"
+                             onclick="location.assign('${path}/course/view?courseSeq=${m.courseSeq}')">
                             <div class="course-header">
                                 <div class="course-info">
                                     <h3>${m.courseName}</h3>
                                     <div class="course-meta">
                                         <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
-                                        <span>👥 수강생 32명</span>
-                                        <span>💰 정산 예정금액: ₩2,400,000</span>
+                                        <span>👥 수강생 ${courseSize}명</span>
+                                        <span>💰 정산 예정금액:<fmt:formatNumber value="${m.accountPrice}" type="currency"/>
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="course-status status-completed">완료</div>
+                                <c:choose>
+                                    <c:when test="${m.accountStatus == 0}">
+                                        <div class="course-status status-pending">정산 신청중</div>
+                                    </c:when>
+                                    <c:when test="${m.accountStatus == 1}">
+                                        <div class="course-status status-completed">정산 완료</div>
+                                    </c:when>
+                                    <c:when test="${m.accountStatus == 2}">
+                                        <div class="course-status status-rejected">정산 거절됨</div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="course-status status-completed">신청</div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <div class="course-actions">
-                                <button class="btn btn-primary btn-sm" onclick="openSettlementModal(this)"
-                                        data-course-name="${m.courseName}"
-                                        data-account-price="${m.accountPrice}"
-                                        data-course-seq="${m.courseSeq}">정산 신청</button>
-
+                                <c:if test="${empty m.accountStatus and m.courseEndDate lt today}">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openSettlementModal(this)"
+                                            data-course-name="${m.courseName}"
+                                            data-account-price="${m.accountPrice}"
+                                            data-course-seq="${m.courseSeq}">정산 신청
+                                    </button>
+                                </c:if>
                             </div>
                         </div>
                     </c:forEach>
@@ -368,11 +399,15 @@
             <div class="form-group">
                 <label class="form-label">주소</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="editCourseAddress" name="courseAddress" placeholder="주소를 검색해주세요" readonly required>
-                    <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcodeForEditModal()">주소 검색</button>
+                    <input type="text" class="form-control" id="editCourseAddress" name="courseAddress"
+                           placeholder="주소를 검색해주세요" readonly required>
+                    <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcodeForEditModal()">주소
+                        검색
+                    </button>
                 </div>
                 <label class="form-label">상세 주소</label>
-                <input type="text" class="form-control" id="editCourseDetailAddress" name="courseDetailAddress" placeholder="상세 주소 입력">
+                <input type="text" class="form-control" id="editCourseDetailAddress" name="courseDetailAddress"
+                       placeholder="상세 주소 입력">
 
             </div>
 
@@ -415,7 +450,8 @@
 
             <div class="form-group">
                 <label class="form-label">삭제 사유</label>
-                <textarea name="deleteRequestContent" class="form-textarea" id="deleteReason" placeholder="강의를 삭제하려는 사유를 상세히 입력해주세요" required></textarea>
+                <textarea name="deleteRequestContent" class="form-textarea" id="deleteReason"
+                          placeholder="강의를 삭제하려는 사유를 상세히 입력해주세요" required></textarea>
             </div>
 
             <div class="form-group">
@@ -468,7 +504,8 @@
 
             <div class="form-group">
                 <label class="form-label">계좌번호</label>
-                <input name="accountBankNumber" type="text" class="form-input" id="accountNumber" placeholder="계좌번호를 입력하세요 (- 없이)" required>
+                <input name="accountBankNumber" type="text" class="form-input" id="accountNumber"
+                       placeholder="계좌번호를 입력하세요 (- 없이)" required>
             </div>
 
             <div class="form-group">
@@ -479,6 +516,7 @@
                 <strong>ℹ️ 안내:</strong> 정산 신청 후 3-5 영업일 내에 검토 후 입금됩니다.
             </div>
             <input type="hidden" name="courseSeq" id="settleCourseSeq"/>
+            <input type="hidden" name="accountStatus" value="0"/>
             <div class="course-actions">
                 <button type="button" class="btn btn-outline" onclick="closeModal('settlementModal')">취소</button>
                 <button type="submit" class="btn btn-primary">정산 신청</button>
@@ -499,7 +537,7 @@
 <script>
     function execDaumPostcode() {
         new daum.Postcode({
-            oncomplete: function(data) {
+            oncomplete: function (data) {
                 // 도로명 주소 또는 지번 주소
                 var address = data.roadAddress ? data.roadAddress : data.jibunAddress;
 
@@ -510,9 +548,10 @@
             }
         }).open();
     }
+
     function execDaumPostcodeForEditModal() {
         new daum.Postcode({
-            oncomplete: function(data) {
+            oncomplete: function (data) {
                 var address = data.roadAddress ? data.roadAddress : data.jibunAddress;
                 document.getElementById('editCourseAddress').value = address;
                 document.getElementById('editCourseDetailAddress').focus();
@@ -582,7 +621,8 @@
         //alert(`선택된 날짜 범위 내에서는 최대 \${validDates}회까지 등록 가능합니다.`);
         return true;
     }
-    function episodeCount(){
+
+    function episodeCount() {
         const start = new Date(document.getElementById('startDate').value);
         const end = new Date(document.getElementById('endDate').value);
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -629,7 +669,7 @@
 <script>
     // 메뉴 네비게이션
     document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             //e.preventDefault();
 
             // 모든 메뉴 아이템에서 active 클래스 제거
@@ -698,7 +738,7 @@
     }
 
     // 모달 외부 클릭 시 닫기
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
             if (event.target === modal) {
@@ -707,7 +747,7 @@
         });
     }
 
-    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    document.getElementById('deleteForm').addEventListener('submit', function (e) {
         const originalName = document.getElementById('deleteCourseName').value.trim();
         const confirmName = document.getElementById('confirmCourseName').value.trim();
 
@@ -717,7 +757,7 @@
         }
     });
 
-    document.getElementById('settlementForm').addEventListener('submit', function(e) {
+    document.getElementById('settlementForm').addEventListener('submit', function (e) {
         const accountNumber = document.getElementById('accountNumber').value;
 
         // 계좌번호 유효성 검사 (간단한 예시)
