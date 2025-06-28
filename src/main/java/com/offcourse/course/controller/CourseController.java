@@ -2,12 +2,18 @@ package com.offcourse.course.controller;
 
 import com.offcourse.attachment.model.dto.EpisodeAttachmentGroup;
 import com.offcourse.attachment.model.service.AttachmentService;
-import com.offcourse.common.AjaxPageFactory;
+import com.offcourse.common.pagefactory.AjaxPageFactory;
+import com.offcourse.common.pagefactory.PageFactory;
 import com.offcourse.course.exception.CourseEpisodeMismatchException;
-import com.offcourse.course.model.dto.*;
+import com.offcourse.course.model.dto.Course;
+import com.offcourse.course.model.dto.CourseListResponse;
+import com.offcourse.course.model.dto.CourseViewResponse;
+import com.offcourse.course.model.dto.Teacher;
 import com.offcourse.course.model.service.CourseService;
 import com.offcourse.member.model.dto.Member;
 import com.offcourse.present.model.service.PresentService;
+import com.offcourse.review.model.dto.ReviewViewResponse;
+import com.offcourse.review.model.service.ReviewService;
 import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
@@ -30,7 +36,9 @@ public class CourseController {
     private final CourseService service;
     private final PresentService presentService;
     private final AjaxPageFactory ajaxPageFactory;
+    private final PageFactory pageFactory;
     private final AttachmentService attachmentService;
+    private final ReviewService reviewService;
 
     @GetMapping("/listpage")
     public String courseList() {
@@ -87,48 +95,58 @@ public class CourseController {
 
     @GetMapping("/view")
     public String courseView(@RequestParam Long courseSeq,
+                             @RequestParam(defaultValue = "1") int cPage,
+                             @RequestParam(defaultValue = "5") int numPerPage,
                              Authentication authentication,
                              Model model) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Member member = userDetails.getMember();
-
+        Member member = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                member = ((CustomUserDetails) principal).getMember();
+            }
+        }
         CourseViewResponse course = service.getCourseBySeq(courseSeq);
-        List<AttachmentViewResponse> attachments = service.getAttachments(courseSeq);
         model.addAttribute("course", course);
-        model.addAttribute("attachments", attachments);
         //에피소드 가져오기
         List<EpisodeAttachmentGroup> episodeAttachment = attachmentService.getEpisodeAttachment(courseSeq);
         model.addAttribute("episodeAttachments", episodeAttachment);
-        // 강사
-        if (course.getMemberSeq().equals(member.getMemberSeq())) {
-            return "course/teacherCourseView";
-        }
+        model.addAttribute("pageBar",
+                pageFactory.basicPageBar(cPage, numPerPage,
+                        service.countEpisodeByCourseSeq(courseSeq), "view"));
+        if (member != null) {
+            // 강사
+            if (course.getMemberSeq().equals(member.getMemberSeq())) {
+                return "course/teacherCourseView";
+            }
 
-        // 수강생 여부 확인
-        Map<String, Long> param = new HashMap<>();
-        param.put("memberSeq", member.getMemberSeq());
-        param.put("courseSeq", courseSeq);
-        boolean isEnrolled = service.checkStudent(param);
+            // 수강생 여부 확인
+            Map<String, Long> param = new HashMap<>();
+            param.put("memberSeq", member.getMemberSeq());
+            param.put("courseSeq", courseSeq);
+            boolean isEnrolled = service.checkStudent(param);
 
-        if (isEnrolled) {
-            //출석 여부 확인
-            boolean isPresent = presentService.checkPresent(Map.of("memberSeq", member.getMemberSeq(), "courseSeq", courseSeq, "date", Date.valueOf(LocalDate.now())));
-            model.addAttribute("isPresent", isPresent);
-            return "course/studentCourseView";
+            if (isEnrolled) {
+                //출석 여부 확인
+                boolean isPresent = presentService.checkPresent(Map.of("memberSeq", member.getMemberSeq(), "courseSeq", courseSeq, "date", Date.valueOf(LocalDate.now())));
+                model.addAttribute("isPresent", isPresent);
+                return "course/studentCourseView";
+            }
         }
         return "course/commonCourseView";
     }
 
     @PostMapping("/reviews")
     @ResponseBody
-    public Map<String, Object> getReviews(@RequestParam Long courseSeq,
-                                          @RequestParam(defaultValue = "1") int cPage,
-                                          @RequestParam(defaultValue = "3") int numPerPage) {
-        List<ReviewViewResponse> reviews = service.getReviewsBySeq(courseSeq, cPage, numPerPage);
-        int totalCount = service.getReviewCount(courseSeq);
+    public Map<String, Object> getReviews(@RequestBody Map<String, Object> param) {
+        Long courseSeq = Long.valueOf(param.get("courseSeq").toString());
+        int cPage = Integer.parseInt(param.get("cPage").toString());
+        int numPerPage = Integer.parseInt(param.get("numPerPage").toString());
+        List<ReviewViewResponse> reviews = reviewService.getReviewsBySeq(courseSeq, cPage, numPerPage);
+        int totalCount = reviewService.getReviewCount(courseSeq);
         String pageBar = ajaxPageFactory.basicPageBar(cPage, numPerPage, totalCount);
 
-        return Map.of("reviews", reviews, "pagebar", pageBar);
+        return Map.of("reviews", reviews, "pageBar", pageBar);
     }
 
     @GetMapping("/teacher")

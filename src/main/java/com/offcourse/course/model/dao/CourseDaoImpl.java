@@ -57,25 +57,8 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
-    public List<ReviewViewResponse> getReviewsBySeq(Long courseSeq, int cPage, int numPerPage) {
-        RowBounds rowBounds
-                = new RowBounds((cPage - 1) * numPerPage, numPerPage);
-        return session.selectList("course.selectReviewByCourseSeq", courseSeq, rowBounds);
-    }
-
-    @Override
-    public int getReviewCount(Long courseSeq) {
-        return session.selectOne("course.selectReviewCount", courseSeq);
-    }
-
-    @Override
     public boolean checkStudent(Map<String, Long> param) {
         return session.selectOne("course.checkStudent", param);
-    }
-
-    @Override
-    public List<AttachmentViewResponse> getAttachments(Long courseSeq) {
-        return session.selectList("course.selectAttachmentsByCourseSeq", courseSeq);
     }
 
     @Override
@@ -108,6 +91,11 @@ public class CourseDaoImpl implements CourseDao {
     @Override
     public int countEpisodeByCourseSeq(Long courseSeq) {
         return session.selectOne("course.countEpisodeByCourseSeq", courseSeq);
+    }
+
+    @Override
+    public List<Episode> getEpisodeByCourseSeq(Long courseSeq) {
+        return session.selectList("course.getEpisodeByCourseSeq", courseSeq);
     }
 
     @Override

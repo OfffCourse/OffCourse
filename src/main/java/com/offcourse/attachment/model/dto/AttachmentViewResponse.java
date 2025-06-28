@@ -1,4 +1,4 @@
-package com.offcourse.course.model.dto;
+package com.offcourse.attachment.model.dto;
 
 import lombok.*;
 

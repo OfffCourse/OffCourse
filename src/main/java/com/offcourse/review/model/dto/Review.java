@@ -1,4 +1,4 @@
-package com.offcourse.course.model.dto;
+package com.offcourse.review.model.dto;
 
 import lombok.*;
 

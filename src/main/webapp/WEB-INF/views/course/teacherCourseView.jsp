@@ -8,6 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy-MM-dd" var="today"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <style>
@@ -613,66 +614,69 @@
             <div class="course-section">
                 <h2 class="section-title">커리큘럼</h2>
                 <div class="curriculum-list">
-                    <div class="curriculum-item">
-                        <span class="curriculum-number">1.</span>
-                        <div class="curriculum-content">
-                            <span>Java 기초와 개발환경 설정</span>
+                    <c:forEach var="episode" items="${episodeAttachments}">
+                        <div class="curriculum-item">
+                            <span class="curriculum-number">${episode.episodeCount}.</span>
+
+                            <div class="curriculum-content">
+                                <span>제목 없음</span>
+                                <div class="curriculum-date">
+                                    <fmt:formatDate value="${episode.episodeDate}" pattern="yyyy-MM-dd"/>
+                                </div>
+                            </div>
+
+                            <div class="curriculum-actions">
+                                <!-- 오늘 날짜일 때만 녹화 버튼 보이기 -->
+                                <c:if test="${episode.episodeDate eq today}">
+                                    <button class="action-btn start-record"
+                                            data-epseq="${episode.episodeSeq}">
+                                        녹화 시작
+                                    </button>
+                                    <button class="action-btn stop-record"
+                                            data-epseq="${episode.episodeSeq}">
+                                        녹화 중지
+                                    </button>
+                                </c:if>
+
+                                <!-- 항상 보이는 자료 업로드 버튼 -->
+                                <button class="action-btn upload-attach-btn"
+                                        data-episode="${episode.episodeSeq}">
+                                    자료업로드
+                                </button>
+                            </div>
                         </div>
-                        <div class="curriculum-actions">
-                            <button id="start" class="action-btn">녹화 시작</button>
-                            <button id="stop" class="action-btn">녹화 중지</button>
-                            <button class="action-btn">자료업로드</button>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <span class="curriculum-number">2.</span>
-                        <div class="curriculum-content">
-                            <span>객체지향 프로그래밍 기초</span>
-                        </div>
-                        <div class="curriculum-actions">
-                            <button class="action-btn">녹화시작</button>
-                            <button class="action-btn">자료업로드</button>
-                        </div>
-                    </div>
+                    </c:forEach>
+                </div>
+                <div id="pageBar">
+                    ${pageBar}
                 </div>
             </div>
             <div class="course-section">
                 <h2 class="section-title">수강생 리뷰</h2>
-                <div class="curriculum-list">
-                    <div class="curriculum-item">
-                        <div class="review-item">
-                            <div class="review-header">
-                                <div class="review-avatar">김</div>
-                                <div class="review-meta">
-                                    <h5>김개발자</h5>
-                                </div>
-                                <div class="review-date">2024년 6월 5일</div>
-                            </div>
-                            <div class="stars" style="font-size: 14px; margin-bottom: 8px;">★★★★★</div>
-                            <div class="review-content">
-                                정말 실무에서 바로 적용할 수 있는 내용들로 가득했습니다.
-                                강사님의 설명도 이해하기 쉽고, 실습 위주로 진행되어서 지루하지 않았어요.
-                                특히 프로젝트 부분이 매우 유용했습니다!
-                            </div>
-                        </div>
-                    </div>
+                <div class="curriculum-list" id="review-container">
                 </div>
                 <div id="review-page-bar"></div>
-                <%--<section class="course-reviews">
-                  <h3>수강생 리뷰</h3>
-                  <c:forEach var="r" items="${reviews}">
-                    <div class="review-item">
-                      <p><strong>${r.memberName}</strong> (${r.reviewRate}점)</p>
-                      <p>${r.reviewContent}</p>
-                    </div>
-                  </c:forEach>
-                </section>--%>
 
             </div>
         </div>
 
         <!-- Right Sidebar -->
         <div class="course-sidebar">
+            <div class="course-schedule-info">
+                <div class="schedule-row" id="teacherview"><%--seq추가--%>
+                    <span class="schedule-label">강사</span>
+                    <button class="action-btn btn-secondary"
+                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">김강사</button>
+                </div>
+                <div class="schedule-row">
+                    <span class="schedule-label">개강일</span>
+                    <span class="schedule-value">2025-02-01</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="schedule-label">종료일</span>
+                    <span class="schedule-value">2025-02-01</span>
+                </div>
+            </div>
             <button class="action-btn" id="showAttendanceBtn" data-course-seq="${course.courseSeq}">출석 코드 보기</button>
         </div>
     </div>
@@ -697,6 +701,26 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
             </div>
         </div>
+    </div>
+</div>
+<!-- 자료 업로드 모달 -->
+<div class="modal fade" id="attachUploadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <form method="post" enctype="multipart/form-data" action="${path}/lecture/uploadattach">
+            <input type="hidden" name="episodeSeq" id="modal-episodeSeq">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">자료 업로드</h5>
+                </div>
+                <div class="modal-body">
+                    <input type="file" name="upFile" multiple required class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">업로드</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 <script>
@@ -825,7 +849,7 @@
 </script>
 <script>
     // 강의 상세 페이지에서 JS 내에 있는 경우 courseSeq는 서버에서 변수로 전달받는다고 가정
-    const courseSeq = ${course.courseSeq}; // EL 표현식으로 전달
+    const courseSeq = "${course.courseSeq}"; // EL 표현식으로 전달
 
     function loadCourses(cPage = 1) {
         fetch(`${path}/course/reviews`, {
@@ -839,7 +863,7 @@
         })
             .then(res => res.json())
             .then(data => {
-                const container = document.getElementById('curriculum-list');
+                const container = document.getElementById('review-container');
                 const pageBar = document.getElementById('review-page-bar');
                 container.innerHTML = "";
 
@@ -850,24 +874,35 @@
                 }
 
                 data.reviews.forEach(r => {
-                    const date = new Date(r.reviewDate);
-                    const formattedDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                    // 1. 날짜 처리
+                    const date = new Date(r.reviewCreateTime); // ← 정확한 필드명
+                    let formattedDate = '날짜 오류';
+                    if (!isNaN(date)) {
+                        formattedDate = `\${date.getFullYear()}년 \${date.getMonth() + 1}월 \${date.getDate()}일`;
+                    }
+
+                    // 2. 프로필 이미지 (없으면 기본 이미지 대체)
+                    const profileImgUrl = r.memberProfile
+                        ? `${path}/resources/upload/profile/\${r.memberProfile}`
+                        : `${path}/resources/img/default-profile.png`;
 
                     const reviewHtml = `
-          <div class="curriculum-item">
-            <div class="review-item">
-              <div class="review-header">
-                <div class="review-avatar">\${r.memberProfile)}</div>
-                <div class="review-meta">
-                  <h5>\${r.memberName}</h5>
-                </div>
-                <div class="review-date">\${formattedDate}</div>
-              </div>
-              <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
-              <div class="review-content">\${r.reviewContent}</div>
-            </div>
-          </div>
-        `;
+                      <div class="curriculum-item">
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-avatar">
+                                    <img src="\${profileImgUrl}" alt="프로필" style="width:40px; height:40px; border-radius:50%;">
+                                </div>
+                                <div class="review-meta">
+                                    <h5>\${r.memberName}</h5>
+                                </div>
+                                <div class="review-date">\${formattedDate}</div>
+                            </div>
+                            <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
+                            <div class="review-content">\${r.reviewContent}</div>
+                        </div>
+                      </div>
+                    `;
                     container.insertAdjacentHTML("beforeend", reviewHtml);
                 });
 
@@ -885,4 +920,19 @@
     document.addEventListener("DOMContentLoaded", () => loadCourses(1));
 
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 업로드 버튼 클릭 시 모달 열기
+        document.querySelectorAll('.upload-attach-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const epSeq = this.dataset.episode;
+                document.getElementById('modal-episodeSeq').value = epSeq;
+                $('#attachUploadModal').modal('show');
+            });
+        });
+
+        // 녹화 시작/중지 버튼도 필요하면 여기에 event 추가
+    });
+</script>
+
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

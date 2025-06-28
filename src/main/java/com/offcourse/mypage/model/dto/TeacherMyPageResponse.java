@@ -1,12 +1,10 @@
 package com.offcourse.mypage.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 
+@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,9 +20,9 @@ public class TeacherMyPageResponse {
     private Integer coursePrice;
     private Integer courseDiscount;
     private String courseQaLink;
-    private Integer reviewCount;
-    private Double averageRating;
     private Integer courseSize;
     private Integer courseCurrentSize;
     private Integer accountPrice;
+    private String accountStatus;
+    private String deleteRequestStatus;
 }

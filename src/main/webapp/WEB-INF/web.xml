@@ -15,9 +15,20 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
-    <!-- 세션 타임아웃 설정 (단위: 분) -->
+    <!-- ===== 세션 설정 (URL rewriting 비활성화) ===== -->
     <session-config>
-        <session-timeout>30</session-timeout>
+        <!-- 세션 타임아웃 (분 단위) -->
+        <session-timeout>5</session-timeout>
+        <!-- 쿠키 설정 -->
+        <cookie-config>
+            <name>OFFCOURSE_SESSION</name>
+            <path>/</path>
+            <http-only>true</http-only>
+            <secure>false</secure> <!-- HTTPS 환경에서는 true -->
+            <max-age>-1</max-age> <!-- 브라우저 세션 동안만 유지 -->
+        </cookie-config>
+        <!-- 쿠키만 사용, URL rewriting 비활성화 -->
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
     <!-- 세션 이벤트 리스너 등록 (SessionDestroyedEvent 발생을 위해 필수) -->
@@ -55,6 +66,22 @@
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- URL Rewriting 비활성화 필터 -->
+    <filter>
+        <filter-name>disableUrlRewritingFilter</filter-name>
+        <filter-class>com.offcourse.common.filter.DisableUrlRewritingFilter</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>disableUrlRewritingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
     </filter-mapping>
 
     <!--인코딩필터-->
