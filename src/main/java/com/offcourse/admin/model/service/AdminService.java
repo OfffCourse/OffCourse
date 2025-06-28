@@ -3,6 +3,7 @@ package com.offcourse.admin.model.service;
 import com.offcourse.acccount.model.dao.AccountDao;
 import com.offcourse.admin.model.dto.AccountRequestAll;
 import com.offcourse.admin.model.dto.DashboardStat;
+import com.offcourse.admin.model.dto.HandleAccountRequest;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.deleterequest.model.dao.DeleteRequestDao;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
@@ -68,5 +69,9 @@ public class AdminService {
 
     public int countAccountRequestsAllByStatus(String status) {
         return accountDao.countAccountRequestsAllByStatus(status);
+    }
+
+    public boolean handleAccountRequest(HandleAccountRequest handleAccountRequest) {
+        return accountDao.updateAccountStatus(Map.of("accountSeq", handleAccountRequest.getAccountSeq(), "action", handleAccountRequest.getAction())) >0;
     }
 }

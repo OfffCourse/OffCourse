@@ -117,8 +117,8 @@
 
                     const buttonsHtml = isPending ? `
                     <div class="request-actions">
-                        <button class="btn btn-success" onclick="handleAccountRequest('\${req.accountSeq}', 'approve','\${req.courseSeq}')">승인</button>
-                        <button class="btn btn-danger" onclick="handleAccountRequest('\${req.accountSeq}', 'reject','\${req.courseSeq}')">거부</button>
+                        <button class="btn btn-success" onclick="handleAccountRequest('\${req.accountSeq}', 'approve')">승인</button>
+                        <button class="btn btn-danger" onclick="handleAccountRequest('\${req.accountSeq}', 'reject')">거부</button>
                     </div>
                 ` : '';
 
@@ -149,7 +149,7 @@
     }
 
     // 정산 요청 처리 함수 (수정된 버전)
-    function handleAccountRequest(accountSeq, action, courseSeq) {
+    function handleAccountRequest(accountSeq, action) {
         if (!confirm(`정말로 이 요청을 \${action == 'approve' ? '승인' : '거부'}하시겠습니까?`)) {
             return;
         }
@@ -157,7 +157,7 @@
         fetch(`${path}/admin/account/handle`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({accountSeq: accountSeq, action, courseSeq})
+            body: JSON.stringify({accountSeq: accountSeq, action})
         })
             .then(r => {
                 if (!r.ok) throw new Error('Network response was not ok');

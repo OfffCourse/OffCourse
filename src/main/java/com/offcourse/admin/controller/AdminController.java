@@ -1,9 +1,6 @@
 package com.offcourse.admin.controller;
 
-import com.offcourse.admin.model.dto.AccountRequestAll;
-import com.offcourse.admin.model.dto.AccountRequestAllResponse;
-import com.offcourse.admin.model.dto.DashboardStat;
-import com.offcourse.admin.model.dto.HandleDeleteRequest;
+import com.offcourse.admin.model.dto.*;
 import com.offcourse.admin.model.service.AdminService;
 import com.offcourse.common.pagefactory.AccountAjaxPageFactory;
 import com.offcourse.common.pagefactory.DeleteRequestAjaxPageFactory;
@@ -59,7 +56,6 @@ public class AdminController {
     @PostMapping("/course/delete")
     @ResponseBody
     public boolean handleDeleteRequest(@RequestBody HandleDeleteRequest handleDeleteRequest) {
-        log.info("action {}", handleDeleteRequest.getAction());
         return adminService.handleDeleteRequest(handleDeleteRequest.getDeleteRequestSeq(), handleDeleteRequest.getAction(), handleDeleteRequest.getCourseSeq());
     }
 
@@ -76,5 +72,11 @@ public class AdminController {
                 .accountRequestAllList(accountRequestAllList)
                 .pageBar(pageBar)
                 .build();
+    }
+
+    @PostMapping("/account/handle")
+    @ResponseBody
+    public boolean handleAccountRequest(@RequestBody HandleAccountRequest handleAccountRequest ){
+        return adminService.handleAccountRequest(handleAccountRequest);
     }
 }

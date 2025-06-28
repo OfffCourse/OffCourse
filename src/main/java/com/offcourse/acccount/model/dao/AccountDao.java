@@ -29,4 +29,8 @@ public class AccountDao {
     public int countAccountRequestsAllByStatus(String status) {
         return session.selectOne("account.countAccountRequestsAllByStatus", status);
     }
+
+    public int updateAccountStatus(Map param) {
+        return session.update("account.updateAccountStatus", param);
+    }
 }
