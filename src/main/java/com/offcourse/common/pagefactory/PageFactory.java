@@ -1,4 +1,4 @@
-package com.offcourse.common;
+package com.offcourse.common.pagefactory;
 
 import org.springframework.stereotype.Component;
 

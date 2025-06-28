@@ -680,6 +680,21 @@
         </div>
         <!-- Right Sidebar -->
         <div class="course-sidebar">
+            <div class="course-schedule-info">
+                <div class="schedule-row" id="teacherview"><%--seq추가--%>
+                    <span class="schedule-label">강사</span>
+                    <button class="action-btn btn-secondary"
+                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">김강사</button>
+                </div>
+                <div class="schedule-row">
+                    <span class="schedule-label">개강일</span>
+                    <span class="schedule-value">2025-02-01</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="schedule-label">종료일</span>
+                    <span class="schedule-value">2025-02-01</span>
+                </div>
+            </div>
             <c:choose>
                 <c:when test="${isPresent}">
                     <button class="action-btn btn-secondary" disabled>출석완료</button>

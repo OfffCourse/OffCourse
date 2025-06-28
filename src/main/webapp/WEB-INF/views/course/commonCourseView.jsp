@@ -670,9 +670,10 @@
 
       <!-- Course Schedule Info -->
       <div class="course-schedule-info">
-        <div class="schedule-row" id="teacherview" onclick="location.assign('${path}/course/teacher')"><%--seq추가--%>
+        <div class="schedule-row" id="teacherview"><%--seq추가--%>
           <span class="schedule-label">강사</span>
-          <span class="schedule-value">김강사</span>
+          <button class="action-btn btn-secondary"
+                  onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">김강사</button>
         </div>
         <div class="schedule-row">
           <span class="schedule-label">개강일</span>

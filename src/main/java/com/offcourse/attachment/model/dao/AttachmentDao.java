@@ -1,7 +1,7 @@
 package com.offcourse.attachment.model.dao;
 
 import com.offcourse.attachment.model.dto.Attachment;
-import com.offcourse.course.model.dto.AttachmentViewResponse;
+import com.offcourse.attachment.model.dto.AttachmentViewResponse;
 import lombok.RequiredArgsConstructor;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;

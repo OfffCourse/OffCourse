@@ -89,23 +89,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<ReviewViewResponse> getReviewsBySeq(Long courseSeq, int cPage, int numPerPage) {
-        return List.of();
-    }
-
-    @Override
-    public int getReviewCount(Long courseSeq) {
-        return dao.getReviewCount(courseSeq);
-    }
-
-    @Override
     public boolean checkStudent(Map<String, Long> param) {
         return dao.checkStudent(param);
-    }
-
-    @Override
-    public List<AttachmentViewResponse> getAttachments(Long courseSeq) {
-        return dao.getAttachments(courseSeq);
     }
 
     @Override
@@ -136,6 +121,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public int countEpisodeByCourseSeq(Long courseSeq) {
         return dao.countEpisodeByCourseSeq(courseSeq);
+    }
+
+    @Override
+    public List<Episode> getEpisodeByCourseSeq(Long courseSeq) {
+        return dao.getEpisodeByCourseSeq(courseSeq);
     }
 
     //날짜 계산용 메소드

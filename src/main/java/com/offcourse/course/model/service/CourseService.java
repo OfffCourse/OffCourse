@@ -20,13 +20,7 @@ public interface CourseService {
 
     CourseViewResponse getCourseBySeq(Long courseSeq);
 
-    List<ReviewViewResponse> getReviewsBySeq(Long courseSeq, int cPage, int numPerPage);
-
-    int getReviewCount(Long courseSeq);
-
     boolean checkStudent(Map<String, Long> param);
-
-    List<AttachmentViewResponse> getAttachments(Long courseSeq);
 
     Teacher getTeacherBySeq(Long memberSeq);
 
@@ -39,4 +33,6 @@ public interface CourseService {
     List<CourseStudentDto> getCourseSeqsByEndDate(LocalDate localDate);
 
     int countEpisodeByCourseSeq(Long courseSeq);
+
+    List<Episode> getEpisodeByCourseSeq(Long courseSeq);
 }

@@ -1,5 +1,6 @@
 package com.offcourse.course.model.dto;
 
+import com.offcourse.review.model.dto.ReviewViewResponse;
 import lombok.*;
 
 import java.sql.Date;
@@ -21,6 +22,7 @@ public class CourseViewResponse {
     private String courseDetailAddress;
     private Integer coursePrice;
     private Integer courseDiscount;
+    private String courseQaLink;
     private Integer reviewCount;
     private Double averageRating;
     private Integer courseSize;
