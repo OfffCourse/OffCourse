@@ -23,6 +23,7 @@ public class CourseViewResponse {
     private Integer coursePrice;
     private Integer courseDiscount;
     private String courseQaLink;
+    private String courseCurriculum;
     private Integer reviewCount;
     private Double averageRating;
     private Integer courseSize;
