@@ -19,8 +19,9 @@ public class AttachmentDao {
     public List<AttachmentViewResponse> getAttachments(Long courseSeq) {
         return session.selectList("attachment.selectAttachmentsByCourseSeq", courseSeq);
     }
+
     public int insertAttachment(Attachment attachment) {
-        return session.insert("attachment.insertAttachment",attachment);
+        return session.insert("attachment.insertAttachment", attachment);
     }
 
     public List<Episode> getEpisodeByCourseSeq(Long courseSeq, int cPage, int numPerPage) {
@@ -29,9 +30,16 @@ public class AttachmentDao {
         return session.selectList("course.getEpisodeByCourseSeq", courseSeq, rowBounds);
     }
 
-    public List<Attachment> getAttachByEpisodeSeq(Long episodeSeq){
+    public List<Attachment> getAttachByEpisodeSeq(Long episodeSeq) {
         return session.selectList("attachment.getAttachByEpisodeSeq", episodeSeq);
     }
 
+    public List<Attachment> getVideoFile(Long episodeSeq) {
+        return session.selectList("attachment.getVideoFile", episodeSeq);
+    }
+
+    public int deleteAttachmentBySeq(Long attachSeq) {
+        return session.delete("attachment.deleteBySeq", attachSeq);
+    }
 
 }

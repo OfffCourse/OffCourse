@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
-    String lectureId = request.getParameter("lectureId");
+    String filename = request.getParameter("filename");
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -12,7 +12,7 @@
 <body>
 <h2>강의 영상 시청</h2>
 <video id="videoPlayer" controls width="800">
-    <source src="${pageContext.request.contextPath}/resources/upload/lecture/video/lecture_<%=lectureId%>.mp4" type="video/mp4">
+    <source src="${pageContext.request.contextPath}/resources/upload/lecture/video/<%=filename%>" type="video/mp4">
     브라우저가 video를 지원하지 않습니다.
 </video>
 

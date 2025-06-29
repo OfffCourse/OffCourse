@@ -32,6 +32,7 @@ public class AttachmentController {
             @RequestParam("index") int index,
             @RequestParam("total") int total,
             @RequestParam("episodeSeq") Long episodeSeq,
+            @RequestParam(value = "videoTitle", required = false) String videoTitle,
             HttpSession session) {
 
         // 1. 실제 경로 얻기 (webapp 아래에 저장)
@@ -65,17 +66,12 @@ public class AttachmentController {
 
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 int rnd = (int) (Math.random() * 1000) + 1;
-                //String renamedFileName = "lecture_" + lectureId + "_" + timeStamp + ".mp4";
                 String renamedFileName = "offcourse_" + timeStamp + "_" + rnd + ".mp4";
                 File convertedMp4File = new File(finalDir, renamedFileName);
 
                 URL exePath = getClass().getResource("/ffmpeg/bin/ffmpeg.exe");
-//                System.out.println("resources경로 :  "+exePath);
                 ProcessBuilder pb = new ProcessBuilder(exePath.getPath(),
                         "-i", mergedFile.getAbsolutePath(),
-                        /*"-c:v", "libx264",
-                        "-c:a", "aac",
-                        "-strict", "-2",*/  // 일부 FFmpeg 버전용
                         "-c:v", "libx264",
                         "-preset", "fast",
                         "-crf", "28",
@@ -101,7 +97,7 @@ public class AttachmentController {
                 mergedFile.delete();
                 // 병합 완료 후 DB 저장 처리
                 Attachment attachment = Attachment.builder()
-                        .attOriName("episodeSeq_" + episodeSeq + ".mp4")
+                        .attOriName(videoTitle + ".mp4")
                         .attRenamedName(renamedFileName)
                         .attType("2")
                         .episodeSeq(episodeSeq)
@@ -125,7 +121,7 @@ public class AttachmentController {
                                    @RequestParam Long courseSeq,
                                    @RequestParam("upFile") MultipartFile[] upFiles,
                                    HttpSession session,
-                                   Model model){
+                                   Model model) {
         String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
         List<Attachment> attachmentList = new ArrayList<>();
         if (upFiles != null) {
@@ -159,22 +155,32 @@ public class AttachmentController {
         }
         if (result > 0) {
             model.addAttribute("msg", "첨부파일 저장성공");
-            model.addAttribute("loc", "/course/view?courseSeq="+courseSeq);
+            model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
         } else {
             model.addAttribute("msg", "첨부파일 저장실패");
-            model.addAttribute("loc", "/course/view?courseSeq="+courseSeq);
+            model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
         }
         return "common/msg";
     }
 
     @GetMapping("/downloadattach")
-    public void fileDownload(String oriname,
-                             String rename,
+    public void fileDownload(@RequestParam(required = false) String oriname,
+                             @RequestParam String rename,
+                             @RequestParam(required = false, defaultValue = "lecture") String type,
                              HttpSession session,
                              @RequestHeader("user-agent") String header,
                              OutputStream out,
                              HttpServletResponse response) {
-        String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        String path;
+        if ("portfolio".equals(type)) {
+            path = session.getServletContext().getRealPath("/resources/upload/instructor/portfolio/");
+            if (oriname == null || oriname.isBlank()) {
+                oriname = "portfolio.pdf";
+            }
+        } else {
+            path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        }
+
         File downloadFile = new File(path, rename);
         if (!downloadFile.exists()) {
             throw new IllegalArgumentException("파일이 존재하지않습니다");
@@ -206,11 +212,25 @@ public class AttachmentController {
 
     }
 
+    /*강사페이지에서 첨부파일자료조회*/
     @GetMapping("/lecture/attachments")
     @ResponseBody
     public List<Attachment> getAttachmentsByEpisode(@RequestParam Long episodeSeq) {
         return service.getAttachByEpisodeSeq(episodeSeq);
     }
 
+    @GetMapping("/lecture/videofile")
+    @ResponseBody
+    public List<Attachment> getVideoFile(@RequestParam Long episodeSeq) {
+        List<Attachment> renamedVideo = service.getVideoFile(episodeSeq);
+        return renamedVideo;
+    }
+
+    @DeleteMapping("/lecture/attachment/{attachSeq}")
+    @ResponseBody
+    public ResponseEntity<Void> deleteAttachment(@PathVariable Long attachSeq) {
+        int result = service.deleteAttachmentBySeq(attachSeq);
+        return result == 1 ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    }
 
 }
