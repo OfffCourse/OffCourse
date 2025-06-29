@@ -1,14 +1,10 @@
 package com.offcourse.course.controller;
 
-import com.offcourse.attachment.model.dto.EpisodeAttachmentGroup;
 import com.offcourse.attachment.model.service.AttachmentService;
 import com.offcourse.common.pagefactory.AjaxPageFactory;
-import com.offcourse.common.pagefactory.PageFactory;
+import com.offcourse.common.pagefactory.StudentPageFactory;
 import com.offcourse.course.exception.CourseEpisodeMismatchException;
-import com.offcourse.course.model.dto.Course;
-import com.offcourse.course.model.dto.CourseListResponse;
-import com.offcourse.course.model.dto.CourseViewResponse;
-import com.offcourse.course.model.dto.Teacher;
+import com.offcourse.course.model.dto.*;
 import com.offcourse.course.model.service.CourseService;
 import com.offcourse.member.model.dto.Member;
 import com.offcourse.present.model.service.PresentService;
@@ -36,7 +32,7 @@ public class CourseController {
     private final CourseService service;
     private final PresentService presentService;
     private final AjaxPageFactory ajaxPageFactory;
-    private final PageFactory pageFactory;
+    private final StudentPageFactory pageFactory;
     private final AttachmentService attachmentService;
     private final ReviewService reviewService;
 
@@ -95,8 +91,6 @@ public class CourseController {
 
     @GetMapping("/view")
     public String courseView(@RequestParam Long courseSeq,
-                             @RequestParam(defaultValue = "1") int cPage,
-                             @RequestParam(defaultValue = "5") int numPerPage,
                              Authentication authentication,
                              Model model) {
         Member member = null;
@@ -108,12 +102,8 @@ public class CourseController {
         }
         CourseViewResponse course = service.getCourseBySeq(courseSeq);
         model.addAttribute("course", course);
-        //에피소드 가져오기
-        List<EpisodeAttachmentGroup> episodeAttachment = attachmentService.getEpisodeAttachment(courseSeq);
-        model.addAttribute("episodeAttachments", episodeAttachment);
-        model.addAttribute("pageBar",
-                pageFactory.basicPageBar(cPage, numPerPage,
-                        service.countEpisodeByCourseSeq(courseSeq), "view"));
+        int countEpisode = service.countEpisodeByCourseSeq(courseSeq);
+        model.addAttribute("countEpisode", countEpisode);
         if (member != null) {
             // 강사
             if (course.getMemberSeq().equals(member.getMemberSeq())) {
@@ -134,6 +124,19 @@ public class CourseController {
             }
         }
         return "course/commonCourseView";
+    }
+
+    @PostMapping("/episodes")
+    @ResponseBody
+    public Map<String, Object> getEpisodeList(@RequestBody Map<String, Object> param) {
+        Long courseSeq = Long.valueOf(param.get("courseSeq").toString());
+        int cPage = Integer.parseInt(param.get("cPage").toString());
+        int numPerPage = Integer.parseInt(param.get("numPerPage").toString());
+        List<Episode> episodeList = attachmentService.getEpisodeByCourseSeq(courseSeq, cPage, numPerPage);
+        int total = service.countEpisodeByCourseSeq(courseSeq);
+        String pageBar = pageFactory.basicPageBar(cPage, numPerPage, total);
+
+        return Map.of("episodes", episodeList, "pageBar", pageBar);
     }
 
     @PostMapping("/reviews")
