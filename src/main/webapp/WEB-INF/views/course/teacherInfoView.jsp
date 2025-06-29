@@ -12,39 +12,17 @@
       👨‍💻
     </div>
     <div class="instructor-info">
-      <h2>김민수</h2>
-      <p class="instructor-title">풀스택 개발자 / 시니어 강사</p>
+      <h2>강사   ${teacher.memberName}</h2>
 
-      <div class="instructor-stats">
-        <div class="stat-item">
-          <span class="stat-label">총 강의</span>
-          <span class="stat-value">12개</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">총 수강생</span>
-          <span class="stat-value">1,247명</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">평균 평점</span>
-          <span class="stat-value">⭐ 4.8</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">경력</span>
-          <span class="stat-value">8년</span>
-        </div>
-      </div>
-
-      <button class="portfolio-btn" onclick="downloadPortfolio()">
+      <button class="portfolio-btn"
+              onclick="location.assign('${path}/downloadattach?type=portfolio&rename=${teacher.portfolioFileName}')">
         📄 포트폴리오 다운로드
       </button>
 
       <div class="instructor-bio">
         <h3>강사 소개</h3>
         <p>
-          10년간 다양한 프로젝트를 진행하며 쌓은 실무 경험을 바탕으로
-          실전에서 사용할 수 있는 개발 기술을 전달합니다.
-          현재 테크 스타트업에서 CTO로 재직 중이며,
-          최신 기술 트렌드를 반영한 실용적인 교육을 제공합니다.
+          ${teacher.memberEmail}
         </p>
       </div>
     </div>
@@ -52,158 +30,19 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <div class="content-header">
-      <div>
-        <h2>김민수 강사의 강의</h2>
-        <p class="course-count">총 <strong>12개</strong>의 강의</p>
-      </div>
-      <div class="sort-options">
-        <select class="sort-select" onchange="sortCourses()">
-          <option value="latest">최신순</option>
-          <option value="popular">인기순</option>
-          <option value="rating">평점순</option>
-        </select>
-      </div>
-    </div>
+    <div id="course-list-container">
+      <div class="course-grid" id="courseGrid">
+        <!-- Course 1 -->
+        <c:if test="${not empty courselist}">
+          <c:forEach var="c" items="${courselist}">
+            <div class="course-card">
 
-    <div class="course-grid" id="courseGrid">
-      <!-- Sample Course Cards -->
-      <div class="course-card" onclick="viewCourse(1)">
-        <div class="course-image">
-          <span class="course-badge">HOT</span>
-          Java 완전정복
-        </div>
-        <div class="course-content">
-          <div class="course-meta">
-            <span>👨‍💻 백엔드</span>
-            <span>⭐4.9 156명 수강</span>
-          </div>
-          <h3 class="course-title">Java 완전정복 - 기초부터 실전까지</h3>
-          <div class="course-schedule">
-            <div class="schedule-row">
-              <span class="schedule-label">시작일</span>
-              <span class="schedule-value">2025-07-01</span>
             </div>
-            <div class="schedule-row">
-              <span class="schedule-label">일시</span>
-              <span class="schedule-value">월, 수, 금</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">장소</span>
-              <span class="schedule-value">강남캠퍼스</span>
-            </div>
-          </div>
-          <div class="course-footer">
-            <div class="course-price">
-              <span class="price-original">200,000원</span>
-              <span class="price-current">150,000원</span>
-            </div>
-            <button class="btn-enroll">수강 신청</button>
-          </div>
-        </div>
+          </c:forEach>
+        </c:if>
       </div>
-
-      <div class="course-card" onclick="viewCourse(2)">
-        <div class="course-image">
-          <span class="course-badge">NEW</span>
-          Spring Boot 마스터
-        </div>
-        <div class="course-content">
-          <div class="course-meta">
-            <span>👨‍💻 백엔드</span>
-            <span>⭐4.8 89명 수강</span>
-          </div>
-          <h3 class="course-title">Spring Boot로 배우는 웹 개발</h3>
-          <div class="course-schedule">
-            <div class="schedule-row">
-              <span class="schedule-label">시작일</span>
-              <span class="schedule-value">2025-07-15</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">일시</span>
-              <span class="schedule-value">화, 목</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">장소</span>
-              <span class="schedule-value">온라인</span>
-            </div>
-          </div>
-          <div class="course-footer">
-            <div class="course-price">
-              <span class="price-original">250,000원</span>
-              <span class="price-current">180,000원</span>
-            </div>
-            <button class="btn-enroll">수강 신청</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="course-card" onclick="viewCourse(3)">
-        <div class="course-image">
-          React 실전 프로젝트
-        </div>
-        <div class="course-content">
-          <div class="course-meta">
-            <span>💻 프론트엔드</span>
-            <span>⭐4.7 124명 수강</span>
-          </div>
-          <h3 class="course-title">React로 만드는 실전 웹 애플리케이션</h3>
-          <div class="course-schedule">
-            <div class="schedule-row">
-              <span class="schedule-label">시작일</span>
-              <span class="schedule-value">2025-08-01</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">일시</span>
-              <span class="schedule-value">토, 일</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">장소</span>
-              <span class="schedule-value">홍대캠퍼스</span>
-            </div>
-          </div>
-          <div class="course-footer">
-            <div class="course-price">
-              <span class="price-original">300,000원</span>
-              <span class="price-current">220,000원</span>
-            </div>
-            <button class="btn-enroll">수강 신청</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="course-card" onclick="viewCourse(4)">
-        <div class="course-image">
-          데이터베이스 설계
-        </div>
-        <div class="course-content">
-          <div class="course-meta">
-            <span>🗄️ 데이터베이스</span>
-            <span>⭐4.6 67명 수강</span>
-          </div>
-          <h3 class="course-title">실무 중심 데이터베이스 설계 및 최적화</h3>
-          <div class="course-schedule">
-            <div class="schedule-row">
-              <span class="schedule-label">시작일</span>
-              <span class="schedule-value">2025-07-20</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">일시</span>
-              <span class="schedule-value">월, 수</span>
-            </div>
-            <div class="schedule-row">
-              <span class="schedule-label">장소</span>
-              <span class="schedule-value">온라인</span>
-            </div>
-          </div>
-          <div class="course-footer">
-            <div class="course-price">
-              <span class="price-original">180,000원</span>
-              <span class="price-current">140,000원</span>
-            </div>
-            <button class="btn-enroll">수강 신청</button>
-          </div>
-        </div>
+      <div id="pageBar">
+        ${pageBar}
       </div>
     </div>
   </main>
@@ -221,40 +60,96 @@
     link.download = '김민수_포트폴리오.pdf';
     link.click();
   }
-
-  // 강의 정렬 함수
-  function sortCourses() {
-    const sortValue = document.querySelector('.sort-select').value;
-    console.log('정렬 기준:', sortValue);
-
-    // 실제로는 서버에 정렬 요청을 보내거나
-    // 클라이언트에서 정렬 로직을 수행합니다
-    alert(`${sortValue} 기준으로 정렬합니다.`);
-  }
-
-  // 강의 상세 보기
-  function viewCourse(courseId) {
-    console.log('강의 ID:', courseId);
-    alert(`강의 ${courseId} 상세 페이지로 이동합니다.`);
-    // 실제로는 강의 상세 페이지로 이동
-    // window.location.href = `/course/view?courseSeq=${courseId}`;
-  }
-
-  // 페이지 로드 시 초기화
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('강사 프로필 페이지가 로드되었습니다.');
-
-    // 실제로는 서버에서 강사 정보와 강의 목록을 불러오는 로직이 들어갑니다
-    // loadInstructorInfo();
-    // loadInstructorCourses();
-  });
-
-  // 수강 신청 버튼 이벤트 처리
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-enroll')) {
-      e.stopPropagation(); // 카드 클릭 이벤트 방지
-      alert('수강 신청 페이지로 이동합니다.');
+</script>
+<script>
+  function loadCourses(cPage) {
+    const params ={sort: document.querySelector('.sort-select')?.value || 'latest'};
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("courseTitle")) {
+      params.courseTitle = urlParams.get("courseTitle");
     }
-  });
+    params.cPage = cPage;
+    params.numPerPage = 4;
+
+    fetch(`${path}/course/search`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(params)
+    })
+            .then(res => res.json())
+            .then(data => {
+              const container = document.getElementById('courseGrid');
+              const pageBar = document.getElementById('pageBar');
+              container.innerHTML = "";
+
+              if (!data || !data.courses || data.courses.length === 0) {
+                container.innerHTML = "<p>강의가 없습니다.</p>";
+                pageBar.innerHTML = "";
+                return;
+              }
+
+              data.courses.forEach(c => {
+                const discounted = Math.round(c.coursePrice * (1 - c.courseDiscount / 100));
+                const date = new Date(c.courseStartDate);
+                const date2 = new Date(c.courseEndDate);
+                const formatted = `\${date.getFullYear()}/\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
+                const formatted2 = `\${(date2.getMonth()+1).toString().padStart(2, '0')}-\${date2.getDate().toString().padStart(2, '0')}`;
+                const rating = c.averageRating;
+                const ratingText = rating ? `⭐${rating}` : '';
+
+                const courseCard = `
+                  <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
+                      <div class="course-image">
+                          <span class="course-badge">HOT</span>
+                          \${c.courseName}
+                      </div>
+                      <div class="course-content">
+                          <div class="course-meta">
+                              <span>👨‍💻 \${c.courseCategory.fullCategoryName}</span>
+                              <span>\${ratingText}</span>
+                              <span>\${c.courseCurrentSize}/\${c.courseSize}명 수강</span>
+                          </div>
+                          <h3 class="course-title">\${c.courseName}</h3>
+                          <p class="course-instructor">\${c.memberName} 강사</p>
+                          <div class="course-schedule">
+                              <div class="schedule-row">
+                                  <span class="schedule-label">기간</span>
+                                  <span class="schedule-value">\${formatted}~\${formatted2}</span>
+                              </div>
+                              <div class="schedule-row">
+                                  <span class="schedule-label">일시</span>
+                                  <span class="schedule-value">\${c.courseDays.map(d => d.dayName).join(", ")}</span>
+                              </div>
+                              <div class="schedule-row">
+                                  <span class="schedule-label">장소</span>
+                                  <span class="schedule-value">\${c.courseAddress}</span>
+                              </div>
+                          </div>
+                          <div class="course-footer">
+                              <div class="course-price">
+                                  <span class="price-original">\${c.coursePrice.toLocaleString()}원</span>
+                                  <span class="price-current">\${discounted.toLocaleString()}원</span>
+                              </div>
+                              <button class="btn-enroll">수강 신청</button>
+                          </div>
+                      </div>
+                  </div>`;
+                container.insertAdjacentHTML("beforeend", courseCard);
+              });
+
+              pageBar.innerHTML = data.pageBar || "";
+            })
+            .catch(() => alert("강의 로딩 실패"));
+  }
+
+  window.addEventListener('DOMContentLoaded', () => loadCourses(1));
+
+  function fn_paging(pageNo) {
+    if (typeof loadCourses === 'function') {
+      loadCourses(pageNo);
+    } else {
+      console.error("loadCourses is not defined");
+    }
+  }
 </script>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

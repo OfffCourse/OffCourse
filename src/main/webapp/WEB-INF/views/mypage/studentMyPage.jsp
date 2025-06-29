@@ -1329,14 +1329,21 @@
                         if (tab === 'completed' && rate ==0) {//rate>=80 으로 바꾸기
                             html += `<div class="course-actions" style="margin-top: 10px;">`;
 
-                            if (!course.reviewWritten) {
+                            if (course.reviewWritten === 'N') {
                                 html += `
                                     <button class="btn btn-primary"
                                             onclick="event.stopPropagation(); openReviewModal('\${course.courseName}')"
                                             style="padding: 4px 12px; font-size: 12px;">리뷰 작성</button>
                                 `;
                             } else {
-                                html += `<span style="font-size: 12px; color: #28a745;">✅ 리뷰 작성 완료</span>`;
+                                /*html += `<span style="font-size: 12px; color: #28a745;">✅ 리뷰 작성 완료</span>`;*/
+                                html += `
+                                    <div class="course-actions" style="margin-top: 10px;">
+                                        <button class="btn btn-outline"
+                                                onclick="event.stopPropagation(); deleteReview(\${course.courseSeq})"
+                                                style="padding: 4px 12px; font-size: 12px;">리뷰 삭제</button>
+                                    </div>
+                                `;
                             }
 
                             html += `
@@ -1374,12 +1381,16 @@
     let currentRating = 0;
     let currentCourse = '';
 
-    function openReviewModal(courseName) {
+    let currentCourseSeq = 0;
+
+    function openReviewModal(courseName, courseSeq) {
         currentCourse = courseName;
+        currentCourseSeq = courseSeq;
         document.getElementById('reviewCourseTitle').textContent = courseName;
         document.getElementById('reviewModal').classList.add('active');
         document.body.style.overflow = 'hidden';
     }
+
 
     function closeReviewModal() {
         document.getElementById('reviewModal').classList.remove('active');
@@ -1471,7 +1482,6 @@
         e.preventDefault();
 
         const content = document.getElementById('reviewContent').value.trim();
-
         if (currentRating === 0) {
             showAlert('별점을 선택해주세요.', 'error');
             return;
@@ -1482,10 +1492,45 @@
             return;
         }
 
-        // Simulate review submission
-        showAlert(`${currentCourse}에 대한 리뷰가 성공적으로 등록되었습니다!`);
-        closeReviewModal();
+        // AJAX 요청으로 리뷰 저장
+        $.ajax({
+            url: `${path}/review/insert`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                courseSeq: currentCourseSeq,
+                reviewContent: content,
+                reviewRate: currentRating
+            }),
+            success: function(response) {
+                showAlert('리뷰가 등록되었습니다!');
+                closeReviewModal();
+                updateCourseList(currentTab, 1); // 강의 리스트 갱신
+            },
+            error: function() {
+                showAlert('리뷰 등록 중 오류가 발생했습니다.', 'error');
+            }
+        });
     });
+
+    function deleteReview(courseSeq) {
+        if (!confirm('리뷰를 삭제하시겠습니까?')) return;
+
+        $.ajax({
+            url: `${path}/review/delete`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ courseSeq }),
+            success: function(response) {
+                showAlert('리뷰가 삭제되었습니다.');
+                updateCourseList(currentTab, 1);
+            },
+            error: function() {
+                showAlert('리뷰 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        });
+    }
+
 
     // Close modal when clicking outside
     document.getElementById('reviewModal').addEventListener('click', function(e) {

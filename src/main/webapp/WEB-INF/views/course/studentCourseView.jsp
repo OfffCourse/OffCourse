@@ -596,86 +596,47 @@
                 <div class="course-meta">
                     <span>👨‍💻 ${course.courseCategory.fullCategoryName}</span>
                     <span>⭐ ${course.averageRating}</span>
-                    <span>📚 총 12강</span>
+                    <span>📚 총 ${countEpisode}강</span>
                 </div>
             </div>
 
             <!-- Course Categories -->
             <div class="course-section">
-                <h2 class="section-title">강의 목록</h2>
+                <h2 class="section-title">강의 소개</h2>
                 <div class="category-list">
                     <div class="category-item">
                         <div class="category-checkbox checked"></div>
-                        <span class="category-text">강의 소개</span>
+                        <span class="category-text">커리큘럼</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-text">${course.courseCurriculum}</span>
                     </div>
                     <div class="category-item">
                         <div class="category-checkbox checked"></div>
-                        <span class="category-text">기본 문법</span>
+                        <span class="category-text">Q&A 링크(오픈카카오톡)</span>
                     </div>
                     <div class="category-item">
-                        <div class="category-checkbox"></div>
-                        <span class="category-text">고급 기능</span>
+                        <span class="category-text">${course.courseQaLink}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Curriculum -->
             <div class="course-section">
-                <h2 class="section-title">커리큘럼</h2>
-                <div class="curriculum-list">
-                    <div class="curriculum-item">
-                        <span class="curriculum-number">1.</span>
-                        <div class="curriculum-content">
-                            <span>Java 기초와 개발환경 설정</span>
-                        </div>
-                        <div class="curriculum-actions">
-                            <button onclick="openVideoPopup()">영상 보기</button>
-                            <button class="action-btn">자료받기</button>
-                        </div>
-                    </div>
-                    <div class="curriculum-item">
-                        <span class="curriculum-number">2.</span>
-                        <div class="curriculum-content">
-                            <span>객체지향 프로그래밍 기초</span>
-                        </div>
-                        <div class="curriculum-actions">
-                            <button class="action-btn">영상보기</button>
-                            <button class="action-btn">자료받기</button>
-                        </div>
-                    </div>
+                <h2 class="section-title">강의 회차</h2>
+                <div class="curriculum-list" id="episode-list">
+                    <!-- JS로 렌더링 -->
+                </div>
+                <div id="episode-page-bar">
+                    <!-- JS로 페이징 바 렌더링 -->
                 </div>
             </div>
             <div class="course-section">
                 <h2 class="section-title">수강생 리뷰</h2>
-                <div class="curriculum-list">
-                    <div class="curriculum-item">
-                        <div class="review-item">
-                            <div class="review-header">
-                                <div class="review-avatar">김</div>
-                                <div class="review-meta">
-                                    <h5>김개발자</h5>
-                                </div>
-                                <div class="review-date">2024년 6월 5일</div>
-                            </div>
-                            <div class="stars" style="font-size: 14px; margin-bottom: 8px;">★★★★★</div>
-                            <div class="review-content">
-                                정말 실무에서 바로 적용할 수 있는 내용들로 가득했습니다.
-                                강사님의 설명도 이해하기 쉽고, 실습 위주로 진행되어서 지루하지 않았어요.
-                                특히 프로젝트 부분이 매우 유용했습니다!
-                            </div>
-                        </div>
-                    </div>
+                <div class="curriculum-list" id="review-container">
                 </div>
                 <div id="review-page-bar"></div>
-                <%--<section class="course-reviews">
-                  <h3>수강생 리뷰</h3>
-                  <c:forEach var="r" items="${reviews}">
-                    <div class="review-item">
-                      <p><strong>${r.memberName}</strong> (${r.reviewRate}점)</p>
-                      <p>${r.reviewContent}</p>
-                    </div>
-                  </c:forEach>
-                </section>--%>
+
             </div>
         </div>
         <!-- Right Sidebar -->
@@ -684,15 +645,15 @@
                 <div class="schedule-row" id="teacherview"><%--seq추가--%>
                     <span class="schedule-label">강사</span>
                     <button class="action-btn btn-secondary"
-                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">김강사</button>
+                            onclick="location.assign('${path}/course/teacher?memberSeq='+${course.memberSeq})">${course.memberName}</button>
                 </div>
                 <div class="schedule-row">
                     <span class="schedule-label">개강일</span>
-                    <span class="schedule-value">2025-02-01</span>
+                    <span class="schedule-value">${course.courseStartDate}</span>
                 </div>
                 <div class="schedule-row">
                     <span class="schedule-label">종료일</span>
-                    <span class="schedule-value">2025-02-01</span>
+                    <span class="schedule-value">${course.courseEndDate}</span>
                 </div>
             </div>
             <c:choose>
@@ -739,6 +700,40 @@
         </div>
     </div>
 </div>
+<!--자료 목록 모달 -->
+<div class="modal fade" id="attachmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">학습 자료 목록</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <ul id="attachmentList" class="list-group">
+                    <!-- JS로 렌더링 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!--회차 영상 보기 모달 -->
+<div class="modal fade" id="lectureVideoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">강의 영상 목록</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <ul id="videoList" class="list-group">
+                    <!-- JS로 영상 목록 렌더링 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     const courseSeq = ${course.courseSeq};
     const memberSeq = ${loginMember.memberSeq};
@@ -796,48 +791,157 @@
 </script>
 
 <script>
-    function openVideoPopup() {
-        const lectureId = 7; // 실제 강의 ID에 따라 바인딩하세요
-        const popup = window.open(
-            '${pageContext.request.contextPath}/popup/videoPlayer.jsp?lectureId=' + lectureId,
-            'lectureVideoPopup',
-            'width=900,height=600,scrollbars=no'
-        );
+    function openVideoPopup(episodeSeq) {
+        fetch(`${path}/lecture/videofile?episodeSeq=\${episodeSeq}`)
+            .then(res => res.json())
+            .then(data => {
+                const videoList = document.getElementById('videoList');
+                videoList.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    videoList.innerHTML = "<li class='list-group-item'>영상이 없습니다.</li>";
+                } else {
+                    data.forEach(video => {
+                        const item = `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>\${video.attOriName}</span>
+                            <button class="btn btn-sm btn-primary open-video-popup" data-filename="\${video.attRenamedName}">
+                                재생
+                            </button>
+                        </li>
+                    `;
+                        videoList.insertAdjacentHTML("beforeend", item);
+                    });
+                }
+
+                // 모달 열기
+                $('#lectureVideoModal').modal('show');
+            })
+            .catch(err => {
+                console.error(err);
+                alert("영상 목록 로딩 실패");
+            });
     }
+
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('open-video-popup')) {
+            const filename = e.target.dataset.filename;
+
+            window.open(
+                `${path}/popup/videoPlayer.jsp?filename=\${filename}`,
+                'lectureVideoPopup',
+                'width=900,height=600,scrollbars=no'
+            );
+        }
+    });
+
 </script>
 <script>
-    // Day selection functionality
-    document.querySelectorAll('.day-number').forEach(day => {
-        day.addEventListener('click', function () {
-            document.querySelectorAll('.day-number').forEach(d => d.classList.remove('day-selected'));
-            this.classList.add('day-selected');
+    // 1. courseSeq 변수 선언을 함수 외부로 이동
+
+    // 2. DOMContentLoaded 이벤트 리스너 수정
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM 로드 완료, courseSeq:", courseSeq); // 디버깅용
+        loadEpisodes(1);
+        loadCourses(1);
+    });
+
+    // 3. 페이징 이벤트 리스너 수정 (jQuery와 vanilla JavaScript 혼용 문제 해결)
+    document.addEventListener('DOMContentLoaded', function() {
+        // jQuery 대신 vanilla JavaScript로 통일
+        document.getElementById('episode-page-bar').addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const page = e.target.getAttribute('data-page');
+                if (page) {
+                    loadEpisodes(parseInt(page));
+                }
+            }
         });
     });
 
-    /*// Category checkbox toggle
-    document.querySelectorAll('.category-item').forEach(item => {
-      item.addEventListener('click', function() {
-        const checkbox = this.querySelector('.category-checkbox');
-        checkbox.classList.toggle('checked');
-      });
-    });*/
+    // 4. loadEpisodes 함수 수정 (에러 핸들링 추가)
+    function loadEpisodes(cPage = 1) {
+        console.log("loadEpisodes 호출됨, cPage:", cPage, "courseSeq:", courseSeq); // 디버깅용
 
-    // Enroll button
-    document.querySelector('.enroll-btn').addEventListener('click', function () {
-        alert('수강 신청이 완료되었습니다!');
-    });
+        // courseSeq 유효성 검사
+        if (!courseSeq || courseSeq === "" || courseSeq === "null") {
+            console.error("courseSeq가 유효하지 않습니다:", courseSeq);
+            document.getElementById('episode-list').innerHTML = "<p>강의 정보를 불러올 수 없습니다.</p>";
+            return;
+        }
 
-    // Wishlist button
-    document.querySelector('.wishlist-btn').addEventListener('click', function () {
-        const heart = this.textContent.includes('♡') ? '♥' : '♡';
-        this.innerHTML = heart + ' 찜하기';
-    });
-</script>
-<script>
-    // 강의 상세 페이지에서 JS 내에 있는 경우 courseSeq는 서버에서 변수로 전달받는다고 가정
-    const courseSeq = ${course.courseSeq}; // EL 표현식으로 전달
+        fetch(`${path}/course/episodes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseSeq: parseInt(courseSeq), // 숫자로 변환
+                cPage: cPage,
+                numPerPage: 5
+            })
+        })
+            .then(response => {
+                console.log("응답 상태:", response.status); // 디버깅용
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: \${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("받은 데이터:", data); // 디버깅용
+                renderEpisodes(data);
+            })
+            .catch(error => {
+                console.error("에러 발생:", error);
+                document.getElementById('episode-list').innerHTML = "<p>데이터를 불러오는 중 오류가 발생했습니다.</p>";
+            });
+    }
+
+    // 5. 렌더링 로직을 별도 함수로 분리
+    function renderEpisodes(data) {
+        const list = document.getElementById('episode-list');
+        const pageBar = document.getElementById('episode-page-bar');
+
+        if (!list || !pageBar) {
+            console.error("필요한 DOM 요소를 찾을 수 없습니다.");
+            return;
+        }
+
+        list.innerHTML = "";
+
+        if (!data.episodes || data.episodes.length === 0) {
+            list.innerHTML = "<p>등록된 회차가 없습니다.</p>";
+            pageBar.innerHTML = "";
+            return;
+        }
+
+        data.episodes.forEach(episode => {
+            const epDate = new Date(episode.episodeDate);
+
+            const episodeHtml = `
+            <div class="curriculum-item">
+                <span class="curriculum-number">\${episode.episodeCount}.</span>
+                <div class="curriculum-content">
+
+                    <div class="curriculum-date">\${formatDate(episode.episodeDate)}</div>
+                </div>
+                <div class="curriculum-actions">
+                    <button class="action-btn view-video-btn" onclick="openVideoPopup('\${episode.episodeSeq}')">영상 보기</button>
+                    <button class="action-btn download-attach-btn" data-epseq="\${episode.episodeSeq}">자료받기</button>
+                </div>
+            </div>
+        `;
+            list.insertAdjacentHTML("beforeend", episodeHtml);
+        });
+
+        pageBar.innerHTML = data.pageBar || "";
+
+    }
 
     function loadCourses(cPage = 1) {
+        console.log("loadCourse 시작")
         fetch(`${path}/course/reviews`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -849,7 +953,7 @@
         })
             .then(res => res.json())
             .then(data => {
-                const container = document.getElementById('curriculum-list');
+                const container = document.getElementById('review-container');
                 const pageBar = document.getElementById('review-page-bar');
                 container.innerHTML = "";
 
@@ -860,24 +964,35 @@
                 }
 
                 data.reviews.forEach(r => {
-                    const date = new Date(r.reviewDate);
-                    const formattedDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                    // 1. 날짜 처리
+                    const date = new Date(r.reviewCreateTime); // ← 정확한 필드명
+                    let formattedDate = '날짜 오류';
+                    if (!isNaN(date)) {
+                        formattedDate = `\${date.getFullYear()}년 \${date.getMonth() + 1}월 \${date.getDate()}일`;
+                    }
+
+                    // 2. 프로필 이미지 (없으면 기본 이미지 대체)
+                    const profileImgUrl = r.memberProfile
+                        ? `${path}/resources/upload/student/profile/\${r.memberProfile}`
+                        : `${path}/resources/upload/student/profile/default_profile_student.png`;
 
                     const reviewHtml = `
-          <div class="curriculum-item">
-            <div class="review-item">
-              <div class="review-header">
-                <div class="review-avatar">\${r.memberProfile)}</div>
-                <div class="review-meta">
-                  <h5>\${r.memberName}</h5>
-                </div>
-                <div class="review-date">\${formattedDate}</div>
-              </div>
-              <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
-              <div class="review-content">\${r.reviewContent}</div>
-            </div>
-          </div>
-        `;
+                      <div class="curriculum-item">
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-avatar">
+                                    <img src="\${profileImgUrl}" alt="프로필" style="width:40px; height:40px; border-radius:50%;">
+                                </div>
+                                <div class="review-meta">
+                                    <h5>\${r.memberName}</h5>
+                                </div>
+                                <div class="review-date">\${formattedDate}</div>
+                            </div>
+                            <div class="stars">\${'★'.repeat(r.reviewRate)}\${'☆'.repeat(5 - r.reviewRate)}</div>
+                            <div class="review-content">\${r.reviewContent}</div>
+                        </div>
+                      </div>
+                    `;
                     container.insertAdjacentHTML("beforeend", reviewHtml);
                 });
 
@@ -891,8 +1006,48 @@
         loadCourses(pageNo);
     }
 
-    // 첫 로딩 시 호출
-    document.addEventListener("DOMContentLoaded", () => loadCourses(1));
+    function formatDate(date) {
+        const d = new Date(date);
+        return d.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    }
+
+    //  다운로드 버튼 클릭 시
+    document.addEventListener('click', function (e) {
+        if (e.target.matches('.download-attach-btn')) {
+            const episodeSeq = e.target.dataset.epseq;
+            fetch(`${path}/lecture/attachments?episodeSeq=\${episodeSeq}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('attachmentList');
+                    list.innerHTML = "";
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = "<li class='list-group-item'>자료가 없습니다.</li>";
+                    } else {
+                        data.forEach(att => {
+                            const item = `
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>\${att.attOriName}</span>
+                <a class="btn btn-sm btn-primary" href="${path}/downloadattach?oriname=\${att.attOriName}&rename=\${att.attRenamedName}">다운로드</a>
+              </li>`;
+                            list.insertAdjacentHTML("beforeend", item);
+                        });
+                    }
+
+                    $('#attachmentModal').modal('show');
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("자료 로딩에 실패했습니다.");
+                });
+        }
+    });
+
 
 </script>
+
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

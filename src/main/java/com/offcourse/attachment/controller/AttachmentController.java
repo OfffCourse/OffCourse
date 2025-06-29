@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +31,8 @@ public class AttachmentController {
             @RequestParam("chunk") MultipartFile chunk,
             @RequestParam("index") int index,
             @RequestParam("total") int total,
-            @RequestParam("lectureId") Long lectureId,
+            @RequestParam("episodeSeq") Long episodeSeq,
+            @RequestParam(value = "videoTitle", required = false) String videoTitle,
             HttpSession session) {
 
         // 1. 실제 경로 얻기 (webapp 아래에 저장)
@@ -50,17 +48,17 @@ public class AttachmentController {
 
         try {
             // 3. 청크 저장
-            String tempChunkName = lectureId + "_" + index + ".part";
+            String tempChunkName = episodeSeq + "_" + index + ".part";
             File tempChunkFile = new File(tempDir, tempChunkName);
             chunk.transferTo(tempChunkFile);
 
             // 4. 마지막 청크일 경우 병합
             if (index == total - 1) {
-                String mergedFileName = "lecture_" + lectureId + ".webm";
+                String mergedFileName = "episodeSeq_" + episodeSeq + ".webm";
                 File mergedFile = new File(finalDir, mergedFileName);
                 try (FileOutputStream fos = new FileOutputStream(mergedFile, true)) {
                     for (int i = 0; i < total; i++) {
-                        File part = new File(tempDir, lectureId + "_" + i + ".part");
+                        File part = new File(tempDir, episodeSeq + "_" + i + ".part");
                         Files.copy(part.toPath(), fos);
                         part.delete(); // 청크 파일 삭제
                     }
@@ -68,17 +66,12 @@ public class AttachmentController {
 
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 int rnd = (int) (Math.random() * 1000) + 1;
-                //String renamedFileName = "lecture_" + lectureId + "_" + timeStamp + ".mp4";
                 String renamedFileName = "offcourse_" + timeStamp + "_" + rnd + ".mp4";
                 File convertedMp4File = new File(finalDir, renamedFileName);
 
                 URL exePath = getClass().getResource("/ffmpeg/bin/ffmpeg.exe");
-//                System.out.println("resources경로 :  "+exePath);
                 ProcessBuilder pb = new ProcessBuilder(exePath.getPath(),
                         "-i", mergedFile.getAbsolutePath(),
-                        /*"-c:v", "libx264",
-                        "-c:a", "aac",
-                        "-strict", "-2",*/  // 일부 FFmpeg 버전용
                         "-c:v", "libx264",
                         "-preset", "fast",
                         "-crf", "28",
@@ -104,10 +97,10 @@ public class AttachmentController {
                 mergedFile.delete();
                 // 병합 완료 후 DB 저장 처리
                 Attachment attachment = Attachment.builder()
-                        .attOriName("lecture_" + lectureId + ".mp4")
+                        .attOriName(videoTitle + ".mp4")
                         .attRenamedName(renamedFileName)
                         .attType("2")
-                        .episodeSeq(lectureId)
+                        .episodeSeq(episodeSeq)
                         .build();
 
                 service.insertAttachment(attachment);
@@ -125,9 +118,10 @@ public class AttachmentController {
 
     @PostMapping("/uploadattach")
     public String uploadAttachment(@RequestParam Long episodeSeq,
+                                   @RequestParam Long courseSeq,
                                    @RequestParam("upFile") MultipartFile[] upFiles,
                                    HttpSession session,
-                                   Model model){
+                                   Model model) {
         String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
         List<Attachment> attachmentList = new ArrayList<>();
         if (upFiles != null) {
@@ -136,7 +130,7 @@ public class AttachmentController {
                 String ext = oriName.substring(oriName.lastIndexOf("."));
                 int rnd = (int) (Math.random() * 1000) + 1;
                 Date d = new Date(System.currentTimeMillis());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
                 String rename = "offcourse_" + sdf.format(d) + "_" + rnd + ext;
 
                 File dir = new File(path);
@@ -145,8 +139,9 @@ public class AttachmentController {
                 }
                 try {
                     upFile.transferTo(new File(dir, rename));
+                    String attType = ext.equals(".pdf") ? "1" : "0";
                     Attachment file = Attachment.builder().attOriName(oriName)
-                            .attRenamedName(rename).attType("1").build();
+                            .attRenamedName(rename).attType(attType).episodeSeq(episodeSeq).build();
                     attachmentList.add(file);
 
                 } catch (IOException e) {
@@ -160,22 +155,32 @@ public class AttachmentController {
         }
         if (result > 0) {
             model.addAttribute("msg", "첨부파일 저장성공");
-            model.addAttribute("loc", "/board/boardlist.do");
+            model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
         } else {
             model.addAttribute("msg", "첨부파일 저장실패");
-            model.addAttribute("loc", "/board/boardwrite.do");
+            model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
         }
         return "common/msg";
     }
 
     @GetMapping("/downloadattach")
-    public void fileDownload(String oriname,
-                             String rename,
+    public void fileDownload(@RequestParam(required = false) String oriname,
+                             @RequestParam String rename,
+                             @RequestParam(required = false, defaultValue = "lecture") String type,
                              HttpSession session,
                              @RequestHeader("user-agent") String header,
                              OutputStream out,
                              HttpServletResponse response) {
-        String path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        String path;
+        if ("portfolio".equals(type)) {
+            path = session.getServletContext().getRealPath("/resources/upload/instructor/portfolio/");
+            if (oriname == null || oriname.isBlank()) {
+                oriname = "portfolio.pdf";
+            }
+        } else {
+            path = session.getServletContext().getRealPath("/resources/upload/lecture/attach/");
+        }
+
         File downloadFile = new File(path, rename);
         if (!downloadFile.exists()) {
             throw new IllegalArgumentException("파일이 존재하지않습니다");
@@ -206,4 +211,26 @@ public class AttachmentController {
 
 
     }
+
+    /*강사페이지에서 첨부파일자료조회*/
+    @GetMapping("/lecture/attachments")
+    @ResponseBody
+    public List<Attachment> getAttachmentsByEpisode(@RequestParam Long episodeSeq) {
+        return service.getAttachByEpisodeSeq(episodeSeq);
+    }
+
+    @GetMapping("/lecture/videofile")
+    @ResponseBody
+    public List<Attachment> getVideoFile(@RequestParam Long episodeSeq) {
+        List<Attachment> renamedVideo = service.getVideoFile(episodeSeq);
+        return renamedVideo;
+    }
+
+    @DeleteMapping("/lecture/attachment/{attachSeq}")
+    @ResponseBody
+    public ResponseEntity<Void> deleteAttachment(@PathVariable Long attachSeq) {
+        int result = service.deleteAttachmentBySeq(attachSeq);
+        return result == 1 ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    }
+
 }
