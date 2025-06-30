@@ -22,7 +22,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void processEnrollmentPayment(Long courseSeq, Long memberSeq, BigDecimal paymentPrice, String orderId) {
+    public void processEnrollmentPayment(Long courseSeq, Long memberSeq, BigDecimal paymentPrice, String orderId, String impUid) {
         Enrollment enrollment = Enrollment.builder()
                 .enrStatus(EnrollmentStatus.ENROLL)
                 .courseSeq(courseSeq)
@@ -34,6 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentHistory ph = PaymentHistory.builder()
                 .paymentPrice(paymentPrice)
                 .paymentOrderId(orderId)
+                .paymentImpUid(impUid)
                 .paymentStatus(PaymentStatus.PAYMENT)
                 .enrSeq(enrollment.getEnrSeq())
                 .build();
@@ -59,5 +60,11 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentHistory findPaymentHistoryBySeq(Long paymentSeq) {
         return paymentHistoryDao.selectBySeq(paymentSeq);
     }
+
+    @Override
+    public PaymentHistory findPaymentHistoryByEnrSeq(Long enrSeq) {
+        return paymentHistoryDao.selectByEnrSeq(enrSeq);
+    }
+
 
 }

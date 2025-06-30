@@ -1,6 +1,7 @@
 package com.offcourse.enrollment.model.service;
 
 import com.offcourse.enrollment.model.dao.EnrollmentDao;
+import com.offcourse.enrollment.model.dto.Enrollment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,4 +26,9 @@ public class EnrollmentService {
         }
         throw new IllegalStateException("ENR_STATUS 업데이트에 실패했습니다.");
     }
+
+    public Enrollment selectEnrollmentBySeq(Long enrSeq) {
+        return dao.selectEnrollmentBySeq(enrSeq);
+    }
+
 }

@@ -1,6 +1,10 @@
 package com.offcourse.payment.controller;
 
 import com.offcourse.config.PortOneConfig;
+import com.offcourse.course.model.dto.CourseViewResponse;
+import com.offcourse.course.model.service.CourseService;
+import com.offcourse.enrollment.model.dto.Enrollment;
+import com.offcourse.enrollment.model.service.EnrollmentService;
 import com.offcourse.payment.model.dto.PaymentHistory;
 import com.offcourse.payment.model.service.PaymentService;
 import com.offcourse.payment.util.PortOneApiUtil;
@@ -24,6 +28,8 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final PortOneConfig portOneConfig;
     private final PortOneApiUtil portOneApiUtil;
+    private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
 
     // [결제 폼 화면]
     @GetMapping("/form")
@@ -33,6 +39,8 @@ public class PaymentController {
             @RequestParam BigDecimal paymentPrice,
             Model model
     ) {
+        CourseViewResponse course = courseService.getCourseBySeq(courseSeq);
+        model.addAttribute("course", course);
         model.addAttribute("courseSeq", courseSeq);
         model.addAttribute("memberSeq", memberSeq);
         model.addAttribute("paymentPrice", paymentPrice);
@@ -58,20 +66,22 @@ public class PaymentController {
             return "redirect:/payment/fail";
         }
         // 3. DB 저장
-        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId);
+        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId, impUid);
         ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
         return "redirect:/mypage/student";
     }
     // [환불 폼 화면]
     @GetMapping("/refund-form")
-    public String showRefundForm(@RequestParam Long paymentSeq,
-                                 @RequestParam Long enrSeq,
+    public String showRefundForm(@RequestParam Long enrSeq,
                                  Model model) {
-        PaymentHistory ph = paymentService.findPaymentHistoryBySeq(paymentSeq);
-        model.addAttribute("paymentSeq", paymentSeq);
+        PaymentHistory ph = paymentService.findPaymentHistoryByEnrSeq(enrSeq);
+        Enrollment enrollment = enrollmentService.selectEnrollmentBySeq(enrSeq);
+        CourseViewResponse course = courseService.getCourseBySeq(enrollment.getCourseSeq());
+        model.addAttribute("paymentSeq", ph.getPaymentSeq());
         model.addAttribute("enrSeq", enrSeq);
-        model.addAttribute("impUid", ph.getPaymentOrderId()); // imp_uid로 사용됨
+        model.addAttribute("impUid", ph.getPaymentImpUid()); // 수정: paymentImpUid 사용
         model.addAttribute("amount", ph.getPaymentPrice());
+        model.addAttribute("course", course);
         return "payment/refundForm";
     }
     // [환불]

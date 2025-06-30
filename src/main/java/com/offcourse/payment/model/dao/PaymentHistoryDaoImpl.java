@@ -31,4 +31,9 @@ public class PaymentHistoryDaoImpl implements PaymentHistoryDao {
         return sqlSession.selectOne(NAMESPACE + "selectBySeq", paymentSeq);
     }
 
+    @Override
+    public PaymentHistory selectByEnrSeq(Long enrSeq) {
+        return sqlSession.selectOne(NAMESPACE + "selectByEnrSeq", enrSeq);
+    }
+
 }

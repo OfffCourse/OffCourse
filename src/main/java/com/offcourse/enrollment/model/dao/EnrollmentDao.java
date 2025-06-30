@@ -32,5 +32,8 @@ public class EnrollmentDao {
         return sqlSession.update(NAMESPACE + "updateEnrollmentStatusByEnrSeq", param);
     }
 
+    public Enrollment selectEnrollmentBySeq(Long enrSeq) {
+        return sqlSession.selectOne(NAMESPACE + "selectEnrollmentBySeq", enrSeq);
+    }
 
 }
