@@ -104,12 +104,12 @@ public class PaymentServiceImpl implements PaymentService {
         );
         if (eResult < 1) throw new IllegalStateException("ENROLLMENT STATUS UPDATE 실패");
 
-        Enrollment enrollment = enrollmentDao.selectEnrollmentBySeq(enrSeq);
+        Enrollment e = enrollmentDao.selectEnrollmentBySeq(enrSeq);
         try {
             notificationProducer.send(
                     NotificationEvent.builder()
                             .msgDate(new Timestamp(System.currentTimeMillis()))
-                            .memberSeq(enrollment.getMemberSeq())
+                            .memberSeq(e.getMemberSeq())
                             .msgType(NotificationType.REFUND_SUCCESS)
                             .redirectLocation(NotificationType.REFUND_SUCCESS.getRedirectLocation())
                             .build());

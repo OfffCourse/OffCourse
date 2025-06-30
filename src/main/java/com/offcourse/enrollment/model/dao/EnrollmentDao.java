@@ -36,7 +36,7 @@ public class EnrollmentDao {
         return sqlSession.selectOne(NAMESPACE + "selectEnrollmentBySeq", enrSeq);
     }
 
-    public Long findStudentSeqByEnrSeq(Long enrSeq) {
-        return sqlSession.selectOne(NAMESPACE + "findStudentSeqByEnrSeq", enrSeq);
+    public List<Long> findEnrSeqsByCourseSeq(Long courseSeq) {
+        return sqlSession.selectList(NAMESPACE + "findEnrSeqsByCourseSeq", courseSeq);
     }
 }

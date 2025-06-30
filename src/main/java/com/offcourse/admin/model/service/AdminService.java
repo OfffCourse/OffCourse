@@ -11,19 +11,25 @@ import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
 import com.offcourse.deleterequest.model.dto.DeleteRequestStatus;
 import com.offcourse.enrollment.model.dao.EnrollmentDao;
 import com.offcourse.member.model.dao.MemberDao;
+import com.offcourse.notification.model.dto.NotificationEvent;
+import com.offcourse.notification.model.dto.NotificationType;
+import com.offcourse.notification.model.service.NotificationProducer;
 import com.offcourse.payment.model.dao.PaymentHistoryDao;
 import com.offcourse.payment.model.dto.PaymentHistory;
 import com.offcourse.payment.model.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminService {
     private final DeleteRequestDao requestDao;
     private final AccountDao accountDao;
@@ -32,6 +38,7 @@ public class AdminService {
     private final EnrollmentDao enrollmentDao;
     private final PaymentHistoryDao paymentHistoryDao;
     private final PaymentService paymentService;
+    private final NotificationProducer notificationProducer;
 
     public DashboardStat getDashboardStat() {
         long deleteCourseRequestCount = requestDao.countDeleteRequestAll();
@@ -65,6 +72,8 @@ public class AdminService {
             return false;
         }
 
+        Long teacherSeq = courseDao.findTeacherSeqByCourseSeq(courseSeq);
+
         if (action.equals("approve")) {
             List<Long> enrSeqList = enrollmentDao.findEnrSeqsByCourseSeq(courseSeq);
 
@@ -82,9 +91,32 @@ public class AdminService {
             if (result2 == 0) {
                 throw new IllegalStateException("삭제 요청 처리 실패");
             }
+            try {
+                notificationProducer.send(
+                        NotificationEvent.builder()
+                                .msgDate(new Timestamp(System.currentTimeMillis()))
+                                .memberSeq(teacherSeq)
+                                .msgType(NotificationType.DELETE_REQUEST_STATUS)
+                                .redirectLocation(NotificationType.DELETE_REQUEST_STATUS.getRedirectLocation())
+                                .build());
+            } catch (Exception kafkaEx) {
+                log.error("⚠️ Kafka 알림 발송 실패 (삭제 요청): {}", kafkaEx.getMessage());
+            }
             return true;
         }
-        return false;
+
+        try {
+            notificationProducer.send(
+                    NotificationEvent.builder()
+                            .msgDate(new Timestamp(System.currentTimeMillis()))
+                            .memberSeq(teacherSeq)
+                            .msgType(NotificationType.DELETE_REQUEST_STATUS)
+                            .redirectLocation(NotificationType.DELETE_REQUEST_STATUS.getRedirectLocation())
+                            .build());
+        } catch (Exception kafkaEx) {
+            log.error("⚠️ Kafka 알림 발송 실패 (삭제 요청): {}", kafkaEx.getMessage());
+        }
+        return true;
     }
 
     public List<AccountRequestAll> getAccountRequestAll(Map param) {
@@ -97,7 +129,7 @@ public class AdminService {
 
     @Transactional
     public boolean handleAccountRequest(HandleAccountRequest handleAccountRequest) {
-        return accountDao.updateAccountStatus(Map.of("accountSeq", handleAccountRequest.getAccountSeq(), "action", handleAccountRequest.getAction())) >0;
+        return accountDao.updateAccountStatus(Map.of("accountSeq", handleAccountRequest.getAccountSeq(), "action", handleAccountRequest.getAction())) > 0;
     }
 
     public long countMemberAll() {
