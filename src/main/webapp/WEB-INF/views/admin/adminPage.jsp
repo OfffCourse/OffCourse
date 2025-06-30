@@ -217,8 +217,7 @@
 
             // 현재 탭에 해당하는 컨테이너만 표시
             const activeTabId = getTabContentId(currentUserTab);
-            $(`#
-            \${activeTabId}`).show();
+            $(`#\${activeTabId}`).show();
 
             // 데이터 로딩
             loadUserManagementData(currentUserTab, 1);
