@@ -62,6 +62,11 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment == null) {
             throw new IllegalStateException("결제내역을 찾을 수 없습니다: paymentSeq=" + paymentSeq);
         }
+        // 환불 요청자 소유권 검증
+        Enrollment enrollment = enrollmentDao.selectEnrollmentBySeq(enrSeq);
+        if (enrollment == null) {
+            throw new IllegalStateException("수강신청 내역을 찾을 수 없습니다: enrSeq=" + enrSeq);
+        }
         // 2. 포트원 환불 API 호출
         portOneApiUtil.cancelPayment(
                 payment.getPaymentImpUid(),

@@ -95,6 +95,7 @@
           <form id="refundForm" action="${path}/payment/refund" method="post">
             <input type="hidden" name="paymentSeq" value="${paymentSeq}" />
             <input type="hidden" name="enrSeq" value="${enrSeq}" />
+            \<input type="hidden" name="memberSeq" value="${memberSeq}" />
             <input type="hidden" name="impUid" value="${impUid}" />
             <input type="hidden" name="amount" value="${amount}" />
 
