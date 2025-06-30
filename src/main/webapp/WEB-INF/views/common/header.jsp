@@ -460,6 +460,9 @@
                 <c:otherwise>
                     <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님, 환영합니다!</span>
                     <c:choose>
+                        <c:when test='${loginMember.memberId eq "admin" }'>
+                            <a href="${path}/admin/listpage" class="btn btn-primary mr-2">관리자페이지</a>
+                        </c:when>
                         <%-- 일반과 강사회원의 마이페이지 주소 다르게 --%>
                         <c:when test="${loginMember.memberType == '0'}">
                             <a href="${path}/mypage/student" class="btn btn-primary mr-2">마이페이지</a>

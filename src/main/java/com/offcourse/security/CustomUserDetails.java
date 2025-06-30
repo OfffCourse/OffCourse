@@ -24,7 +24,12 @@ public class CustomUserDetails implements UserDetails, Serializable {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // 권한은 0이면 ROLE_USER, 1이면 ROLE_INSTRUCTOR
-        String role = member.getMemberType().equals("1") ? "ROLE_INSTRUCTOR" : "ROLE_USER";
+        String role;
+        if (member.getMemberId().equals("admin")) {
+            role = "ROLE_ADMIN";
+            return Collections.singleton((() -> role));
+        }
+        role = member.getMemberType().equals("1") ? "ROLE_INSTRUCTOR" : "ROLE_USER";
         return Collections.singleton(() -> role);
     }
 
@@ -71,6 +76,7 @@ public class CustomUserDetails implements UserDetails, Serializable {
         if (!(o instanceof CustomUserDetails that)) return false;
         return Objects.equals(this.getUsername(), that.getUsername());
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(this.getUsername());
