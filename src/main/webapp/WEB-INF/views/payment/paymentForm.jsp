@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<c:set var="path"    value="${pageContext.request.contextPath}" />
+<c:set var="path" value="${pageContext.request.contextPath}" />
 <c:set var="impCode" value="${impCode}" />
 
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
@@ -24,7 +24,6 @@
 
 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 <script>
-  // PortOne 가맹점 식별코드 (imp 코드)
   IMP.init("${impCode}");
 
   function showLoading() {
@@ -34,38 +33,35 @@
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 
-  // 결제 요청
   function requestPay() {
     showLoading();
     IMP.request_pay({
       pg: "kakaopay.TC0ONETIME",
-      // pay_method: "card",
       merchant_uid: "${orderId}",
-      name: "강의 결제",
+      name: "OFFCOURSE 강의 결제 - ${course.courseName}",
       amount: ${paymentPrice},
-      buyer_email: "test@example.com",
-      buyer_name: "홍길동",
-      buyer_tel: "010-1234-5678"
+      buyer_email: "${loginMember.memberEmail}",
+      buyer_name: "${loginMember.memberName}",
+      buyer_tel: "${loginMember.memberPhone}"
     }, function (rsp) {
       hideLoading();
       if (rsp.success) {
-        // 서버로 결제 성공 데이터 전송 (POST)
         const form = document.createElement("form");
         form.method = "post";
         form.action = "${path}/payment/process";
 
         const fields = {
-          impUid:     rsp.imp_uid,
-          orderId:    rsp.merchant_uid,
-          courseSeq:  "${courseSeq}",
-          memberSeq:  "${memberSeq}",
+          impUid: rsp.imp_uid,
+          orderId: rsp.merchant_uid,
+          courseSeq: "${courseSeq}",
+          memberSeq: "${memberSeq}",
           paymentPrice: "${paymentPrice}"
         };
 
         for (const key in fields) {
           const input = document.createElement("input");
-          input.type  = "hidden";
-          input.name  = key;
+          input.type = "hidden";
+          input.name = key;
           input.value = fields[key];
           form.appendChild(input);
         }
@@ -79,67 +75,83 @@
   }
 </script>
 
-<div class="container mt-4">
-  <!-- 2. 단계별 진행 표시 -->
-  <ul class="payment-steps d-flex list-unstyled mb-4">
-    <li class="flex-fill text-center text-muted">1. 정보 확인</li>
-    <li class="flex-fill text-center font-weight-bold">2. 결제 진행</li>
-    <li class="flex-fill text-center text-muted">3. 완료</li>
-  </ul>
-  <style>
-    .payment-steps li + li::before {
-      content: "›";
-      margin: 0 10px;
-      color: #ccc;
-    }
-  </style>
+<div class="container mt-5">
+  <div class="row">
 
-  <!-- 4. 플래시 메시지 -->
-  <c:if test="${not empty msg}">
-    <div class="alert alert-info">${msg}</div>
-  </c:if>
+    <!-- 📝 강의 정보 -->
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          강의 정보
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">${course.courseName}</h5>
+          <p>
+            <strong>기간:</strong>
+            <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/>
+            ~
+            <fmt:formatDate value="${course.courseEndDate}" pattern="yyyy-MM-dd"/><br>
+            <strong>인원:</strong>
+            ${course.courseCurrentSize}/${course.courseSize}명
+          </p>
+        </div>
+      </div>
 
-  <!-- 1. 결제 정보 요약 카드 -->
-  <div class="card mb-4">
-    <div class="card-header">결제 정보 확인</div>
-    <div class="card-body">
-      <p><strong>강의명:</strong> ${course.courseName}</p>
-      <p><strong>기간:</strong>
-        <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/>
-        ~
-        <fmt:formatDate value="${course.courseEndDate}"   pattern="yyyy-MM-dd"/>
-      </p>
-      <p><strong>인원:</strong> ${course.courseCurrentSize}/${course.courseSize}명</p>
-      <hr/>
-      <p>
-        <del><fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원</del>
-        →
-        <strong><fmt:formatNumber value="${paymentPrice}"       pattern="#,##0"/>원</strong>
-      </p>
+      <!-- 📝 회원 정보 -->
+      <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+          회원 정보
+        </div>
+        <div class="card-body">
+          <p><strong>이름:</strong> ${loginMember.memberName}</p>
+          <p><strong>이메일:</strong> ${loginMember.memberEmail}</p>
+          <p><strong>연락처:</strong> ${loginMember.memberPhone}</p>
+        </div>
+      </div>
     </div>
+
+    <!-- 💳 결제 정보 -->
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+          결제 정보
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item">
+              <strong>원래 가격:</strong>
+              <span class="text-muted" style="text-decoration: line-through;">
+                <fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원
+              </span>
+            </li>
+            <li class="list-group-item">
+              <strong>결제 금액:</strong>
+              <span style="font-size: 1.2em;">
+                <fmt:formatNumber value="${paymentPrice}" pattern="#,##0"/>원
+              </span>
+            </li>
+          </ul>
+
+          <!-- 카카오페이 결제 버튼 -->
+          <button type="button" class="btn btn-warning btn-block mb-2"
+                  onclick="requestPay()"
+                  style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold;">
+            <img src="${path}/resources/images/kakaopay.png"
+                 alt="카카오페이"
+                 style="height:24px; vertical-align:middle; margin-right:8px;">
+            카카오페이로 결제하기
+          </button>
+
+          <!-- 취소 버튼 -->
+          <a href="${path}/course/view?courseSeq=${courseSeq}"
+             class="btn btn-outline-secondary btn-block">
+            취소
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
-
-  <!-- 결제 버튼 영역 -->
-  <div class="form-group text-center">
-    <!-- 카카오페이 제휴사 문구 -->
-    <p class="mb-2">
-      <img src="${path}/resources/images/kakaopay.png" alt="카카오페이" style="height:40px;">
-    </p>
-    <p class="text-muted" style="font-size:0.9em;">
-      카카오페이 제휴사
-    </p>
-
-    <button type="button" class="btn btn-warning btn-block" onclick="requestPay()" style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold;">
-      <img src="${path}/resources/images/kakaopay.png" alt="카카오페이" style="height:24px; vertical-align:middle; margin-right:8px;">
-      카카오페이로 결제하기
-    </button>
-
-    <a href="${path}/course/view?courseSeq=${courseSeq}"
-       class="btn btn-outline-secondary btn-block mt-2">
-      취소
-    </a>
-  </div>
-
 </div>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
