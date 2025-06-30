@@ -198,6 +198,112 @@
             loadAdminDeleteRequests(status, page);
         }
     });
+
+    let currentUserTab = 'member-all';
+
+    $(document).ready(function () {
+        // 초기 로딩
+        loadUserManagementData(currentUserTab, 1);
+
+        // 탭 클릭 시 전환 처리
+        $('.tab-btn').click(function () {
+            $('.tab-btn').removeClass('active');
+            $(this).addClass('active');
+
+            currentUserTab = $(this).data('tab');
+
+            // 모든 탭 컨테이너 숨김
+            $('.request-list').hide();
+
+            // 현재 탭에 해당하는 컨테이너만 표시
+            const activeTabId = getTabContentId(currentUserTab);
+            $(`#
+            \${activeTabId}`).show();
+
+            // 데이터 로딩
+            loadUserManagementData(currentUserTab, 1);
+        });
+
+        // 페이지 클릭 처리
+        $('#userPageBarContainer').on('click', 'a.page-link', function (e) {
+            e.preventDefault();
+            const role = $(this).data('role'); // teacher, student, all
+            const page = $(this).data('page');
+            if (role && page) {
+                loadUserManagementData(`member-\${role}`, page);
+            }
+        });
+    });
+
+    // 탭 ID → 컨테이너 ID 변환
+    function getTabContentId(tabId) {
+        if (tabId.startsWith('member-')) {
+            const type = tabId.replace('member-', '');
+            return type === 'all' ? 'memberAllTab'
+                : type === 'teacher' ? 'memberTeacherTab'
+                    : 'memberStudentTab';
+        }
+        return '';
+    }
+
+    // AJAX로 회원 데이터 로드
+    function loadUserManagementData(tabId, page) {
+        let role2 = tabId.replace('member-', '');
+        $.ajax({
+                url: `${path}/admin/member`,
+                method: 'GET',
+                data: {
+                    role: role2,
+                    page: page,
+                    numPerPage: 5
+                },
+                success: function (data) {
+                    const containerId = getTabContentId(tabId);
+                    const $container = $(`#\${containerId}`);
+                    $container.empty();
+
+                    data.memberAllList.forEach(user => {
+                        const typeText = user.memberType === '1' ? '강사' : '수강생';
+                        const date = new Date(user.memberCreateTime).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+
+                        $container.append(`
+                    <div class="request-item border rounded p-3 mb-3 bg-light">
+                        <div class="request-header d-flex justify-content-between">
+                            <div>
+                                <h5>\${user.memberName} (\${user.memberId})</h5>
+                                <p>📧 \${user.memberEmail} &nbsp;&nbsp; 📱 \${user.memberPhone}</p>
+                            </div>
+                            <span class="badge badge-secondary">\${typeText}</span>
+                        </div>
+                        <div class="request-details">
+                            <strong>가입일자:</strong><br>
+                            \${date}
+                        </div>
+                    </div>
+                `);
+                    });
+
+                    $('#userPageBarContainer').html(data.pageBar || '');
+                },
+                error: function () {
+                    const containerId = getTabContentId(tabId);
+                    $(`#${containerId}`).html('<div class="text-danger">회원 정보를 불러오지 못했습니다.</div>');
+                }
+            }
+        )
+        ;
+    }
+
+    $('#pageBarContainer').on('click', 'a.page-link', function (e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        const status = $(this).data('status'); // 예: pending
+        loadAdminDeleteRequests(status, page);
+    });
 </script>
 
 
@@ -695,8 +801,6 @@
                 <span class="icon">💰</span><span>정산 요청</span></a></li>
             <li><a href="#" class="menu-item" data-section="user-management">
                 <span class="icon">👥</span><span>회원 관리</span></a></li>
-            <li><a href="#" class="menu-item" data-section="settings">
-                <span class="icon">⚙️</span><span>시스템 설정</span></a></li>
         </ul>
     </aside>
 
@@ -772,52 +876,30 @@
             </div>
             <div class="stats-container">
                 <div class="stat-card">
-                    <div class="stat-number">0</div>
+                    <div class="stat-number">${totalCount}</div>
                     <div class="stat-label">총 회원 수</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">0</div>
+                    <div class="stat-number">${teacherCount}</div>
                     <div class="stat-label">강사 수</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">0</div>
+                    <div class="stat-number">${studentCount}</div>
                     <div class="stat-label">수강생 수</div>
                 </div>
             </div>
-        </div>
-
-        <!-- 시스템 설정 -->
-        <!-- 시스템 설정 섹션 개선 버전 -->
-        <div class="admin-section" id="settings">
-            <div class="page-header">
-                <h1 class="page-title">시스템 설정</h1>
-                <p class="page-subtitle">시스템 설정을 관리하세요</p>
+            <!-- 👉 탭 버튼 -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="member-all">전체</button>
+                <button class="tab-btn" data-tab="member-teacher">강사</button>
+                <button class="tab-btn" data-tab="member-student">수강생</button>
             </div>
 
-            <div class="settings-form">
-                <div class="form-group">
-                    <label class="form-label">알림 설정</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="deleteNotification" checked>
-                            <label for="deleteNotification">강의 삭제 요청 알림</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="settlementNotification" checked>
-                            <label for="settlementNotification">정산 요청 알림</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="memberJoinNotification">
-                            <label for="memberJoinNotification">회원 가입 알림</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-actions">
-                    <button class="btn btn-primary" onclick="saveSystemSettings()">설정 저장</button>
-                    <button class="btn btn-outline" onclick="loadSystemSettings()">설정 초기화</button>
-                </div>
-            </div>
+            <!-- 👉 회원 리스트 + 페이지바 영역 -->
+            <div class="request-list" id="memberAllTab"></div>
+            <div class="request-list" id="memberTeacherTab" style="display:none;"></div>
+            <div class="request-list" id="memberStudentTab" style="display:none;"></div>
+            <div id="userPageBarContainer" style="margin-top:20px;"></div>
         </div>
     </main>
 </div>
@@ -1025,9 +1107,6 @@
             case 'user-management':
                 loadUserManagementData();
                 break;
-            case 'settings':
-                loadSystemSettings();
-                break;
         }
     }
 
@@ -1039,6 +1118,9 @@
         } else if (tabId.startsWith('settlement-')) {
             const status = tabId.replace('settlement-', '');
             loadSettlementRequests(status);
+        } else if (tabId.startsWith('member-')) {
+            const role = tabId.replace('member-', '');
+            loadUserManagementData(role);
         }
     }
 
@@ -1055,37 +1137,6 @@
             })
             .catch(error => {
                 console.error('대시보드 데이터 로드 실패:', error);
-            });
-    }
-
-    // 회원 관리 데이터 로드
-    function loadUserManagementData() {
-        Promise.all([
-            fetch(`${path}/admin/users/total`).then(r => r.json()),
-            fetch(`${path}/admin/users/instructors`).then(r => r.json()),
-            fetch(`${path}/admin/users/students`).then(r => r.json())
-        ]).then(([totalUsers, instructors, students]) => {
-            const statNumbers = document.querySelectorAll('#user-management .stat-number');
-            statNumbers[0].textContent = totalUsers.count || 0;
-            statNumbers[1].textContent = instructors.count || 0;
-            statNumbers[2].textContent = students.count || 0;
-        }).catch(error => {
-            console.error('회원 관리 데이터 로드 실패:', error);
-        });
-    }
-
-    // 시스템 설정 로드
-    function loadSystemSettings() {
-        fetch(`${path}/admin/settings`)
-            .then(r => r.json())
-            .then(settings => {
-                const checkboxes = document.querySelectorAll('#settings input[type="checkbox"]');
-                checkboxes[0].checked = settings.deleteRequestNotification || false;
-                checkboxes[1].checked = settings.settlementRequestNotification || false;
-                checkboxes[2].checked = settings.memberJoinNotification || false;
-            })
-            .catch(error => {
-                console.error('시스템 설정 로드 실패:', error);
             });
     }
 
@@ -1113,33 +1164,6 @@
             .catch(error => {
                 console.error('강의 삭제 요청 처리 실패:', error);
                 alert('처리 중 오류가 발생했습니다.');
-            });
-    }
-
-    // 시스템 설정 저장
-    function saveSystemSettings() {
-        const checkboxes = document.querySelectorAll('#settings input[type="checkbox"]');
-        const settings = {
-            deleteRequestNotification: checkboxes[0].checked,
-            settlementRequestNotification: checkboxes[1].checked,
-            memberJoinNotification: checkboxes[2].checked
-        };
-
-        fetch(`${path}/admin/settings`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(settings)
-        })
-            .then(r => {
-                if (!r.ok) throw new Error('Network response was not ok');
-                return r.json();
-            })
-            .then(result => {
-                alert('설정이 저장되었습니다.');
-            })
-            .catch(error => {
-                console.error('시스템 설정 저장 실패:', error);
-                alert('설정 저장 중 오류가 발생했습니다.');
             });
     }
 

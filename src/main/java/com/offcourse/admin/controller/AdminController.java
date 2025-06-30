@@ -4,12 +4,14 @@ import com.offcourse.admin.model.dto.*;
 import com.offcourse.admin.model.service.AdminService;
 import com.offcourse.common.pagefactory.AccountAjaxPageFactory;
 import com.offcourse.common.pagefactory.DeleteRequestAjaxPageFactory;
+import com.offcourse.common.pagefactory.MemberAjaxPageFactory;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
 import com.offcourse.deleterequest.model.dto.DeleteRequestAllResponse;
 import com.offcourse.deleterequest.model.dto.DeleteRequestStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +25,13 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/listpage")
-    public String adminPage() {
+    public String adminPage(Model model) {
+        //회원 수 가져와서 Model에 담기
+        long totalCount = adminService.countMemberAll();
+        long teacherCount = adminService.countTeacherAll();
+        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("teacherCount", teacherCount);
+        model.addAttribute("studentCount", totalCount - teacherCount);
         return "admin/adminPage";
     }
 
@@ -64,7 +72,7 @@ public class AdminController {
     public AccountRequestAllResponse getAccountRequestAll(
             String status,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "1") int numPerPage
+            @RequestParam(required = false, defaultValue = "5") int numPerPage
     ) {
         List<AccountRequestAll> accountRequestAllList = adminService.getAccountRequestAll(Map.of("status", status, "cPage", page, "numPerPage", numPerPage));
         String pageBar = AccountAjaxPageFactory.basicPageBar(page, numPerPage, adminService.countAccountRequestsAllByStatus(status), "loadSettlementRequests", status);
@@ -76,7 +84,25 @@ public class AdminController {
 
     @PostMapping("/account/handle")
     @ResponseBody
-    public boolean handleAccountRequest(@RequestBody HandleAccountRequest handleAccountRequest ){
+    public boolean handleAccountRequest(@RequestBody HandleAccountRequest handleAccountRequest) {
         return adminService.handleAccountRequest(handleAccountRequest);
+    }
+
+    @GetMapping("/member")
+    @ResponseBody
+    public MemberAllResponse getMemberAll(
+            @RequestParam String role,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "5") int numPerPage
+    ) {
+        int start = (page - 1) * numPerPage + 1;
+        int end = page * numPerPage;
+        List<MemberAll> memberAllList = adminService.getMemberAllByRole(Map.of("role", role, "start", start, "end", end));
+        String pageBar = MemberAjaxPageFactory.basicPageBar(page, numPerPage, adminService.countMemberAllByRole(Map.of("role", role)), "loadUserManagementData", role);
+
+        return MemberAllResponse.builder()
+                .memberAllList(memberAllList)
+                .pageBar(pageBar)
+                .build();
     }
 }

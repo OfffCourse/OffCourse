@@ -1,7 +1,9 @@
 package com.offcourse.member.model.dao;
 
+import com.offcourse.admin.model.dto.MemberAll;
 import com.offcourse.member.model.dto.Member;
 
+import java.util.List;
 import java.util.Map;
 
 public interface MemberDao {
@@ -24,4 +26,10 @@ public interface MemberDao {
     int updatePassword(Map<String, Object> paramMap);
 
     long countMemberAll();
+
+    long countTeacherAll();
+
+    List<MemberAll> getMemberAllByRole(Map param);
+
+    int countMemberAllByRole(Map param);
 }

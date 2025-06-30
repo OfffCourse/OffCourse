@@ -1,10 +1,13 @@
 package com.offcourse.member.model.dao;
 
+import com.offcourse.admin.model.dto.MemberAll;
 import com.offcourse.member.model.dto.Member;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -13,7 +16,7 @@ public class MemberDaoImpl implements MemberDao {
 
     private final SqlSession sqlSession;
 
-    private static final String NAMESPACE = "member.";
+    private static final String NAMESPACE = "memberDao.";
 
     @Override
     public int existsById(String memberId) {
@@ -69,4 +72,21 @@ public class MemberDaoImpl implements MemberDao {
         return sqlSession.selectOne(NAMESPACE + "countMemberAll");
     }
 
+    @Override
+    public long countTeacherAll() {
+        return sqlSession.selectOne(NAMESPACE + "countTeacherAll");
+    }
+
+    @Override
+    public List<MemberAll> getMemberAllByRole(Map param) {
+        int cPage = (int) param.get("cPage");
+        int numPerPage = (int) param.get("numPerPage");
+        RowBounds rb = new RowBounds((cPage - 1) * numPerPage, numPerPage);
+        return sqlSession.selectList(NAMESPACE + "getMemberAllByRole", param, rb);
+    }
+
+    @Override
+    public int countMemberAllByRole(Map param) {
+        return sqlSession.selectOne(NAMESPACE + "countMemberAllByRole", param);
+    }
 }

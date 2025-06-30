@@ -4,6 +4,7 @@ import com.offcourse.acccount.model.dao.AccountDao;
 import com.offcourse.admin.model.dto.AccountRequestAll;
 import com.offcourse.admin.model.dto.DashboardStat;
 import com.offcourse.admin.model.dto.HandleAccountRequest;
+import com.offcourse.admin.model.dto.MemberAll;
 import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.deleterequest.model.dao.DeleteRequestDao;
 import com.offcourse.deleterequest.model.dto.DeleteCourseRequestAll;
@@ -73,5 +74,21 @@ public class AdminService {
 
     public boolean handleAccountRequest(HandleAccountRequest handleAccountRequest) {
         return accountDao.updateAccountStatus(Map.of("accountSeq", handleAccountRequest.getAccountSeq(), "action", handleAccountRequest.getAction())) >0;
+    }
+
+    public long countMemberAll() {
+        return memberDao.countMemberAll();
+    }
+
+    public long countTeacherAll() {
+        return memberDao.countTeacherAll();
+    }
+
+    public List<MemberAll> getMemberAllByRole(Map param) {
+        return memberDao.getMemberAllByRole(param);
+    }
+
+    public int countMemberAllByRole(Map param) {
+        return memberDao.countMemberAllByRole(param);
     }
 }
