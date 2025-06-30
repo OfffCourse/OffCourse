@@ -641,6 +641,10 @@
           <span class="schedule-label">종료일</span>
           <span class="schedule-value">${course.courseEndDate}</span>
         </div>
+        <div class="schedule-row">
+          <span class="schedule-label">정원</span>
+          <span class="schedule-value">${course.courseCurrentSize}/${course.courseSize}</span>
+        </div>
       </div>
 
       <!-- 할인 계산: (coursePrice * (100 - courseDiscount) / 100)을 소수점 없이 반올림 -->
@@ -680,11 +684,20 @@
           <c:url var="paymentUrl" value="/payment/form">
             <c:param name="courseSeq" value="${course.courseSeq}"/>
             <c:param name="memberSeq" value="${loginMember.memberSeq}"/>
-            <c:param name="paymentPrice" value="${discounted}"/>
+            <c:param name="paymentPrice" value="${course.coursePrice * (100 - course.courseDiscount) / 100}"/>
           </c:url>
+          <c:choose>
+          <c:when test="${course.courseCurrentSize >= course.courseSize}">
+            <button class="enroll-btn full-capacity" disabled>
+              정원이 가득 찼습니다
+            </button>
+          </c:when>
+          <c:otherwise>
           <button class="enroll-btn" onclick="location.href='${paymentUrl}';">
             수강 신청
           </button>
+          </c:otherwise>
+          </c:choose>
         </sec:authorize>
       </div>
 
