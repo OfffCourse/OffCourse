@@ -30,9 +30,13 @@
         }
     }
 
-    // ✅ 그 다음 메인 함수 정의
     function loadAdminDeleteRequests(status = 'pending', cPage = 1) {
         const tabName = status.charAt(0).toUpperCase() + status.slice(1);
+
+        // ✅ 탭 콘텐츠 강제 show 처리
+        $('#deletePendingTab, #deleteApprovedTab, #deleteRejectedTab').hide();
+        $(`#delete\${tabName}Tab`).show();
+
         fetch(`${path}/admin/delete-requests?status=\${status}&page=\${cPage}`)
             .then(res => res.json())
             .then(data => {
@@ -44,6 +48,7 @@
                 } else {
                     $container = $("#deleteRejectedTab");
                 }
+
                 $container.empty();
 
                 if (!data.courseList || data.courseList.length === 0) {
@@ -56,30 +61,29 @@
                     const isPending = status === 'pending';
 
                     const buttonsHtml = isPending ? `
-                        <div class="request-actions">
-                            <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'approve','\${req.courseSeq}')">승인</button>
-                            <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'reject','\${req.courseSeq}')">거부</button>
-                        </div>
-                    ` : '';
+                    <div class="request-actions">
+                        <button class="btn btn-success" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'approve','\${req.courseSeq}')">승인</button>
+                        <button class="btn btn-danger" onclick="handleDeleteRequest('\${req.deleteRequestSeq}', 'reject','\${req.courseSeq}')">거부</button>
+                    </div>
+                ` : '';
 
                     $container.append(`
-                        <div class="request-item">
-                            <div class="request-header">
-                                <div class="request-info">
-                                    <h3>\${req.courseName}</h3>
-                                    <div class="request-meta">
-                                        <span>👤 요청자: \${req.teacherName}</span>
-                                        <span>👥 수강생: \${req.enrollStudentsCount}명</span>
-                                    </div>
+                    <div class="request-item">
+                        <div class="request-header">
+                            <div class="request-info">
+                                <h3>\${req.courseName}</h3>
+                                <div class="request-meta">
+                                    <span>👤 요청자: \${req.teacherName}</span>
+                                    <span>👥 수강생: \${req.enrollStudentsCount}명</span>
                                 </div>
-                                <div class="request-status \${getStatusClass(status)}">\${getStatusText(status)}</div>
                             </div>
-                            <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent}</div>
-                            \${buttonsHtml}
+                            <div class="request-status \${getStatusClass(status)}">\${getStatusText(status)}</div>
                         </div>
-                    `);
+                        <div class="request-details"><strong>삭제 사유:</strong><br>\${req.deleteRequestContent}</div>
+                        \${buttonsHtml}
+                    </div>
+                `);
                 });
-
 
                 $('#pageBarContainer').html(data.pageBar || '');
             })
@@ -187,6 +191,7 @@
     // ✅ 페이지 로드 시 실행
     $(document).ready(() => {
         loadAdminDeleteRequests('pending', 1);
+        loadSettlementRequests('pending', 1);
     });
 
     // ✅ 페이지바 클릭 이벤트
@@ -199,10 +204,8 @@
         }
     });
 
-    let currentUserTab = 'member-all';
-
     $(document).ready(function () {
-        // 초기 로딩
+        // 초기 로딩 - 기본은 member 탭으로 설정
         loadUserManagementData(currentUserTab, 1);
 
         // 탭 클릭 시 전환 처리
@@ -217,13 +220,25 @@
 
             // 현재 탭에 해당하는 컨테이너만 표시
             const activeTabId = getTabContentId(currentUserTab);
-            $(`#\${activeTabId}`).show();
+            if (activeTabId) {
+                $(`#\${activeTabId}`).show();
+            } else {
+                console.warn('잘못된 탭 ID:', currentUserTab);
+            }
 
-            // 데이터 로딩
-            loadUserManagementData(currentUserTab, 1);
+            // 탭 종류에 따라 알맞은 데이터 로딩
+            if (currentUserTab.startsWith('member-')) {
+                loadUserManagementData(currentUserTab, 1);
+            } else if (currentUserTab.startsWith('delete-')) {
+                const status = currentUserTab.replace('delete-', '');
+                loadAdminDeleteRequests(status, 1);
+            } else if (currentUserTab.startsWith('settlement-')) {
+                const status = currentUserTab.replace('settlement-', '');
+                loadSettlementRequests(status, 1);
+            }
         });
 
-        // 페이지 클릭 처리
+        // 회원 페이지바 클릭 처리
         $('#userPageBarContainer').on('click', 'a.page-link', function (e) {
             e.preventDefault();
             const role = $(this).data('role'); // teacher, student, all
@@ -232,18 +247,57 @@
                 loadUserManagementData(`member-\${role}`, page);
             }
         });
+
+        // 삭제 요청 페이지바
+        $('#pageBarContainer').on('click', 'a.page-link', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            const status = $('.tab-btn.active').data('tab').replace('delete-', '');
+            if (status && page) {
+                loadAdminDeleteRequests(status, page);
+            }
+        });
+
+        // 정산 요청 페이지바
+        $('#settlementPageBarContainer').on('click', 'a.page-link', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            const status = $('.tab-btn.active').data('tab').replace('settlement-', '');
+            if (status && page) {
+                loadSettlementRequests(status, page);
+            }
+        });
     });
+
 
     // 탭 ID → 컨테이너 ID 변환
     function getTabContentId(tabId) {
+        if (!tabId) return null;
+
         if (tabId.startsWith('member-')) {
             const type = tabId.replace('member-', '');
-            return type === 'all' ? 'memberAllTab'
-                : type === 'teacher' ? 'memberTeacherTab'
-                    : 'memberStudentTab';
+            if (type === 'all') return 'memberAllTab';
+            if (type === 'teacher') return 'memberTeacherTab';
+            if (type === 'student') return 'memberStudentTab';
         }
-        return '';
+
+        if (tabId.startsWith('delete-')) {
+            const type = tabId.replace('delete-', '');
+            if (type === 'pending') return 'deletePendingTab';
+            if (type === 'approved') return 'deleteApprovedTab';
+            if (type === 'rejected') return 'deleteRejectedTab';
+        }
+
+        if (tabId.startsWith('settlement-')) {
+            const type = tabId.replace('settlement-', '');
+            if (type === 'pending') return 'settlementPendingTab';
+            if (type === 'approved') return 'settlementApprovedTab';
+            if (type === 'rejected') return 'settlementRejectedTab';
+        }
+
+        return null; // 유효하지 않은 tabId는 null 반환
     }
+
 
     // AJAX로 회원 데이터 로드
     function loadUserManagementData(tabId, page) {
@@ -290,19 +344,12 @@
                 },
                 error: function () {
                     const containerId = getTabContentId(tabId);
-                    $(`#${containerId}`).html('<div class="text-danger">회원 정보를 불러오지 못했습니다.</div>');
+                    $(`#\${containerId}`).html('<div class="text-danger">회원 정보를 불러오지 못했습니다.</div>');
                 }
             }
         )
         ;
     }
-
-    $('#pageBarContainer').on('click', 'a.page-link', function (e) {
-        e.preventDefault();
-        const page = $(this).data('page');
-        const status = $(this).data('status'); // 예: pending
-        loadAdminDeleteRequests(status, page);
-    });
 </script>
 
 
@@ -1098,16 +1145,47 @@
                 loadDashboardData();
                 break;
             case 'course-delete':
-                loadDeleteRequests('pending'); // 기본으로 대기중 탭 로드
+                setActiveTab('delete-', 'pending');
+                loadDeleteRequests('pending');
                 break;
             case 'settlement':
-                loadSettlementRequests('pending'); // 기본으로 대기중 탭 로드
+                setActiveTab('settlement-', 'pending');
+                loadSettlementRequests('pending');
                 break;
             case 'user-management':
-                loadUserManagementData();
+                setActiveTab('member-', 'all');
+                loadUserManagementData('member-all', 1);
                 break;
         }
     }
+
+    function setActiveTab(prefix, status) {
+        const tabClass = `\${prefix}\${status}`;
+
+        // 탭 버튼 UI 갱신
+        document.querySelectorAll(`.tab-btn[data-tab^="\${prefix}"]`).forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tabClass) {
+                btn.classList.add('active');
+            }
+        });
+
+        // 탭 콘텐츠 영역 갱신
+        const sectionId = prefix === 'delete-' ? 'course-delete' :
+            prefix === 'settlement-' ? 'settlement' :
+                prefix === 'member-' ? 'user-management' : '';
+
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.querySelectorAll('.request-list').forEach(div => div.style.display = 'none');
+            const tabId = prefix === 'member-'
+                ? (status === 'all' ? 'memberAllTab' : status === 'teacher' ? 'memberTeacherTab' : 'memberStudentTab')
+                : `\${prefix.replace('-', '')}\${status.charAt(0).toUpperCase()}\${status.slice(1)}Tab`;
+            const targetDiv = document.getElementById(tabId);
+            if (targetDiv) targetDiv.style.display = 'block';
+        }
+    }
+
 
     // 탭별 데이터 로드 함수
     function loadTabData(tabId) {
