@@ -26,6 +26,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void processEnrollmentPayment(Long courseSeq, Long memberSeq, BigDecimal paymentPrice, String orderId, String impUid) {
+        // 결제 정보 검증
+        Map<String, Object> paymentInfo = portOneApiUtil.getPaymentInfo(impUid);
+        String status = (String) paymentInfo.get("status");
+        BigDecimal paidAmount = new BigDecimal(paymentInfo.get("amount").toString());
+
+        if (!"paid".equals(status) || paymentPrice.compareTo(paidAmount) != 0) {
+            throw new IllegalStateException("결제 검증 실패: 결제 금액 또는 상태 불일치");
+        }
+        // 수강신청 INSERT
         Enrollment enrollment = Enrollment.builder()
                 .enrStatus(EnrollmentStatus.ENROLL)
                 .courseSeq(courseSeq)
@@ -33,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         int eResult = enrollmentDao.insertEnrollment(enrollment);
         if (eResult < 1) throw new IllegalStateException("ENROLLMENT INSERT 실패");
-
+        // 결제내역 INSERT
         PaymentHistory ph = PaymentHistory.builder()
                 .paymentPrice(paymentPrice)
                 .paymentOrderId(orderId)
@@ -52,6 +61,11 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentHistory payment = paymentHistoryDao.selectBySeq(paymentSeq);
         if (payment == null) {
             throw new IllegalStateException("결제내역을 찾을 수 없습니다: paymentSeq=" + paymentSeq);
+        }
+        // 환불 요청자 소유권 검증
+        Enrollment enrollment = enrollmentDao.selectEnrollmentBySeq(enrSeq);
+        if (enrollment == null) {
+            throw new IllegalStateException("수강신청 내역을 찾을 수 없습니다: enrSeq=" + enrSeq);
         }
         // 2. 포트원 환불 API 호출
         portOneApiUtil.cancelPayment(

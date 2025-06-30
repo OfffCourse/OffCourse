@@ -5,7 +5,7 @@
 
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 
-<!-- 전체 화면 오버레이 스피너 -->
+<!-- 🔄 로딩 오버레이 -->
 <div id="loadingOverlay" style="
      display: none;
      position: fixed;
@@ -14,12 +14,22 @@
      background: rgba(255,255,255,0.7);
      z-index: 9999;
      justify-content: center;
-     align-items: center;
-">
-  <div class="spinner-border text-primary" role="status">
+     align-items: center;">
+  <div class="spinner-border text-danger" role="status">
     <span class="sr-only">Loading...</span>
   </div>
 </div>
+
+<style>
+  .refund-container {
+    max-width: 800px;
+    margin: 50px auto;
+    font-family: 'Cafe24Supermagic-Bold-v1.0', sans-serif;
+  }
+  .card-header i {
+    margin-right: 8px;
+  }
+</style>
 
 <script>
   function showLoading() {
@@ -37,45 +47,31 @@
   }
 </script>
 
-<div class="container mt-5">
-  <!-- 페이지 타이틀 -->
-  <h2 class="mb-4">환불 신청</h2>
-
-  <!-- flash message -->
-  <c:if test="${not empty msg}">
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-        ${msg}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-  </c:if>
+<div class="container refund-container">
+  <h2 class="mb-4">💸 환불 신청</h2>
 
   <div class="row">
-
-    <!-- 📝 강의 정보 -->
+    <!-- 📚 강의 정보 -->
     <div class="col-md-8">
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-          강의 정보
+          <i class="fas fa-book"></i> 강의 정보
         </div>
         <div class="card-body">
-          <h5 class="card-title">${course.courseName}</h5>
+          <h5 class="card-title">🎓 ${course.courseName}</h5>
           <p>
-            <strong>기간:</strong>
-            <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/>
-            ~
+            <strong>🗓 기간:</strong>
+            <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/> ~
             <fmt:formatDate value="${course.courseEndDate}" pattern="yyyy-MM-dd"/><br>
-            <strong>인원:</strong>
-            ${course.courseCurrentSize}/${course.courseSize}명
+            <strong>👥 인원:</strong> ${course.courseCurrentSize}/${course.courseSize}명
           </p>
         </div>
       </div>
 
-      <!-- 📝 회원 정보 -->
+      <!-- 🙋 회원 정보 -->
       <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
-          회원 정보
+          <i class="fas fa-user"></i> 회원 정보
         </div>
         <div class="card-body">
           <p><strong>이름:</strong> ${loginMember.memberName}</p>
@@ -89,54 +85,50 @@
     <div class="col-md-4">
       <div class="card mb-4">
         <div class="card-header bg-danger text-white">
-          환불 정보
+          <i class="fas fa-undo"></i> 환불 정보
         </div>
         <div class="card-body">
           <form id="refundForm" action="${path}/payment/refund" method="post">
             <input type="hidden" name="paymentSeq" value="${paymentSeq}" />
             <input type="hidden" name="enrSeq" value="${enrSeq}" />
+            <input type="hidden" name="memberSeq" value="${memberSeq}" />
             <input type="hidden" name="impUid" value="${impUid}" />
             <input type="hidden" name="amount" value="${amount}" />
 
             <ul class="list-group list-group-flush mb-3">
               <li class="list-group-item">
                 <strong>환불 금액:</strong>
-                <span style="font-size: 1.2em;">
+                <span style="font-size: 1.3em; color: #d9534f;">
                   <fmt:formatNumber value="${amount}" pattern="#,##0"/>원
                 </span>
               </li>
             </ul>
 
-            <!-- 환불 사유 입력 -->
             <div class="form-group">
-              <label for="reason"><strong>환불 사유</strong></label>
-              <textarea name="reason" id="reason" class="form-control" rows="3" placeholder="환불 사유를 입력해주세요." required></textarea>
+              <label for="reason">✏️ <strong>환불 사유</strong></label>
+              <textarea name="reason" id="reason" class="form-control" rows="3" placeholder="필수 입력 사항" required></textarea>
             </div>
 
-            <!-- 카카오페이 표시 -->
             <div class="text-center mb-3">
-              <img src="${path}/resources/images/kakaopay.png"
-                   alt="카카오페이"
-                   style="height:40px;">
-              <p class="text-muted" style="font-size:0.9em;">
-                카카오페이 연동 환불 처리
-              </p>
+              <button type="button"
+                      class="btn btn-warning btn-block mb-2"
+                      onclick="submitRefundForm()"
+                      style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold; padding: 14px 0;">
+                <img src="${path}/resources/images/kakaopay.png"
+                     alt="카카오페이"
+                     style="height:50px; vertical-align:middle; margin-right:12px;">
+                카카오로 환불
+              </button>
             </div>
 
-            <!-- 환불 버튼 -->
-            <button type="button" class="btn btn-danger btn-block mb-2" onclick="submitRefundForm()">
-              환불 신청
-            </button>
 
-            <!-- 취소 버튼 -->
             <a href="${path}/mypage/student" class="btn btn-outline-secondary btn-block">
-              취소
+              ❌ 환불취소
             </a>
           </form>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
