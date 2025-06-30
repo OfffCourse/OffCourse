@@ -88,15 +88,10 @@ public class PaymentController {
     @PostMapping("/refund")
     public String refundPayment(@RequestParam Long paymentSeq,
                                 @RequestParam Long enrSeq,
-                                @RequestParam String impUid,
-                                @RequestParam BigDecimal amount,
                                 @RequestParam String reason,
                                 RedirectAttributes ra) {
         try {
-            // 1. 포트원 환불 API 호출
-            portOneApiUtil.cancelPayment(impUid, amount, reason);
-            // 2. DB 상태 변경 (환불 완료 처리)
-            paymentService.refundPayment(paymentSeq, enrSeq);
+            paymentService.refundPayment(paymentSeq, enrSeq, reason);
             ra.addFlashAttribute("msg", "환불이 완료되었습니다.");
         } catch (Exception e) {
             ra.addFlashAttribute("msg", "환불 처리 중 오류: " + e.getMessage());

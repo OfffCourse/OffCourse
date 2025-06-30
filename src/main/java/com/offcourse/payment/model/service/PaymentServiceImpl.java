@@ -6,6 +6,7 @@ import com.offcourse.enrollment.model.dto.EnrollmentStatus;
 import com.offcourse.payment.model.dao.PaymentHistoryDao;
 import com.offcourse.payment.model.dto.PaymentHistory;
 import com.offcourse.payment.model.dto.PaymentStatus;
+import com.offcourse.payment.util.PortOneApiUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final EnrollmentDao enrollmentDao;
     private final PaymentHistoryDao paymentHistoryDao;
+    private final PortOneApiUtil portOneApiUtil;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -44,7 +47,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void refundPayment(Long paymentSeq, Long enrSeq) {
+    public void refundPayment(Long paymentSeq, Long enrSeq, String reason) {
+        // 1. 결제내역 조회
+        PaymentHistory payment = paymentHistoryDao.selectBySeq(paymentSeq);
+        if (payment == null) {
+            throw new IllegalStateException("결제내역을 찾을 수 없습니다: paymentSeq=" + paymentSeq);
+        }
+        // 2. 포트원 환불 API 호출
+        portOneApiUtil.cancelPayment(
+                payment.getPaymentImpUid(),
+                payment.getPaymentPrice(),
+                reason
+        );
+        // 3. DB 상태 변경
         int pResult = paymentHistoryDao.updatePaymentStatus(
                 Map.of("paymentSeq", paymentSeq, "status", PaymentStatus.REFUND.toString())
         );
