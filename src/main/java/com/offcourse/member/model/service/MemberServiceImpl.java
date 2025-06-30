@@ -140,7 +140,7 @@ public class MemberServiceImpl implements MemberService {
             try {
                 notificationProducer.send(event);
             } catch (Exception kafkaEx) {
-                log.warn("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
+                log.error("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
             }
 
             return result;

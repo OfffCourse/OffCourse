@@ -58,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
                             .redirectLocation(NotificationType.ENROLL_SUCCESS.getRedirectLocation())
                             .build());
         } catch (Exception kafkaEx) {
-            log.warn("⚠️ Kafka 알림 발송 실패 (결제): {}", kafkaEx.getMessage());
+            log.error("⚠️ Kafka 알림 발송 실패 (결제): {}", kafkaEx.getMessage());
         }
     }
 
@@ -74,6 +74,19 @@ public class PaymentServiceImpl implements PaymentService {
                 Map.of("enrSeq", enrSeq, "status", EnrollmentStatus.CANCEL.toString())
         );
         if (eResult < 1) throw new IllegalStateException("ENROLLMENT STATUS UPDATE 실패");
+
+        Enrollment enrollment = enrollmentDao.selectEnrollmentBySeq(enrSeq);
+        try {
+            notificationProducer.send(
+                    NotificationEvent.builder()
+                            .msgDate(new Timestamp(System.currentTimeMillis()))
+                            .memberSeq(enrollment.getMemberSeq())
+                            .msgType(NotificationType.REFUND_SUCCESS)
+                            .redirectLocation(NotificationType.REFUND_SUCCESS.getRedirectLocation())
+                            .build());
+        } catch (Exception kafkaEx) {
+            log.error("⚠️ Kafka 알림 발송 실패 (환불): {}", kafkaEx.getMessage());
+        }
     }
 
     @Override
