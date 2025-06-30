@@ -132,8 +132,8 @@ public class MemberServiceImpl implements MemberService {
                 event = NotificationEvent.builder()
                         .memberSeq(member.getMemberSeq())
                         .msgDate(new Timestamp(System.currentTimeMillis()))
-                        .msgType(NotificationType.STUDENT_JOIN_SUCCESS)
-                        .redirectLocation(NotificationType.STUDENT_JOIN_SUCCESS.getRedirectLocation())
+                        .msgType(NotificationType.TEACHER_JOIN_SUCCESS)
+                        .redirectLocation(NotificationType.TEACHER_JOIN_SUCCESS.getRedirectLocation())
                         .build();
             }
 
