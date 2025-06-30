@@ -6,7 +6,7 @@
 
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 
-<!-- 전체 화면 오버레이 스피너 -->
+<!-- 🔄 로딩 오버레이 -->
 <div id="loadingOverlay" style="
      display: none;
      position: fixed;
@@ -15,12 +15,22 @@
      background: rgba(255,255,255,0.7);
      z-index: 9999;
      justify-content: center;
-     align-items: center;
-">
+     align-items: center;">
   <div class="spinner-border text-primary" role="status">
     <span class="sr-only">Loading...</span>
   </div>
 </div>
+
+<style>
+  .payment-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    font-family: 'Cafe24Supermagic-Bold-v1.0', sans-serif;
+  }
+  .card-header i {
+    margin-right: 8px;
+  }
+</style>
 
 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 <script>
@@ -49,7 +59,6 @@
         const form = document.createElement("form");
         form.method = "post";
         form.action = "${path}/payment/process";
-
         const fields = {
           impUid: rsp.imp_uid,
           orderId: rsp.merchant_uid,
@@ -57,7 +66,6 @@
           memberSeq: "${memberSeq}",
           paymentPrice: "${paymentPrice}"
         };
-
         for (const key in fields) {
           const input = document.createElement("input");
           input.type = "hidden";
@@ -65,42 +73,38 @@
           input.value = fields[key];
           form.appendChild(input);
         }
-
         document.body.appendChild(form);
         form.submit();
       } else {
-        alert("결제에 실패했습니다: " + rsp.error_msg);
+        alert("결제 실패: " + rsp.error_msg);
       }
     });
   }
 </script>
 
-<div class="container mt-5">
+<div class="container payment-container">
   <div class="row">
-
-    <!-- 📝 강의 정보 -->
+    <!-- 📚 강의 정보 -->
     <div class="col-md-8">
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-          강의 정보
+          <i class="fas fa-book"></i> 강의 정보
         </div>
         <div class="card-body">
-          <h5 class="card-title">${course.courseName}</h5>
+          <h5 class="card-title">🎓 ${course.courseName}</h5>
           <p>
-            <strong>기간:</strong>
-            <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/>
-            ~
+            <strong>🗓 기간:</strong>
+            <fmt:formatDate value="${course.courseStartDate}" pattern="yyyy-MM-dd"/> ~
             <fmt:formatDate value="${course.courseEndDate}" pattern="yyyy-MM-dd"/><br>
-            <strong>인원:</strong>
-            ${course.courseCurrentSize}/${course.courseSize}명
+            <strong>👥 인원:</strong> ${course.courseCurrentSize}/${course.courseSize}명
           </p>
         </div>
       </div>
 
-      <!-- 📝 회원 정보 -->
+      <!-- 🙋 회원 정보 -->
       <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
-          회원 정보
+          <i class="fas fa-user"></i> 회원 정보
         </div>
         <div class="card-body">
           <p><strong>이름:</strong> ${loginMember.memberName}</p>
@@ -114,9 +118,9 @@
     <div class="col-md-4">
       <div class="card mb-4">
         <div class="card-header bg-success text-white">
-          결제 정보
+          <i class="fas fa-credit-card"></i> 결제 정보
         </div>
-        <div class="card-body">
+        <div class="card-body text-center">
           <ul class="list-group list-group-flush mb-3">
             <li class="list-group-item">
               <strong>원래 가격:</strong>
@@ -126,31 +130,25 @@
             </li>
             <li class="list-group-item">
               <strong>결제 금액:</strong>
-              <span style="font-size: 1.2em;">
+              <span style="font-size: 1.3em; color: #d9534f;">
                 <fmt:formatNumber value="${paymentPrice}" pattern="#,##0"/>원
               </span>
             </li>
           </ul>
 
-          <!-- 카카오페이 결제 버튼 -->
-          <button type="button" class="btn btn-warning btn-block mb-2"
-                  onclick="requestPay()"
-                  style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold;">
-            <img src="${path}/resources/images/kakaopay.png"
-                 alt="카카오페이"
-                 style="height:24px; vertical-align:middle; margin-right:8px;">
-            카카오페이로 결제하기
+          <button type="button" class="btn btn-warning btn-block mb-2" onclick="requestPay()"
+                  style="background-color:#FEE500; border:none; color:#3C1E1E; font-weight:bold; padding: 14px 0;">
+            <img src="${path}/resources/images/kakaopay.png" alt="카카오페이"
+                 style="height:50px; vertical-align:middle; margin-right:12px;">
+            카카오로 결제
           </button>
 
-          <!-- 취소 버튼 -->
-          <a href="${path}/course/view?courseSeq=${courseSeq}"
-             class="btn btn-outline-secondary btn-block">
-            취소
+          <a href="${path}/course/view?courseSeq=${courseSeq}" class="btn btn-outline-secondary btn-block">
+            ❌ 결제취소
           </a>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
