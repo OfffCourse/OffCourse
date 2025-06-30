@@ -59,7 +59,7 @@ public class PaymentController {
             paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId, impUid);
             ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
         } catch (Exception e) {
-            ra.addFlashAttribute("msg", "결제 실패: " + e.getMessage());
+            ra.addFlashAttribute("msg", "결제 실패하였습니다 :(");
         }
         return "redirect:/mypage/student";
     }
@@ -87,7 +87,7 @@ public class PaymentController {
             paymentService.refundPayment(paymentSeq, enrSeq, reason);
             ra.addFlashAttribute("msg", "환불이 완료되었습니다.");
         } catch (Exception e) {
-            ra.addFlashAttribute("msg", "환불 처리 중 오류: " + e.getMessage());
+            ra.addFlashAttribute("msg", "환불 실패하였습니다 :(");
         }
         return "redirect:/mypage/student";
     }
