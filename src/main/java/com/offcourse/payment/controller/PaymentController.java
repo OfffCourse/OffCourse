@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -56,18 +55,12 @@ public class PaymentController {
                                  @RequestParam Long memberSeq,
                                  @RequestParam BigDecimal paymentPrice,
                                  RedirectAttributes ra) {
-        // 1. 결제 정보 검증
-        Map<String, Object> paymentInfo = portOneApiUtil.getPaymentInfo(impUid);
-        String status = (String) paymentInfo.get("status");
-        BigDecimal paidAmount = new BigDecimal(paymentInfo.get("amount").toString());
-        // 2. 금액 및 상태 확인
-        if (!"paid".equals(status) || paymentPrice.compareTo(paidAmount) != 0) {
-            ra.addFlashAttribute("msg", "결제 검증 실패: 결제 금액 또는 상태 불일치");
-            return "redirect:/payment/fail";
+        try {
+            paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId, impUid);
+            ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("msg", "결제 실패: " + e.getMessage());
         }
-        // 3. DB 저장
-        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId, impUid);
-        ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
         return "redirect:/mypage/student";
     }
     // [환불 폼 화면]
