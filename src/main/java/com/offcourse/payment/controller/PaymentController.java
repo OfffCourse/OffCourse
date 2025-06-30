@@ -58,19 +58,18 @@ public class PaymentController {
             return "redirect:/payment/fail";
         }
         // 3. DB 저장
-        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId);
+        paymentService.processEnrollmentPayment(courseSeq, memberSeq, paymentPrice, orderId, impUid);
         ra.addFlashAttribute("msg", "결제가 완료되었습니다.");
         return "redirect:/mypage/student";
     }
     // [환불 폼 화면]
     @GetMapping("/refund-form")
-    public String showRefundForm(@RequestParam Long paymentSeq,
-                                 @RequestParam Long enrSeq,
+    public String showRefundForm(@RequestParam Long enrSeq,
                                  Model model) {
-        PaymentHistory ph = paymentService.findPaymentHistoryBySeq(paymentSeq);
-        model.addAttribute("paymentSeq", paymentSeq);
+        PaymentHistory ph = paymentService.findPaymentHistoryByEnrSeq(enrSeq);
+        model.addAttribute("paymentSeq", ph.getPaymentSeq());
         model.addAttribute("enrSeq", enrSeq);
-        model.addAttribute("impUid", ph.getPaymentOrderId()); // imp_uid로 사용됨
+        model.addAttribute("impUid", ph.getPaymentImpUid()); // 수정: paymentImpUid 사용
         model.addAttribute("amount", ph.getPaymentPrice());
         return "payment/refundForm";
     }

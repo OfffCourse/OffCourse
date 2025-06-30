@@ -20,6 +20,7 @@ public class PaymentHistory {
     // 그런 확장성을 생각해서 BigDecimal 로 type 잡음.
     private Timestamp paymentTime;
     private String paymentOrderId;
+    private String paymentImpUid;  // 이거는 결제 회사에서 제공해주는 값으로 환불할 때 필요한 값!
     private PaymentStatus paymentStatus;
     private Long enrSeq;
 }
