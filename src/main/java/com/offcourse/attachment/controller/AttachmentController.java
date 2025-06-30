@@ -3,6 +3,7 @@ package com.offcourse.attachment.controller;
 import com.offcourse.attachment.model.dto.Attachment;
 import com.offcourse.attachment.model.service.AttachmentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,8 +23,8 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class AttachmentController {
-
     private final AttachmentService service;
 
     @PostMapping("/uploadChunk")
@@ -32,6 +33,7 @@ public class AttachmentController {
             @RequestParam("index") int index,
             @RequestParam("total") int total,
             @RequestParam("episodeSeq") Long episodeSeq,
+            @RequestParam("courseSeq") Long courseSeq,
             @RequestParam(value = "videoTitle", required = false) String videoTitle,
             HttpSession session) {
 
@@ -106,6 +108,7 @@ public class AttachmentController {
                 service.insertAttachment(attachment);
             }
 
+            service.sendVideoNotifications(courseSeq, episodeSeq);
             return ResponseEntity.ok("청크 업로드 성공");
 
         } catch (IOException e) {
@@ -156,6 +159,7 @@ public class AttachmentController {
         if (result > 0) {
             model.addAttribute("msg", "첨부파일 저장성공");
             model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
+            service.sendAttachNotifications(courseSeq, episodeSeq);
         } else {
             model.addAttribute("msg", "첨부파일 저장실패");
             model.addAttribute("loc", "/course/view?courseSeq=" + courseSeq);
