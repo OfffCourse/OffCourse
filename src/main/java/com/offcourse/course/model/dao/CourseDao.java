@@ -39,4 +39,8 @@ public interface CourseDao {
     int countEpisodeByCourseSeq(Long courseSeq);
 
     List<Episode> getEpisodeByCourseSeq(Long courseSeq);
+
+    long countInProgressCourseAll();
+
+    int deleteCourse(Long courseSeq);
 }
