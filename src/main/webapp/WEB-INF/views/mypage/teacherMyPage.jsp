@@ -303,9 +303,9 @@
                                     <c:when test="${m.accountStatus == 2}">
                                         <div class="course-status status-rejected">정산 거절</div>
                                     </c:when>
-                                    <c:otherwise>
+                                    <%--<c:otherwise>
                                         <div class="course-status status-completed">신청</div>
-                                    </c:otherwise>
+                                    </c:otherwise>--%>
                                 </c:choose>
                             </div>
                             <div class="course-actions">
