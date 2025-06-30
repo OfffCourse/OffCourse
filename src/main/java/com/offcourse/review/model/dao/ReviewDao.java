@@ -1,5 +1,6 @@
 package com.offcourse.review.model.dao;
 
+import com.offcourse.review.model.dto.Review;
 import com.offcourse.review.model.dto.ReviewViewResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.RowBounds;
@@ -21,5 +22,18 @@ public class ReviewDao {
 
     public int getReviewCount(Long courseSeq) {
         return session.selectOne("review.selectReviewCount", courseSeq);
+    }
+
+    public void insertReview(Review review) {
+        session.insert("review.insertReview", review);
+    }
+
+    public void updateReview(Review review) {
+        session.update("review.updateReview", review);
+    }
+
+    //enrSeq 중복현상때문에 delete로 수정
+    public void softDeleteReview(Long enrSeq) {
+        session.delete("review.softDeleteReview", enrSeq);
     }
 }
