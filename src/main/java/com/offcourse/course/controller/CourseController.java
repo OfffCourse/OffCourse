@@ -104,6 +104,10 @@ public class CourseController {
         model.addAttribute("course", course);
         int countEpisode = service.countEpisodeByCourseSeq(courseSeq);
         model.addAttribute("countEpisode", countEpisode);
+        LocalDate today = LocalDate.now();
+        LocalDate courseStart = course.getCourseStartDate().toLocalDate();
+        boolean isBeforeStart = today.isBefore(courseStart);
+        model.addAttribute("isBeforeStart", isBeforeStart);
         if (member != null) {
             // 강사
             if (course.getMemberSeq().equals(member.getMemberSeq())) {
