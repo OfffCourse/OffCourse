@@ -590,7 +590,7 @@
         </p>
 
         <div class="cta-buttons">
-            <a href="#register" class="btn btn-primary">강의 둘러보기</a>
+            <a href="${pageContext.request.contextPath}/course/listpage" class="btn btn-primary">강의 둘러보기</a>
             <a href="https://open.kakao.com/o/scWgCCzh" class="btn btn-secondary">무료 상담 신청</a>
         </div>
     </div>
@@ -605,25 +605,25 @@
             <p class="section-subtitle">다양한 분야의 전문 강의를 통해 실무 능력을 향상시켜보세요</p>
         </div>
         <div class="category-grid">
-            <div class="category-card" onclick="filterCourses('programming')">
+            <div class="category-card" onclick="filterCourses(['5', '6'])">
                 <div class="category-icon programming">💻</div>
-                <h3 class="category-title">프로그래밍</h3>
-                <p class="category-desc">웹개발, 앱개발, 데이터사이언스 등 최신 개발 기술을 배워보세요</p>
+                <h3 class="category-title">백엔드</h3>
+                <p class="category-desc">서버 개발과 데이터베이스 설계, API 구축을 배워보세요</p>
             </div>
-            <div class="category-card" onclick="filterCourses('design')">
+            <div class="category-card" onclick="filterCourses(['7', '8'])">
+                <div class="category-icon programming">💻</div>
+                <h3 class="category-title">프론트엔드</h3>
+                <p class="category-desc">사용자 인터페이스 개발에 필요한 기술을 익혀보세요</p>
+            </div>
+            <div class="category-card" onclick="filterCourses(['9', '10'])">
                 <div class="category-icon design">🎨</div>
                 <h3 class="category-title">디자인</h3>
                 <p class="category-desc">UI/UX, 그래픽 디자인, 브랜딩까지 창의적 역량을 키워보세요</p>
             </div>
-            <div class="category-card" onclick="filterCourses('business')">
+            <div class="category-card" onclick="filterCourses(['11', '12'])">
                 <div class="category-icon business">📊</div>
                 <h3 class="category-title">비즈니스</h3>
                 <p class="category-desc">마케팅, 기획, 경영 전략으로 비즈니스 역량을 강화하세요</p>
-            </div>
-            <div class="category-card" onclick="filterCourses('data')">
-                <div class="category-icon data">📈</div>
-                <h3 class="category-title">데이터 분석</h3>
-                <p class="category-desc">빅데이터, AI, 머신러닝으로 데이터 전문가가 되어보세요</p>
             </div>
         </div>
     </div>
@@ -633,21 +633,21 @@
 <section class="courses" id="courses">
     <div class="container">
         <div class="section-header">
-            <h2 class="section-title">🔥인기 강의</h2>
+            <h2 class="section-title">🔥추천 강의</h2>
             <p class="section-subtitle">검증된 커리큘럼과 전문 강사진이 함께하는 프리미엄 교육</p>
         </div>
 
         <div class="course-filters">
-            <button class="filter-btn active" onclick="filterCourses('all')">전체</button>
-            <button class="filter-btn" onclick="filterCourses('programming')">프로그래밍</button>
-            <button class="filter-btn" onclick="filterCourses('design')">디자인</button>
-            <button class="filter-btn" onclick="filterCourses('business')">비즈니스</button>
-            <button class="filter-btn" onclick="filterCourses('data')">데이터분석</button>
+            <button class="filter-btn active" onclick="loadRecommendedCourses(null, this)">전체</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([5,6], this)">백엔드</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([7,8], this)">프론트엔드</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([9,10], this)">디자인</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([11,12], this)">비즈니스</button>
         </div>
 
         <div class="course-grid">
             <!-- Course 1 -->
-            <div class="course-card" data-category="programming">
+            <%--<div class="course-card" data-category="programming">
                 <div class="course-image">
                     <span class="course-badge">HOT</span>
                     React & Node.js
@@ -687,135 +687,8 @@
                         <button class="btn-enroll">수강 신청</button>
                     </div>
                 </div>
-            </div>
+            </div>--%>
 
-            <!-- Course 2 -->
-            <div class="course-card" data-category="design">
-                <div class="course-image">
-                    <span class="course-badge">NEW</span>
-                    UI/UX Design
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>🎨 디자인</span>
-                        <span>⭐ 4.8 (189)</span>
-                    </div>
-                    <h3 class="course-title">실무 UI/UX 디자인 완성 과정</h3>
-                    <p class="course-instructor">박디자인 강사 · 카카오 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">8주 (64시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">주말반 10:00-18:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">홍대 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.05</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩980,000</span>
-                            <span class="price-current">₩720,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course 3 -->
-            <div class="course-card" data-category="business">
-                <div class="course-image">
-                    Digital Marketing
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>📊 비즈니스</span>
-                        <span>⭐ 4.7 (156)</span>
-                    </div>
-                    <h3 class="course-title">디지털 마케팅 전략 및 실무</h3>
-                    <p class="course-instructor">최마케팅 강사 · 구글 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">6주 (48시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">화목 19:30-22:30</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">판교 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.08</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩750,000</span>
-                            <span class="price-current">₩590,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course 4 -->
-            <div class="course-card" data-category="data">
-                <div class="course-image">
-                    <span class="course-badge">BEST</span>
-                    Data Science
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>📈 데이터분석</span>
-                        <span>⭐ 4.9 (298)</span>
-                    </div>
-                    <h3 class="course-title">Python 데이터 사이언스 부트캠프</h3>
-                    <p class="course-instructor">이데이터 강사 · 삼성 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">10주 (100시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">주말집중반 09:00-18:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">강남 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.12</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩1,500,000</span>
-                            <span class="price-current">₩1,190,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>
@@ -839,197 +712,6 @@
             <div class="stat-item">
                 <div class="stat-number">80%</div>
                 <div class="stat-label">취업률</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Courses -->
-<section class="courses" id="courses">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">마감임박 강의</h2>
-            <p class="section-subtitle">검증된 커리큘럼과 전문 강사진이 함께하는 프리미엄 교육</p>
-        </div>
-
-        <div class="course-filters">
-            <button class="filter-btn active" onclick="filterCourses('all')">전체</button>
-            <button class="filter-btn" onclick="filterCourses('programming')">프로그래밍</button>
-            <button class="filter-btn" onclick="filterCourses('design')">디자인</button>
-            <button class="filter-btn" onclick="filterCourses('business')">비즈니스</button>
-            <button class="filter-btn" onclick="filterCourses('data')">데이터분석</button>
-        </div>
-
-        <div class="course-grid">
-            <!-- Course 1 -->
-            <div class="course-card" data-category="programming">
-                <div class="course-image">
-                    <span class="course-badge">HOT</span>
-                    React & Node.js
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>👨‍💻 프로그래밍</span>
-                        <span>⭐ 4.9 (234)</span>
-                    </div>
-                    <h3 class="course-title">풀스택 웹개발 마스터 부트캠프</h3>
-                    <p class="course-instructor">김개발 강사 · 네이버 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">12주 (120시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">평일반 19:00-22:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">강남 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.01</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩1,200,000</span>
-                            <span class="price-current">₩890,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course 2 -->
-            <div class="course-card" data-category="design">
-                <div class="course-image">
-                    <span class="course-badge">NEW</span>
-                    UI/UX Design
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>🎨 디자인</span>
-                        <span>⭐ 4.8 (189)</span>
-                    </div>
-                    <h3 class="course-title">실무 UI/UX 디자인 완성 과정</h3>
-                    <p class="course-instructor">박디자인 강사 · 카카오 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">8주 (64시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">주말반 10:00-18:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">홍대 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.05</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩980,000</span>
-                            <span class="price-current">₩720,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course 3 -->
-            <div class="course-card" data-category="business">
-                <div class="course-image">
-                    Digital Marketing
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>📊 비즈니스</span>
-                        <span>⭐ 4.7 (156)</span>
-                    </div>
-                    <h3 class="course-title">디지털 마케팅 전략 및 실무</h3>
-                    <p class="course-instructor">최마케팅 강사 · 구글 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">6주 (48시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">화목 19:30-22:30</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">판교 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.08</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩750,000</span>
-                            <span class="price-current">₩590,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course 4 -->
-            <div class="course-card" data-category="data">
-                <div class="course-image">
-                    <span class="course-badge">BEST</span>
-                    Data Science
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>📈 데이터분석</span>
-                        <span>⭐ 4.9 (298)</span>
-                    </div>
-                    <h3 class="course-title">Python 데이터 사이언스 부트캠프</h3>
-                    <p class="course-instructor">이데이터 강사 · 삼성 출신</p>
-
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">10주 (100시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">주말집중반 09:00-18:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">강남 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.12</span>
-                        </div>
-                    </div>
-
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩1,500,000</span>
-                            <span class="price-current">₩1,190,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1177,24 +859,111 @@
     });
 
     // 강의 필터링 함수
-    function filterCourses(category) {
-        const cards = document.querySelectorAll('.course-card');
-        const buttons = document.querySelectorAll('.filter-btn');
+    function filterCourses(categoryList) {
+        const params = new URLSearchParams();
+        params.set("categoryList", categoryList.join(","));
+        location.href = `${path}/course/listpage?` + params.toString();
+    }
 
-        // 모든 버튼에서 active 클래스 제거
-        buttons.forEach(btn => btn.classList.remove('active'));
 
-        // 클릭된 버튼에 active 클래스 추가
-        event.target.classList.add('active');
+</script>
+<script>
+    function loadRecommendedCourses(categoryList, button) {
+        // 버튼 active 스타일 처리
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
 
-        // 카드 필터링
-        cards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
+        const params = new URLSearchParams();
+        if (categoryList && categoryList.length > 0) {
+            params.set("categoryList", categoryList.join(","));
+        }
+
+        fetch(`${path}/main/recommend` + (params.toString() ? "?" + params.toString() : ""))
+            .then(res => res.json())
+            .then(data => {
+                const container = document.querySelector('.course-grid');
+                container.innerHTML = ''; // 기존 강의 제거
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align: center;">추천 강의가 없습니다.</p>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    const discounted = Math.round(c.coursePrice * (1 - c.courseDiscount / 100));
+                    const date = new Date(c.courseStartDate);
+                    const date2 = new Date(c.courseEndDate);
+                    const formatted = `\${date.getFullYear()}/\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
+                    const formatted2 = `\${(date2.getMonth()+1).toString().padStart(2, '0')}-\${date2.getDate().toString().padStart(2, '0')}`;
+                    const rating = c.averageRating;
+                    const ratingText = rating ? `⭐${rating}` : '';
+                    let priceHtml = '';
+
+                    if (c.courseDiscount == null || c.courseDiscount === 0) {
+                        // 할인 없음
+                        priceHtml = `
+                        <div class="price-info">
+                          <div class="price-current">\${c.coursePrice.toLocaleString()}원</div>
+                        </div>
+                      `;
+                    } else {
+                        // 할인 있음
+                        const discounted = Math.round(c.coursePrice * (100 - c.courseDiscount) / 100);
+                        priceHtml = `
+                        <div class="price-info">
+                          <div class="price-original">
+                            <del>\${c.coursePrice.toLocaleString()}원</del>
+                          </div>
+                          <div class="price-current">\${discounted.toLocaleString()}원</div>
+                        </div>
+                      `;
+                    }
+
+                    const courseCard = `
+                      <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
+                        <div class="course-image">
+                            \${c.courseName}
+                        </div>
+                        <div class="course-content">
+                            <div class="course-meta">
+                                <span>👨‍💻 \${c.courseCategory.fullCategoryName}</span>
+                                <span>\${ratingText}</span>
+                                <span>\${c.courseCurrentSize}/\${c.courseSize}명 수강</span>
+                            </div>
+                            <h3 class="course-title">\${c.courseName}</h3>
+                            <p class="course-instructor">\${c.memberName} 강사</p>
+                            <div class="course-schedule">
+                                <div class="schedule-row">
+                                    <span class="schedule-label">기간</span>
+                                    <span class="schedule-value">\${formatted}~\${formatted2}</span>
+                                </div>
+                                <div class="schedule-row">
+                                    <span class="schedule-label">일시</span>
+                                    <span class="schedule-value">\${c.courseDays.map(d => d.dayName).join(", ")}</span>
+                                </div>
+                                <div class="schedule-row">
+                                    <span class="schedule-label">장소</span>
+                                    <span class="schedule-value">\${c.courseAddress}</span>
+                                </div>
+                            </div>
+                            <div class="course-footer">
+                                \${priceHtml}
+                                <button class="btn-enroll">수강 신청</button>
+                            </div>
+                        </div>
+                      </div>`;
+
+                    container.insertAdjacentHTML("beforeend", courseCard);
+                });
+            })
+            .catch(() => alert("추천 강의 로딩 실패"));
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadRecommendedCourses(null, document.querySelector(".filter-btn.active"));
+    });
+</script>
+
+
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

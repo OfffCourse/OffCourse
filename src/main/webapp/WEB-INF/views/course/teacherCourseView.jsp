@@ -1039,26 +1039,47 @@
     let mediaRecorder;
     let chunks = [];
     let videoBlob;
-
-    function startRecording(epSeq) {
-        navigator.mediaDevices.getDisplayMedia({video: true, audio: true})
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
-
-                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-
-                mediaRecorder.onstop = async () => {
-                    confirm("업로드 완료 알림창이 뜰 때까지 기다려주세요.");
-                    videoBlob = new Blob(chunks, {type: 'video/webm'});
-                    await uploadInChunks(videoBlob, epSeq);
-                    alert("업로드 완료");
-                    loadVideoList(epSeq);
-                };
-
-                mediaRecorder.start();
+    async function startRecording(epSeq) {
+        try {
+            // 화면 + 시스템 오디오
+            const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: true
             });
+
+            // 마이크 오디오
+            const micStream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+            // ✅ 오디오 트랙 병합
+            const combinedStream = new MediaStream([
+                ...displayStream.getVideoTracks(),
+                ...displayStream.getAudioTracks(),
+                ...micStream.getAudioTracks()
+            ]);
+
+            mediaRecorder = new MediaRecorder(combinedStream);
+            chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+            mediaRecorder.onstop = async () => {
+                confirm("업로드 완료 알림창이 뜰 때까지 기다려주세요.");
+                videoBlob = new Blob(chunks, {type: 'video/webm'});
+                await uploadInChunks(videoBlob, epSeq);
+                alert("업로드 완료");
+                loadVideoList(epSeq);
+            };
+
+            mediaRecorder.start();
+
+        } catch (err) {
+            alert("녹화 시작 실패: " + err.message);
+            console.error(err);
+        }
     }
+
 
     function stopRecording() {
         if (mediaRecorder) {
@@ -1101,9 +1122,12 @@
                     const li = document.createElement('li');
                     li.className = 'list-group-item d-flex justify-content-between align-items-center';
                     li.innerHTML = `
-                    <a href="${path}/resources/upload/lecture/video/\${video.attRenamedName}" target="_blank">\${video.attOriName}</a>
-                    <button class="btn btn-sm btn-danger" onclick="deleteVideo(\${video.attSeq}, \${episodeSeq})">삭제</button>
-                `;
+                        <span class="video-title mb-0" style="font-weight: 500;">\${video.attOriName}</span>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-primary open-video-popup" data-filename="\${video.attRenamedName}">재생</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteVideo(\${video.attSeq}, \${episodeSeq})">삭제</button>
+                        </div>
+                    `;
                     list.appendChild(li);
                 });
             });
@@ -1122,6 +1146,17 @@
             });
     }
 
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('open-video-popup')) {
+            const filename = e.target.dataset.filename;
+
+            window.open(
+                `${path}/popup/videoPlayer.jsp?filename=\${filename}`,
+                'lectureVideoPopup',
+                'width=900,height=600,scrollbars=no'
+            );
+        }
+    });
 
 </script>
 <%--자료 업로드 스크립트--%>

@@ -36,11 +36,11 @@
                 </div>
                 <div class="sub-category" id="backend-sub" style="display: none; padding-left: 1em;">
                     <div class="filter-option">
-                        <input type="checkbox" id="java" value="Java">
+                        <input type="checkbox" id="java" value="Java" data-category-seq="5">
                         <label for="java">Java</label>
                     </div>
                     <div class="filter-option">
-                        <input type="checkbox" id="python" value="Python">
+                        <input type="checkbox" id="python" value="Python" data-category-seq="6">
                         <label for="python">Python</label>
                     </div>
                 </div>
@@ -51,11 +51,11 @@
                 </div>
                 <div class="sub-category" id="frontend-sub" style="display: none; padding-left: 1em;">
                     <div class="filter-option">
-                        <input type="checkbox" id="react" value="React">
+                        <input type="checkbox" id="react" value="React" data-category-seq="7">
                         <label for="react">React</label>
                     </div>
                     <div class="filter-option">
-                        <input type="checkbox" id="vue" value="Vue.js">
+                        <input type="checkbox" id="vue" value="Vue.js" data-category-seq="8">
                         <label for="vue">Vue.js</label>
                     </div>
                 </div>
@@ -66,11 +66,11 @@
                 </div>
                 <div class="sub-category" id="business-sub" style="display: none; padding-left: 1em;">
                     <div class="filter-option">
-                        <input type="checkbox" id="marketing" value="Marketing">
+                        <input type="checkbox" id="marketing" value="Marketing" data-category-seq="9">
                         <label for="marketing">마케팅</label>
                     </div>
                     <div class="filter-option">
-                        <input type="checkbox" id="startup" value="Startup">
+                        <input type="checkbox" id="startup" value="Startup" data-category-seq="10">
                         <label for="startup">스타트업</label>
                     </div>
                 </div>
@@ -81,11 +81,11 @@
                 </div>
                 <div class="sub-category" id="design-sub" style="display: none; padding-left: 1em;">
                     <div class="filter-option">
-                        <input type="checkbox" id="ux" value="UX/UI">
+                        <input type="checkbox" id="ux" value="UX/UI" data-category-seq="11">
                         <label for="ux">UX/UI</label>
                     </div>
                     <div class="filter-option">
-                        <input type="checkbox" id="photoshop" value="Photoshop">
+                        <input type="checkbox" id="photoshop" value="Photoshop" data-category-seq="12">
                         <label for="photoshop">Photoshop</label>
                     </div>
                 </div>
@@ -157,29 +157,40 @@
     });
 </script>
 <script>
-    // URL 파라미터에서 검색 조건 불러오기 (courseTitle 등)
     function getQueryParams() {
         const urlParams = new URLSearchParams(window.location.search);
         return {
             courseTitle: urlParams.get("courseTitle") || "",
             cPage: parseInt(urlParams.get("cPage")) || 1,
-            numPerPage: 4
+            numPerPage: 4,
+            categoryList: urlParams.get("categoryList")?.split(",") || []
         };
     }
 
-    // 검색어 input에 자동으로 반영
     window.addEventListener("DOMContentLoaded", () => {
         const q = getQueryParams();
-        if (q.courseTitle) {
-            document.getElementById("courseTitle").value = q.courseTitle;
-        }
+
+        // courseTitle 값 반영
+        document.getElementById("courseTitle").value = q.courseTitle;
+
+        // ✅ 카테고리 번호 체크박스 자동 체크
+        q.categoryList.forEach(seq => {
+            const checkbox = document.querySelector(`input[type="checkbox"][data-category-seq="\${seq}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+
         loadCourses(q.cPage);
     });
+
+
 </script>
 <script>
     window.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.sort-select').addEventListener('change', () => loadCourses(1));
-        document.getElementById('searchBtn').addEventListener('click', () => loadCourses(1));
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            history.replaceState({}, '', location.pathname);  // URL 쿼리스트링 제거
+            loadCourses(1);
+        });
         loadCourses(1);
     });
 
@@ -194,10 +205,14 @@
         if (document.getElementById('weekend').checked) dayList.push('6');
 
         const categoryList = [];
-        if (document.getElementById('java').checked) categoryList.push("자바");  // 백엔드 seq
-        if (document.getElementById('python').checked) categoryList.push("파이썬"); // 프론트엔드 seq
-        if (document.getElementById('react').checked) categoryList.push("리액트");
-        if (document.getElementById('vue').checked) categoryList.push("vue");
+        if (document.getElementById('java').checked) categoryList.push("5");  // 백엔드 seq
+        if (document.getElementById('python').checked) categoryList.push("6"); // 프론트엔드 seq
+        if (document.getElementById('react').checked) categoryList.push("7");
+        if (document.getElementById('vue').checked) categoryList.push("8");
+        if (document.getElementById('marketing').checked) categoryList.push("9");
+        if (document.getElementById('startup').checked) categoryList.push("10");
+        if (document.getElementById('ux').checked) categoryList.push("11");
+        if (document.getElementById('photoshop').checked) categoryList.push("12");
 
         const minPriceValue = document.querySelector("#minPrice").value;
         const maxPriceValue = document.querySelector("#maxPrice").value;
@@ -214,10 +229,12 @@
 
     function loadCourses(cPage) {
         const params = getFilterParams();
-        const urlParams = new URLSearchParams(window.location.search);
+        /*const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get("courseTitle")) {
             params.courseTitle = urlParams.get("courseTitle");
-        }
+        }*/
+        const inputTitle = document.getElementById('courseTitle').value;
+        params.courseTitle = inputTitle || getQueryParams().courseTitle || "";
         params.cPage = cPage;
         params.numPerPage = 4;
 
