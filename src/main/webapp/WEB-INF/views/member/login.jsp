@@ -74,7 +74,7 @@
     </div>
 
     <div class="form-group" style="text-align:center;">
-      <button type="submit" class="btn btn-primary">로그인</button>
+      <button type="submit" class="hc-btn hc-btn-outline">로그인</button>
     </div>
   </form>
 

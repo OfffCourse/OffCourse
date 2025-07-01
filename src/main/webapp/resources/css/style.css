@@ -18,7 +18,7 @@ body {
     background-color: #fff;
 }
 
-.btn {
+.hc-btn {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
@@ -31,29 +31,29 @@ body {
     font-size: 14px;
 }
 
-.btn-outline {
-    background: transparent;
-    color: #666;
+.hc-btn-outline {
+    color: white; /* ← 여기 수정 */
+    background-color: #162D43;
     border: 1px solid #ddd;
 }
 
-.btn-outline:hover {
+.hc-btn-outline:hover {
     background: #f8f9fa;
     border-color: #162D43;
     color: #162D43;
 }
 
-.btn-primary {
+.hc-btn-primary {
     background: #162D43;
     color: white;
 }
 
-.btn-primary:hover {
+.hc-btn-primary:hover {
     background: #0f1f2f;
 }
 
 /* 헤더 스타일 */
-.header {
+.hc-header {
     position: fixed;
     top: 0;
     left: 0;
@@ -65,7 +65,7 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.header-container {
+.hc-header-container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
@@ -74,56 +74,71 @@ body {
     align-items: center;
 }
 
-.header-container a{
+.hc-header-container a{
     text-decoration:none;
 }
 
-.header-actions {
+.hc-header-actions {
     display: flex;
     align-items: center;
     gap: 16px;
+    margin-left: 10px;
 }
 
-.logo {
+.hc-logo {
     font-size: 32px;
     font-weight: 800;
     color: #162D43;
     text-decoration: none;
     letter-spacing: -0.5px;
 }
-.nav-menu {
+.hc-nav-menu {
     display: flex;
+    align-items: center; /* 수직 중앙 정렬 */
     list-style: none;
     gap: 40px;
+    margin: 0;
+    padding: 0;
+    height: 100%; /* header 높이에 맞춰 정렬 */
 }
 
-.nav-menu a {
+.hc-nav-menu li {
+    display: flex;
+    align-items: center;
+}
+
+.hc-nav-menu a {
+    display: flex;
+    align-items: center; /* 텍스트 수직 정렬 */
     text-decoration: none;
     color: #1d1d1f;
     font-weight: 500;
     transition: color 0.3s;
     font-size: 19px;
+    height: 100%; /* 부모 기준 정렬을 위해 */
+    padding: 8px 0; /* 텍스트와 주변 요소 간 여백 */
 }
 
-.nav-menu a:hover {
+.hc-nav-menu a:hover {
     color: #162D43;
 }
 
+
 /* Search Section */
-.search-container {
+.hc-search-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-.search-form {
+.hc-search-form {
     display: flex;
     gap: 15px;
     max-width: 800px;
     margin: 0 auto;
 }
 
-.search-input {
+.hc-search-input {
     min-width: 500px;
     flex: 1;
     padding: 15px 20px;
@@ -132,19 +147,24 @@ body {
     font-size: 18px;
 }
 
-.search-input:focus {
+.hc-search-input:focus {
     outline: none;
     border-color: #162D43;
 }
 
-.search-btn {
-    padding: 15px 30px;
+.hc-search-btn {
+    border-radius: 20px; /* 네모 → 둥글게 고정 */
+    background: #162D43;
     color: white;
-    border: none;
-    border-radius: 8px;
+    padding: 15px 30px;
     font-size: 18px;
     font-weight: 600;
+    border: none;
     cursor: pointer;
-    background: #162D43;
+    transition: background 0.2s;
+}
+
+.hc-search-btn:hover {
+    background: #0f1f2f;
 }
 /* header end */

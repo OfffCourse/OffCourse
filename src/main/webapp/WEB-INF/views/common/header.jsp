@@ -385,7 +385,6 @@
 
         .btn-sm-custom {
             font-size: 11px;
-            padding: 2px 5px;
             border-radius: 20px;
             font-weight: 500;
             line-height: 0.6;
@@ -425,28 +424,28 @@
 </c:if>
 
 <!-- Header -->
-<header class="header">
-    <div class="header-container">
-        <a href="${path}" class="logo"><img src="${path}/resources/images/logo.png" alt="Off Course" width="50px"
-                                            height="50px">Off Course</a>
+<header class="hc-header">
+    <div class="hc-header-container">
+        <a href="${path}" class="hc-logo"><img src="${path}/resources/images/logo.png" alt="Off Course" width="50px"
+                                               height="50px">Off Course</a>
         <!-- Search Section -->
         <section class="search-section">
-            <div class="search-container">
-                <form id="headerSearchForm" class="search-form"
+            <div class="hc-search-container">
+                <form id="headerSearchForm" class="hc-search-form"
                       action="${pageContext.request.contextPath}/course/listpage" method="GET">
-                    <input type="text" name="courseTitle" class="search-input" placeholder="관심있는 강의를 검색해보세요">
-                    <button type="submit" class="search-btn btn btn-hero btn-hero-primary">검색</button>
+                    <input type="text" name="courseTitle" class="hc-search-input" placeholder="관심있는 강의를 검색해보세요">
+                    <button class="hc-btn hc-btn-outline">검색</button>
                 </form>
             </div>
         </section>
         <nav>
-            <ul class="nav-menu">
+            <ul class="hc-nav-menu">
                 <li><a href="${pageContext.request.contextPath}/course/listpage">강의</a></li>
             </ul>
         </nav>
 
         <!-- 로그인 상태에 따른 헤더 표시 -->
-        <div class="header-actions">
+        <div class="hc-header-actions">
             <!-- 로그인한 사용자에게만 알림 버튼 표시 -->
             <sec:authorize access="isAuthenticated()">
                 <div class="notification-wrapper">
@@ -460,8 +459,8 @@
             <c:choose>
                 <%-- 로그인 안 된 경우 --%>
                 <c:when test="${empty loginMember}">
-                    <a href="${path}/member/loginform" class="btn btn-primary">로그인</a>
-                    <a href="${path}/member/enroll/select" class="btn btn-outline">회원가입</a>
+                    <a href="${path}/member/loginform" class="hc-btn hc-btn-outline">로그인</a>
+                    <a href="${path}/member/enroll/select" class="hc-btn btn-link text-muted small align-self-center">회원가입</a>
                 </c:when>
 
                 <%-- 로그인 된 경우 --%>
@@ -469,14 +468,14 @@
                     <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님, 환영합니다!</span>
                     <c:choose>
                         <c:when test='${loginMember.memberId eq "admin" }'>
-                            <a href="${path}/admin/listpage" class="btn btn-primary mr-2">관리자페이지</a>
+                            <a href="${path}/admin/listpage" class="hc-btn btn-primary mr-2">관리자페이지</a>
                         </c:when>
                         <%-- 일반과 강사회원의 마이페이지 주소 다르게 --%>
                         <c:when test="${loginMember.memberType == '0'}">
-                            <a href="${path}/mypage/student" class="btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/student" class="hc-btn btn-primary mr-2">마이페이지</a>
                         </c:when>
                         <c:when test="${loginMember.memberType == '1'}">
-                            <a href="${path}/mypage/teacher" class="btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/teacher" class="hc-btn btn-primary mr-2">마이페이지</a>
                         </c:when>
                     </c:choose>
                     <%--<a href="${path}/member/logout" class="text-muted small align-self-center"
@@ -488,8 +487,7 @@
                                                     csrf 를 끄면 get 방식으로도 로그아웃이 되긴 되지만, 추후에 csrf 기능도 키려면,
                                                     post 방식으로 로그아웃을 보내야 security-context 에서도 받아내고 로그아웃을 시켜줌
                             --%>
-                        <button type="submit" class="btn btn-link text-muted small align-self-center"
-                                style="padding: 0; margin-top: 4px;">로그아웃
+                        <button type="submit" class="hc-btn btn-link text-muted small align-self-center">로그아웃
                         </button>
                     </form>
 
@@ -525,8 +523,8 @@
                 <label for="selectAllCheckbox">전체 선택</label>
             </div>
             <div class="notification-actions">
-                <button class="btn btn-sm-custom btn-navy" id="markSelectedReadBtn">읽음 처리</button>
-                <button class="btn btn-sm-custom btn-gray" id="deleteSelectedBtn">삭제</button>
+                <button class="hc-btn btn-sm-custom btn-navy" id="markSelectedReadBtn">읽음 처리</button>
+                <button class="hc-btn btn-sm-custom btn-gray" id="deleteSelectedBtn">삭제</button>
             </div>
         </div>
 
@@ -622,7 +620,7 @@
         }
 
         init() {
-                this.startHeartbeat();
+            this.startHeartbeat();
 
             // Visibility API로 탭 상태 감지
             document.addEventListener('visibilitychange', () => {
@@ -660,10 +658,10 @@
         }
 
         resumeHeartbeat() {
-                this.startHeartbeat();
-                // 즉시 한 번 전송
-                this.sendHeartbeat();
-                console.log('Heartbeat 재시작');
+            this.startHeartbeat();
+            // 즉시 한 번 전송
+            this.sendHeartbeat();
+            console.log('Heartbeat 재시작');
         }
 
         stopHeartbeat() {
