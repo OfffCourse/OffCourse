@@ -11,9 +11,10 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="user-profile">
-            <div class="profile-image">박</div>
-            <div class="user-name">박강사</div>
-            <div class="user-level">Pro 강사</div>
+            <div class="profile-image"></div>
+            <%--<img src="${path}/resources/upload/instructor/${loginMember.memberProfile}">--%>
+            <div class="user-name">${loginMember.memberName}</div>
+            <%--<div class="user-level">Pro 강사</div>--%>
         </div>
 
         <ul class="sidebar-menu">
@@ -35,10 +36,6 @@
             <li><a href="#" class="menu-item" data-section="profile">
                 <span class="icon">👤</span>
                 <span>개인정보 수정</span>
-            </a></li>
-            <li><a href="#" class="menu-item" data-section="settings">
-                <span class="icon">⚙️</span>
-                <span>설정</span>
             </a></li>
         </ul>
     </aside>
@@ -236,10 +233,15 @@
                                         <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
                                             <%--<span>⏰ 평일 19:00-22:00</span>--%>
                                         <span>📍 ${m.courseAddress}</span>
-                                        <span>👥 수강생 ${courseSize}명</span>
+                                        <span>👥 수강생 ${m.courseCurrentSize}/${m.courseSize}명</span>
                                     </div>
                                 </div>
-                                <div class="course-status status-progress">진행중</div>
+                                <c:if test="${m.deleteRequestStatus == 0}">
+                                    <div class="course-status status-progress">삭제 진행중</div>
+                                </c:if>
+                                <c:if test="${m.deleteRequestStatus == 2}">
+                                    <div class="course-status status-rejected">삭제 거절</div>
+                                </c:if>
                             </div>
                             <div class="course-actions">
                                 <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openEditModal(this)"
@@ -251,10 +253,11 @@
                                         data-course-qalink="${m.courseQaLink}"
                                         data-course-seq="${m.courseSeq}">강의 정보 수정
                                 </button>
-                                <c:if test="${m.courseStartDate > today and m.courseCurrentSize == 0 and empty m.deleteRequestStatus}">
+                                <c:if test="${m.courseStartDate > today and (empty m.deleteRequestStatus or m.deleteRequestStatus == 2)}">
                                     <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); openDeleteModal(this)"
                                             data-course-name="${m.courseName}"
-                                            data-course-seq="${m.courseSeq}">강의 삭제 신청
+                                            data-course-seq="${m.courseSeq}"
+                                            data-delete-request-status="${m.deleteRequestStatus}">강의 삭제 신청
                                     </button>
                                 </c:if>
                             </div>
@@ -284,7 +287,8 @@
                                     <h3>${m.courseName}</h3>
                                     <div class="course-meta">
                                         <span>📅 ${m.courseStartDate} ~ ${m.courseEndDate}</span>
-                                        <span>👥 수강생 ${courseSize}명</span>
+                                        <span>👥 수강생 ${m.courseCurrentSize}/${m.courseSize}명</span>
+
                                         <span>💰 정산 예정금액:<fmt:formatNumber value="${m.accountPrice}" type="currency"/>
                                         </span>
                                     </div>
@@ -297,19 +301,20 @@
                                         <div class="course-status status-completed">정산 완료</div>
                                     </c:when>
                                     <c:when test="${m.accountStatus == 2}">
-                                        <div class="course-status status-rejected">정산 거절됨</div>
+                                        <div class="course-status status-rejected">정산 거절</div>
                                     </c:when>
-                                    <c:otherwise>
+                                    <%--<c:otherwise>
                                         <div class="course-status status-completed">신청</div>
-                                    </c:otherwise>
+                                    </c:otherwise>--%>
                                 </c:choose>
                             </div>
                             <div class="course-actions">
-                                <c:if test="${empty m.accountStatus and m.courseEndDate lt today}">
+                                <c:if test="${m.courseEndDate lt today and (empty m.accountStatus or m.accountStatus == 2) }">
                                     <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openSettlementModal(this)"
                                             data-course-name="${m.courseName}"
                                             data-account-price="${m.accountPrice}"
-                                            data-course-seq="${m.courseSeq}">정산 신청
+                                            data-course-seq="${m.courseSeq}"
+                                            data-account-status="${m.accountStatus}">정산 신청
                                     </button>
                                 </c:if>
                             </div>
@@ -723,6 +728,14 @@
         document.getElementById('confirmCourseName').value = '';
 
         document.getElementById('deleteCourseSeq').value = button.dataset.courseSeq;
+
+        const status = button.dataset.deleteRequestStatus;
+        const inputStatus = document.querySelector('#deleteForm input[name="deleteRequestStatus"]');
+        if (status === '2') {
+            inputStatus.value = '2';
+        } else {
+            inputStatus.value = '0';
+        }
         openModal('deleteModal');
 
     }
@@ -733,6 +746,12 @@
         document.getElementById('settlementCourseName').value = button.dataset.courseName;
         document.getElementById('settlementAmount').value = button.dataset.accountPrice;
         document.getElementById('settleCourseSeq').value = button.dataset.courseSeq;
+        const accountStatusInput = document.querySelector('#settlementForm input[name="accountStatus"]');
+        if (button.dataset.accountStatus === '2') {
+            accountStatusInput.value = '2'; // 수정의도라고 표시
+        } else {
+            accountStatusInput.value = '0'; // 일반 신규 신청
+        }
         openModal('settlementModal');
 
     }

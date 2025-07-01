@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
+<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy-MM-dd" var="today"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <style>
   @font-face {
@@ -575,7 +576,6 @@
     <div class="course-main">
       <!-- Course Hero -->
       <div class="course-hero">
-        <span class="course-badge">HOT</span>
         <h1>${course.courseName}</h1>
         <div class="course-meta">
           <span>👨‍💻 ${course.courseCategory.fullCategoryName}</span>
@@ -601,6 +601,13 @@
           </div>
           <div class="category-item">
             <span class="category-text">${course.courseQaLink}</span>
+          </div>
+          <div class="category-item">
+            <div class="category-checkbox checked"></div>
+            <span class="category-text">상세 주소</span>
+          </div>
+          <div class="category-item">
+            <span class="category-text">${course.courseAddress}/${course.courseDetailAddress}</span>
           </div>
         </div>
       </div>
@@ -654,14 +661,25 @@
               pattern="#,##0"/>--%>
       <!-- Enrollment -->
       <div class="enroll-section">
-        <div class="price-info">
-          <div class="price-original">
-            <del><fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원</del>
-          </div>
-          <div class="price-current">
-            <fmt:formatNumber value="${course.coursePrice * (100 - course.courseDiscount) / 100}" pattern="#,##0"/>원
-          </div>
-        </div>
+        <c:choose>
+          <c:when test="${empty course.courseDiscount || course.courseDiscount == 0}">
+            <div class="price-info">
+              <div class="price-current">
+                <fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원
+              </div>
+            </div>
+          </c:when>
+         <c:otherwise>
+           <div class="price-info">
+             <div class="price-original">
+               <del><fmt:formatNumber value="${course.coursePrice}" pattern="#,##0"/>원</del>
+             </div>
+             <div class="price-current">
+               <fmt:formatNumber value="${course.coursePrice * (100 - course.courseDiscount) / 100}" pattern="#,##0"/>원
+             </div>
+           </div>
+         </c:otherwise>
+        </c:choose>
 
 
         <!-- 로그인하지 않은 익명 사용자 -->
@@ -692,6 +710,11 @@
               정원이 가득 찼습니다
             </button>
           </c:when>
+            <c:when test="${course.courseStartDate >= today}">
+              <button class="enroll-btn full-capacity" disabled>
+                신청 가능 날짜가 아닙니다
+              </button>
+            </c:when>
           <c:otherwise>
           <button class="enroll-btn" onclick="location.href='${paymentUrl}';">
             수강 신청

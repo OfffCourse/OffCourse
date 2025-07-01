@@ -768,8 +768,8 @@
     <aside class="sidebar">
         <div class="user-profile">
             <div class="profile-image">김</div>
-            <div class="user-name">김학생</div>
-            <div class="user-level">Regular 회원</div>
+            <div class="user-name">${loginMember.memberName}</div>
+            <%--<div class="user-level">Regular 회원</div>--%>
         </div>
 
         <ul class="sidebar-menu">
@@ -784,14 +784,6 @@
             <li><a href="#" class="menu-item" data-section="attendance">
                 <span class="icon">📅</span>
                 <span>출석 정보</span>
-            </a></li>
-            <li><a href="#" class="menu-item" data-section="refund">
-                <span class="icon">💰</span>
-                <span>환불</span>
-            </a></li>
-            <li><a href="#" class="menu-item" data-section="settings">
-                <span class="icon">⚙️</span>
-                <span>설정</span>
             </a></li>
         </ul>
     </aside>
@@ -870,73 +862,29 @@
         <div class="attendance-section" id="attendance">
             <div class="page-header">
                 <h1 class="page-title">출석 정보</h1>
-                <p class="page-subtitle">출석률을 확인하고 관리하세요</p>
+                <select id="courseSelect" class="form-control"></select>
             </div>
 
             <div class="attendance-stats">
                 <div class="stat-card">
-                    <div class="stat-number">85%</div>
-                    <div class="stat-label">전체 출석률</div>
+                    <div class="stat-number" id="statRate">0%</div>
+                    <div class="stat-label">출석률</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">34</div>
+                    <div class="stat-number" id="statPresent">0</div>
                     <div class="stat-label">출석일</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">6</div>
+                    <div class="stat-number" id="statAbsent">0</div>
                     <div class="stat-label">결석일</div>
                 </div>
             </div>
 
             <div class="attendance-calendar">
-                <div class="calendar-header">
-                    <h3 class="calendar-title">2025년 6월</h3>
-                    <div class="calendar-nav">
-                        <button class="nav-btn">◀</button>
-                        <button class="nav-btn">▶</button>
-                    </div>
-                </div>
-                <div class="calendar-grid">
-                    <div class="calendar-day">일</div>
-                    <div class="calendar-day">월</div>
-                    <div class="calendar-day">화</div>
-                    <div class="calendar-day">수</div>
-                    <div class="calendar-day">목</div>
-                    <div class="calendar-day">금</div>
-                    <div class="calendar-day">토</div>
-                    <div class="calendar-day">1</div>
-                    <div class="calendar-day attended">2</div>
-                    <div class="calendar-day attended">3</div>
-                    <div class="calendar-day attended">4</div>
-                    <div class="calendar-day attended">5</div>
-                    <div class="calendar-day attended">6</div>
-                    <div class="calendar-day">7</div>
-                    <div class="calendar-day">8</div>
-                    <div class="calendar-day attended">9</div>
-                    <div class="calendar-day attended">10</div>
-                    <div class="calendar-day attended">11</div>
-                    <div class="calendar-day attended">12</div>
-                    <div class="calendar-day absent">13</div>
-                    <div class="calendar-day">14</div>
-                    <div class="calendar-day">15</div>
-                    <div class="calendar-day today">16</div>
-                    <div class="calendar-day">17</div>
-                    <div class="calendar-day">18</div>
-                    <div class="calendar-day">19</div>
-                    <div class="calendar-day">20</div>
-                    <div class="calendar-day">21</div>
-                    <div class="calendar-day">22</div>
-                    <div class="calendar-day">23</div>
-                    <div class="calendar-day">24</div>
-                    <div class="calendar-day">25</div>
-                    <div class="calendar-day">26</div>
-                    <div class="calendar-day">27</div>
-                    <div class="calendar-day">28</div>
-                    <div class="calendar-day">29</div>
-                    <div class="calendar-day">30</div>
-                </div>
+                <div id="calendar"></div>
             </div>
         </div>
+
 
         <!-- Refund Section -->
         <div class="refund-section" id="refund">
@@ -1069,19 +1017,6 @@
     </div>
 </div>
 <script>
-
-    /* $(document).ready(() => {
-       updateCourseList('current', 1);
-     });
-
-     $('#pageBarContainer').on('click', 'a', function (e) {
-       e.preventDefault();
-       const page = $(this).data('page');
-       const tab = $('.tab-btn.active').data('tab');
-       if (page) {
-         updateCourseList(tab, page);
-       }
-     });*/
 
     // Menu navigation
     document.querySelectorAll('.menu-item').forEach(item => {
@@ -1332,31 +1267,31 @@
                             if (course.reviewWritten === 'N') {
                                 html += `
                                     <button class="btn btn-primary"
-                                            onclick="event.stopPropagation(); openReviewModal('\${course.courseName}')"
-                                            style="padding: 4px 12px; font-size: 12px;">리뷰 작성</button>
+                                    onclick="event.stopPropagation(); openReviewModal('\${course.courseName}', \${course.enrSeq})"
+                                    style="padding: 4px 12px; font-size: 12px;">리뷰 작성</button>
                                 `;
                             } else {
-                                /*html += `<span style="font-size: 12px; color: #28a745;">✅ 리뷰 작성 완료</span>`;*/
                                 html += `
-                                    <div class="course-actions" style="margin-top: 10px;">
-                                        <button class="btn btn-outline"
-                                                onclick="event.stopPropagation(); deleteReview(\${course.courseSeq})"
-                                                style="padding: 4px 12px; font-size: 12px;">리뷰 삭제</button>
-                                    </div>
+                                    <button class="btn btn-primary"
+                                            onclick="event.stopPropagation(); openReviewModal('\${course.courseName}', \${course.enrSeq}, '\${course.reviewContent}', \${course.reviewRate})"
+                                            style="padding: 4px 12px; font-size: 12px;">리뷰 수정</button>
+                                    <button class="btn btn-outline"
+                                            onclick="event.stopPropagation(); deleteReview(\${course.enrSeq})"
+                                            style="padding: 4px 12px; font-size: 12px;">리뷰 삭제</button>
                                 `;
                             }
 
                             html += `
                                     <button class="btn btn-primary"
-                                            onclick="event.stopPropagation(); downloadCertificate('\${course.courseSeq}')"
+                                            onclick="event.stopPropagation(); downloadCertificate('\${course.enrSeq}')"
                                             style="padding: 4px 12px; font-size: 12px;">수료증 다운로드</button>
                                 </div>`;
                         }
                     } else {
-                        if (course.isCancelable || course.courseCurrentSize == 1) {
+                        if (course.cancelable == 'Y') {
                             html += `
                             <div style="text-align: right; margin-top: 10px;">
-                              <button class="btn btn-outline btn-sm cancel-btn" onclick="event.stopPropagation(); location.assign('${path}/payment?enrSeq=\${course.enrSeq}')">수강 취소</button>
+                              <button class="btn btn-outline btn-sm cancel-btn" onclick="event.stopPropagation(); location.assign('${path}/payment/refund-form?enrSeq=\${course.enrSeq}')">수강 취소</button>
                             </div>
                           `;
                         }
@@ -1378,18 +1313,36 @@
 
 
     // Review Modal Functions
+    let currentEnrSeq = 0;
     let currentRating = 0;
-    let currentCourse = '';
+    let isEditMode = false;
 
-    let currentCourseSeq = 0;
-
-    function openReviewModal(courseName, courseSeq) {
+    function openReviewModal(courseName, enrSeq, reviewContent = '', reviewRate = 0) {
         currentCourse = courseName;
-        currentCourseSeq = courseSeq;
-        document.getElementById('reviewCourseTitle').textContent = courseName;
+        currentEnrSeq = enrSeq;
+        isEditMode = reviewRate > 0;
+
+        document.getElementById('reviewCourseTitle').textContent = isEditMode ? `${courseName} 리뷰 수정` : `${courseName} 리뷰 작성`;
         document.getElementById('reviewModal').classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // 별점 설정
+        currentRating = reviewRate;
+        document.querySelectorAll('.star').forEach((star, idx) => {
+            if (idx < reviewRate) star.classList.add('active');
+            else star.classList.remove('active');
+        });
+
+        // 텍스트 설정
+        const ratingTexts = ['', '별로예요', '그저그래요', '보통이에요', '좋아요', '최고예요!'];
+        document.getElementById('ratingText').textContent = reviewRate > 0 ? ratingTexts[reviewRate] : '별점을 선택해주세요';
+
+        // 리뷰 내용 설정
+        document.getElementById('reviewContent').value = reviewContent;
+
+        checkFormValidity(); // 버튼 활성화 여부 체크
     }
+
 
 
     function closeReviewModal() {
@@ -1478,49 +1431,48 @@
     document.getElementById('reviewContent').addEventListener('input', checkFormValidity);
 
     // Review form submission
-    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    $('#reviewForm').on('submit', function(e) {
         e.preventDefault();
+        const content = $('#reviewContent').val().trim();
 
-        const content = document.getElementById('reviewContent').value.trim();
-        if (currentRating === 0) {
-            showAlert('별점을 선택해주세요.', 'error');
+        if (currentRating === 0 || content.length < 10) {
+            showAlert('별점과 리뷰 내용을 입력해주세요.', 'error');
             return;
         }
 
-        if (content.length < 10) {
-            showAlert('리뷰 내용을 10자 이상 입력해주세요.', 'error');
-            return;
-        }
+        const data = {
+            enrSeq: currentEnrSeq,
+            reviewContent: content,
+            reviewRate: currentRating
+        };
 
-        // AJAX 요청으로 리뷰 저장
+        const url = isEditMode ? `${path}/review/update` : `${path}/review/insert`;
+
         $.ajax({
-            url: `${path}/review/insert`,
+            url,
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({
-                courseSeq: currentCourseSeq,
-                reviewContent: content,
-                reviewRate: currentRating
-            }),
-            success: function(response) {
-                showAlert('리뷰가 등록되었습니다!');
+            data: JSON.stringify(data),
+            success: function() {
+                showAlert(isEditMode ? '리뷰가 수정되었습니다!' : '리뷰가 등록되었습니다!');
                 closeReviewModal();
-                updateCourseList(currentTab, 1); // 강의 리스트 갱신
+                updateCourseList(currentTab, 1);
             },
             error: function() {
-                showAlert('리뷰 등록 중 오류가 발생했습니다.', 'error');
+                showAlert('리뷰 저장 중 오류가 발생했습니다.', 'error');
             }
         });
     });
 
-    function deleteReview(courseSeq) {
+
+    function deleteReview(enrSeq) {
         if (!confirm('리뷰를 삭제하시겠습니까?')) return;
 
         $.ajax({
             url: `${path}/review/delete`,
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ courseSeq }),
+            data: JSON.stringify({ enrSeq: enrSeq }),
             success: function(response) {
                 showAlert('리뷰가 삭제되었습니다.');
                 updateCourseList(currentTab, 1);
@@ -1562,6 +1514,82 @@
             year: 'numeric',
             month: '2-digit',
             day: '2-digit'
+        });
+    }
+
+</script>
+<script>
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function () {
+            const sectionId = this.dataset.section;
+            if (sectionId === 'attendance') {
+                loadAttendanceCourses();
+            }
+        });
+    });
+
+    let calendar;
+
+    function loadAttendanceCourses() {
+        $.ajax({
+            url: `${path}/mypage/attend-courses`,
+            method: 'GET',
+            success: function (courses) {
+                const $select = $('#courseSelect');
+                $select.empty();
+                $select.append('<option value="">강의 선택</option>');
+
+                courses.forEach(course => {
+                    $select.append(`<option value="\${course.courseSeq}"
+                    data-rate="\${course.presentRate}"
+                    data-present="\${course.presentCount}"
+                    data-total="\${course.totalEpisodeCount}">
+                    \${course.courseName}
+                </option>`);
+                });
+            }
+        });
+    }
+
+    $('#courseSelect').on('change', function () {
+        const courseSeq = $(this).val();
+        if (!courseSeq) return;
+
+        const rateRaw = $('option:selected', this).data('rate') ?? 0;
+        const rate = Math.round(rateRaw);
+        const present = $('option:selected', this).data('present') ?? 0;
+        const total = $('option:selected', this).data('total') ?? 0;
+        const absent = total - present;
+
+        $('#statRate').text(rate + '%');
+        $('#statPresent').text(present);
+        $('#statAbsent').text(absent < 0 ? 0 : absent);
+
+        loadPresentDates(courseSeq);
+    });
+
+    function loadPresentDates(courseSeq) {
+        $.ajax({
+            url: `${path}/mypage/attend-dates`,
+            method: 'GET',
+            data: { courseSeq },
+            success: function (timestamps) {
+                const events = timestamps.map(ts => ({
+                    title: '출석',
+                    start: ts,
+                    allDay: true,
+                    color: '#162D43'
+                }));
+
+                if (calendar) calendar.destroy();
+
+                calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                    initialView: 'dayGridMonth',
+                    events
+                });
+
+                calendar.render();
+            }
         });
     }
 

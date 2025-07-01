@@ -582,7 +582,6 @@
         <div class="course-main">
             <!-- Course Hero -->
             <div class="course-hero">
-                <span class="course-badge">HOT</span>
                 <h1>${course.courseName}</h1>
                 <div class="course-meta">
                     <span>👨‍💻 ${course.courseCategory.fullCategoryName}</span>
@@ -608,6 +607,13 @@
                     </div>
                     <div class="category-item">
                         <span class="category-text">${course.courseQaLink}</span>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-checkbox checked"></div>
+                        <span class="category-text">상세 주소</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-text">${course.courseAddress}/${course.courseDetailAddress}</span>
                     </div>
                 </div>
             </div>
@@ -646,6 +652,10 @@
                 <div class="schedule-row">
                     <span class="schedule-label">종료일</span>
                     <span class="schedule-value">${course.courseEndDate}</span>
+                </div>
+                <div class="schedule-row">
+                    <span class="schedule-label">정원</span>
+                    <span class="schedule-value">${course.courseCurrentSize}/${course.courseSize}</span>
                 </div>
             </div>
             <button class="action-btn" id="showAttendanceBtn" data-course-seq="${course.courseSeq}">출석 코드 보기</button>
@@ -1067,6 +1077,7 @@
             formData.append("index", i);
             formData.append("total", totalChunks);
             formData.append("episodeSeq", episodeSeq);
+            formData.append("courseSeq", courseSeq);
             formData.append("videoTitle", videoTitle);
             await fetch(`${path}/uploadChunk`, {
                 method: "POST",

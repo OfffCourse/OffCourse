@@ -8,14 +8,18 @@ import com.offcourse.mypage.model.dto.StudentMyPageResponse;
 import com.offcourse.mypage.model.dto.TeacherMyPageResponse;
 import com.offcourse.present.model.service.PresentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MyPageService {
 
     private final MyPageDao dao;
@@ -36,8 +40,18 @@ public class MyPageService {
     }
 
     @Transactional
+    public int updateAccount(Account account) {
+        return dao.updateAccount(account);
+    }
+
+    @Transactional
     public int insertDeleteCourseRequest(DeleteCourseRequest request) {
         return dao.insertDeleteCourseRequest(request);
+    }
+
+    @Transactional
+    public int updateDeleteCourseRequest(DeleteCourseRequest request) {
+        return dao.updateDeleteCourseRequest(request);
     }
 
     public List<StudentMyPageResponse> getCurrentCoursesByStudent(Map<String, Object> param) {
@@ -62,7 +76,10 @@ public class MyPageService {
         for (StudentMyPageResponse course : courseList) {
             Long courseSeq = course.getCourseSeq();
             int countEpisode = courseService.countEpisodeByCourseSeq(courseSeq);
-            int countPresent = presentService.countPresentByCourseAndStudent(courseSeq, memberSeq);
+            Map<String, Long> param=new HashMap<>();
+            param.put("courseSeq",courseSeq);
+            param.put("memberSeq",memberSeq);
+            int countPresent = dao.countPresent(param);
             double presentRate = countEpisode == 0 ? 0 : ((double) countPresent / countEpisode) * 100;
             course.setPresentRate(presentRate);
         }
@@ -81,5 +98,13 @@ public class MyPageService {
         return dao.countPendingCoursesByStudent(memberSeq);
     }
 
+    public List<Timestamp> selectPresentTimestampsByCourse(Map<String, Long> param) {
+        return dao.selectPresentTimestampsByCourse(param);
+    }
+
+    public List<StudentMyPageResponse> selectAttendanceCourses(Long memberSeq) {
+        List<StudentMyPageResponse> courses = dao.selectAttendanceCourses(memberSeq);
+        return getPresentRate(courses, memberSeq);
+    }
 
 }

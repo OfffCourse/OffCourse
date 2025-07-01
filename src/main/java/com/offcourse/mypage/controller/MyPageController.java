@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,14 @@ public class MyPageController {
 
     @PostMapping("/account")
     public String insertAccount(@ModelAttribute Account account, Model model) {
-        int result = service.insertAccount(account);
+
+        int result = 0;
+        if ("2".equals(account.getAccountStatus())) {
+            result = service.updateAccount(account);
+        } else {
+            result = service.insertAccount(account);
+        }
+
         if (result > 0) {
             model.addAttribute("msg", "정산 신청 성공");
             model.addAttribute("loc", "/mypage/teacher?section=settlement");
@@ -129,15 +137,43 @@ public class MyPageController {
     @PostMapping("/deleterequest")
     public String insertDeleteCourseRequest(@ModelAttribute DeleteCourseRequest req,
                                             Model model) {
-        int result = service.insertDeleteCourseRequest(req);
+        int result = 0;
+        if ("2".equals(req.getDeleteRequestStatus())) {
+            result = service.updateDeleteCourseRequest(req);
+        } else {
+            result = service.insertDeleteCourseRequest(req);
+        }
+
         if (result > 0) {
             model.addAttribute("msg", "삭제 신청 성공");
-            model.addAttribute("loc", "/mypage");
+            model.addAttribute("loc", "/mypage/teacher?section=manage-courses");
         } else {
             model.addAttribute("msg", "삭제 신청 실패");
-            model.addAttribute("loc", "/mypage");
+            model.addAttribute("loc", "/mypage/teacher?section=manage-courses");
         }
         return "common/msg";
+    }
+
+    @GetMapping("/attend-courses")
+    @ResponseBody
+    public List<StudentMyPageResponse> selectAttendCourses(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member loginMember = userDetails.getMember();
+        Long memberSeq = loginMember.getMemberSeq();
+        return service.selectAttendanceCourses(memberSeq);
+    }
+
+    @GetMapping("/attend-dates")
+    @ResponseBody
+    public List<Timestamp> selectAttendDates(Authentication authentication,
+                                             @RequestParam Long courseSeq) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member loginMember = userDetails.getMember();
+        Long memberSeq = loginMember.getMemberSeq();
+        Map<String, Long> paramMap = new HashMap<>();
+        paramMap.put("memberSeq", memberSeq);
+        paramMap.put("courseSeq", courseSeq);
+        return service.selectPresentTimestampsByCourse(paramMap);
     }
 
 }
