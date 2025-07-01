@@ -32,4 +32,9 @@ public interface MemberDao {
     List<MemberAll> getMemberAllByRole(Map param);
 
     int countMemberAllByRole(Map param);
+
+    String selectPwdBySeq(Long memberSeq);
+
+    int updateStudentProfile(Member member);
+
 }

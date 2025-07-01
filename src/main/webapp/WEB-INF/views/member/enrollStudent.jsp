@@ -193,7 +193,7 @@
 
     // 주소 합치기, 비밀번호 복합성 최종 검증
     document.getElementById("studentEnrollForm")
-        .addEventListener("submit", function () {
+        .addEventListener("submit", function (e) {
             const road = document.getElementById("roadAddress").value;
             const detail = document.getElementById("memberAddress").value;
             document.getElementById("memberAddress").value = road + " " + detail;

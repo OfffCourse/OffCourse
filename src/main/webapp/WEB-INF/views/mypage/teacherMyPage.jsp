@@ -11,7 +11,26 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="user-profile">
-            <div class="profile-image"></div>
+            <div>
+                <c:choose>
+                    <%-- memberProfile이 "default"로 시작하면 기본 이미지 --%>
+                    <c:when test="${fn:startsWith(loginMember.memberProfile, 'default')}">
+                        <img
+                                src="${path}/resources/images/instructor.png"
+                                alt="프로필 기본 이미지"
+                                id="profile-image"
+                                class="profile-image" />
+                    </c:when>
+                    <%-- 그 외에는 업로드된 이미지 --%>
+                    <c:otherwise>
+                        <img
+                                src="${path}/resources/upload/instructor/profile/${loginMember.memberProfile}"
+                                alt="프로필"
+                                id="profile-image"
+                                class="profile-image" />
+                    </c:otherwise>
+                </c:choose>
+            </div>
             <%--<img src="${path}/resources/upload/instructor/${loginMember.memberProfile}">--%>
             <div class="user-name">${loginMember.memberName}</div>
             <%--<div class="user-level">Pro 강사</div>--%>

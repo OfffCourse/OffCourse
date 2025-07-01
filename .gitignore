@@ -55,6 +55,7 @@ src/main/webapp/resources/images/*.ico
 
 !src/main/webapp/resources/images/logo.png
 !src/main/webapp/resources/images/bell-icon.png
+!src/main/webapp/resources/images/kakaopay.png
 !src/main/webapp/resources/upload/instructor/profile/default_profile_instructor.png
 !src/main/webapp/resources/upload/student/profile/default_profile_student.png
 
