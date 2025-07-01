@@ -385,7 +385,6 @@
 
         .btn-sm-custom {
             font-size: 11px;
-            padding: 2px 5px;
             border-radius: 20px;
             font-weight: 500;
             line-height: 0.6;
