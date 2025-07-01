@@ -1,8 +1,9 @@
 package com.offcourse.member.controller;
 
-import com.offcourse.member.model.dto.Member;
 import com.offcourse.member.exception.DuplicateMemberException;
+import com.offcourse.member.model.dto.Member;
 import com.offcourse.member.model.service.MemberService;
+import com.offcourse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -180,4 +181,81 @@ public class MemberController {
         return "member/findPasswordResult";
     }
 
+    @PostMapping("/verifyCurrentPwd")
+    @ResponseBody
+    public Map<String, Object> verifyCurrentPwd(
+            @ModelAttribute("loginMember") Member loginMember,
+            @RequestParam("currentPwd") String currentPwd) {
+
+        Map<String, Object> response = new HashMap<>();
+        boolean ok = memberService.verifyCurrentPwd(loginMember.getMemberSeq(), currentPwd);
+
+        response.put("success", ok);
+        response.put("error", ok ? null : "기존 비밀번호가 일치하지 않습니다.");
+        return response;
+    }
+
+    @PostMapping("/update/student")
+    public String updateStudentProfile(
+            @ModelAttribute("loginMember") Member loginMember,
+            @RequestParam String memberName,
+            @RequestParam String memberNickname,
+            @RequestParam String memberEmail,
+            @RequestParam String memberPhone,
+            @RequestParam String memberAddress,
+            @RequestParam(required = false) String memberPwd, // 새 비밀번호 (없으면 그대로)
+            @RequestParam(value = "profileFile", required = false) MultipartFile profileFile,
+            @RequestParam String oldProfile,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+        String originalEmail = loginMember.getMemberEmail();
+        // 기존 이메일과 다른 경우에만 이메일 인증 확인
+        if (!originalEmail.equals(memberEmail)) {
+            if (!memberService.isEmailVerified(memberEmail, session)) {
+                redirectAttributes.addFlashAttribute("msg", "변경된 이메일 인증을 완료해주세요.");
+                return "redirect:/mypage/student";
+            }
+            // 인증 완료 후 session 인증값 제거
+            session.removeAttribute("authEmail");
+            session.removeAttribute("authCode");
+            session.removeAttribute("authExpire");
+            session.removeAttribute("emailVerified");
+        }
+        try {
+            // 서비스 호출
+            int result = memberService.updateStudentProfile(loginMember, memberPwd, profileFile, oldProfile, session);
+
+            if (result > 0) {
+                loginMember.setMemberName(memberName);
+                loginMember.setMemberNickname(memberNickname);
+                loginMember.setMemberEmail(memberEmail);
+                loginMember.setMemberPhone(memberPhone);
+                loginMember.setMemberAddress(memberAddress);
+
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+                    ((CustomUserDetails) auth.getPrincipal()).setMember(loginMember);
+                }
+                redirectAttributes.addFlashAttribute("msg", "회원정보가 수정되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("msg", "회원정보 수정에 실패했습니다.");
+            }
+
+        } catch (DuplicateMemberException dup) {
+            // 중복 이메일
+            redirectAttributes.addFlashAttribute("msg", dup.getMessage());
+        } catch (Exception e) {
+            log.error("회원정보 수정 중 예외 발생", e);
+            redirectAttributes.addFlashAttribute("msg", "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
+
+        return "redirect:/mypage/student"; // 수정 후 마이페이지로 리다이렉트
+    }
+
+    @GetMapping("/check-email")
+    @ResponseBody
+    public Map<String,Object> checkEmail(@RequestParam String email) {
+        boolean duplicate = memberService.existsByEmail(email);
+        return Map.of("duplicate", duplicate);
+    }
 }

@@ -33,6 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private static final String ATTR_EXPIRE   = "authExpire";
     private static final String ATTR_VERIFIED = "emailVerified";
 
+
     @Override
     public void sendAuthCode(String email, HttpSession session) {
         // 6자리 랜덤 코드 생성
@@ -258,5 +259,73 @@ public class MemberServiceImpl implements MemberService {
         return pwd.toString();
     }
 
+    @Override
+    public boolean verifyCurrentPwd(Long memberSeq, String currentPwd) {
+        // DB에서 저장된 해시된 비밀번호 조회
+        String storedHash = memberDao.selectPwdBySeq(memberSeq);
+        if (storedHash == null) {
+            log.warn("존재하지 않는 회원Seq: {}", memberSeq);
+            return false;
+        }
+        // matches() 로 평문 ↔ 해시 비교
+        return passwordEncoder.matches(currentPwd, storedHash);
+    }
 
+    @Override
+    @Transactional
+    public int updateStudentProfile(Member member, String newPassword, MultipartFile profileFile, String oldProfile, HttpSession session) {
+
+        String newEmail = member.getMemberEmail();
+        Long   meSeq    = member.getMemberSeq();
+        Member existing = memberDao.findByEmail(newEmail);
+        if (existing != null && !existing.getMemberSeq().equals(meSeq)) {
+            // 나 자신이 아니라 다른 사용자가 이미 쓰고 있다면
+            throw new DuplicateMemberException("이미 사용 중인 이메일입니다.");
+        }
+
+
+        String profileFileName = null;
+        String profilePath = "";
+
+        try {
+            // 1) 비밀번호 변경 처리
+            if (newPassword != null && !newPassword.isEmpty()) {
+                String encPwd = passwordEncoder.encode(newPassword);
+                member.setMemberPwd(encPwd);
+            }
+
+            // 2) 저장 경로 결정
+            profilePath = session.getServletContext().getRealPath("/resources/upload/student/profile");
+
+            // 3) 파일 저장
+            if (profileFile != null && !profileFile.isEmpty()) {
+                profileFileName = saveFile(profileFile, profilePath);
+
+                // 기존 파일 삭제
+                deleteFile(profilePath, oldProfile);
+
+                // DTO에 새로운 파일명 설정
+                member.setMemberProfile(profileFileName);
+            }
+
+            // 4) DB 업데이트
+            int result = memberDao.updateStudentProfile(member);
+
+            if (result <= 0) {
+                // 실패 시 저장된 파일 삭제
+                deleteFile(profilePath, profileFileName);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            // 예외 발생 시 저장된 파일 삭제 후 롤백
+            deleteFile(profilePath, profileFileName);
+            throw new RuntimeException("회원정보 수정 중 오류 발생", e);
+        }
+    }
+    @Override
+    public boolean existsByEmail(String email) {
+        return memberDao.existsByEmail(email) > 0;
+    }
 }

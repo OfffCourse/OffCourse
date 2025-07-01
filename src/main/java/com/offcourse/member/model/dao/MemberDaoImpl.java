@@ -89,4 +89,16 @@ public class MemberDaoImpl implements MemberDao {
     public int countMemberAllByRole(Map param) {
         return sqlSession.selectOne(NAMESPACE + "countMemberAllByRole", param);
     }
+
+    @Override
+    public String selectPwdBySeq(Long memberSeq) {
+        return sqlSession.selectOne(NAMESPACE + "selectPwdBySeq", memberSeq);
+    }
+
+    @Override
+    public int updateStudentProfile(Member member) {
+        return sqlSession.update(NAMESPACE + "updateStudentProfile", member);
+    }
 }
+
+

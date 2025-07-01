@@ -54,7 +54,6 @@
       buyer_name: "${loginMember.memberName}",
       buyer_tel: "${loginMember.memberPhone}"
     }, function (rsp) {
-      hideLoading();
       if (rsp.success) {
         const form = document.createElement("form");
         form.method = "post";
@@ -76,6 +75,7 @@
         document.body.appendChild(form);
         form.submit();
       } else {
+        hideLoading();
         alert("결제 실패: " + rsp.error_msg);
       }
     });
