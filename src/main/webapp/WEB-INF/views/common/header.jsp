@@ -418,6 +418,12 @@
     </style>
 </head>
 <body>
+<c:if test="${not empty msg}">
+<script>
+    alert("${msg}");
+</script>
+</c:if>
+
 <!-- Header -->
 <header class="header">
     <div class="header-container">

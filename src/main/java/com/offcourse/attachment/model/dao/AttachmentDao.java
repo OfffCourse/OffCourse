@@ -42,4 +42,7 @@ public class AttachmentDao {
         return session.delete("attachment.deleteBySeq", attachSeq);
     }
 
+    public List<Long> findMemberSeqListByEpisodeSeq(Long episodeSeq) {
+        return session.selectList("attachment.findMemberSeqListByEpisodeSeq", episodeSeq);
+    }
 }

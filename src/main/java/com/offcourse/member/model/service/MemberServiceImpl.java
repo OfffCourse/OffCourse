@@ -132,15 +132,15 @@ public class MemberServiceImpl implements MemberService {
                 event = NotificationEvent.builder()
                         .memberSeq(member.getMemberSeq())
                         .msgDate(new Timestamp(System.currentTimeMillis()))
-                        .msgType(NotificationType.STUDENT_JOIN_SUCCESS)
-                        .redirectLocation(NotificationType.STUDENT_JOIN_SUCCESS.getRedirectLocation())
+                        .msgType(NotificationType.TEACHER_JOIN_SUCCESS)
+                        .redirectLocation(NotificationType.TEACHER_JOIN_SUCCESS.getRedirectLocation())
                         .build();
             }
 
             try {
                 notificationProducer.send(event);
             } catch (Exception kafkaEx) {
-                log.warn("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
+                log.error("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
             }
 
             return result;

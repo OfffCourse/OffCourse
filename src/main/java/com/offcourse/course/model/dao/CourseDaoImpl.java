@@ -107,4 +107,9 @@ public class CourseDaoImpl implements CourseDao {
     public int deleteCourse(Long courseSeq) {
         return session.update("course.deleteCourse", courseSeq);
     }
+
+    @Override
+    public Long findTeacherSeqByCourseSeq(Long courseSeq) {
+        return session.selectOne("course.findTeacherSeqByCourseSeq", courseSeq);
+    }
 }

@@ -51,14 +51,18 @@ public class PresentCodeGenerateScheduler {
 
             //Kafka 메시지 publish
             for (Long memberSeq : studentSeqList) {
-                NotificationEvent event = NotificationEvent.builder()
-                        .memberSeq(memberSeq)
-                        .msgDate(new Timestamp(System.currentTimeMillis()))
-                        .msgType(NotificationType.ATTENDANCE_REQUEST)
-                        .redirectLocation(NotificationType.ATTENDANCE_REQUEST.getRedirectLocation() + courseSeq)
-                        .courseSeq(courseSeq)
-                        .build();
-                notificationProducer.send(event);
+                try {
+                    notificationProducer.send(
+                            NotificationEvent.builder()
+                                    .memberSeq(memberSeq)
+                                    .msgDate(new Timestamp(System.currentTimeMillis()))
+                                    .msgType(NotificationType.ATTENDANCE_REQUEST)
+                                    .redirectLocation(NotificationType.ATTENDANCE_REQUEST.getRedirectLocation() + courseSeq)
+                                    .courseSeq(courseSeq)
+                                    .build());
+                } catch (Exception kafkaEx) {
+                    log.error("⚠️ Kafka 알림 발송 실패 (회원가입): {}", kafkaEx.getMessage());
+                }
             }
         }
         log.info("출석 코드 생성 총 {}개 강의, {}명 학생에게 알림 전송 완료", courseSeqList.size(), countStudents);
