@@ -19,7 +19,11 @@ public class CustomUserDetails implements UserDetails, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final Member member;
+    private Member member;
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

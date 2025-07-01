@@ -28,4 +28,11 @@ public interface MemberService {
     int updatePassword(String memberId, String memberPwd);
 
     boolean resetPassword(String memberId, String memberEmail);
+
+    boolean verifyCurrentPwd(Long memberSeq, String currentPwd);
+
+    int updateStudentProfile(Member member, String newPassword, MultipartFile profileFile, String oldProfile, HttpSession session);
+
+    boolean existsByEmail(String email);
+
 }
