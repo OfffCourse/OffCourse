@@ -710,7 +710,7 @@
               정원이 가득 찼습니다
             </button>
           </c:when>
-            <c:when test="${course.courseStartDate >= today}">
+            <c:when test="${course.courseStartDate <= today}">
               <button class="enroll-btn full-capacity" disabled>
                 신청 가능 날짜가 아닙니다
               </button>
