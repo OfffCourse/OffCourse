@@ -82,6 +82,7 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+    margin-left: 10px;
 }
 
 .logo {
@@ -93,21 +94,35 @@ body {
 }
 .nav-menu {
     display: flex;
+    align-items: center; /* 수직 중앙 정렬 */
     list-style: none;
     gap: 40px;
+    margin: 0;
+    padding: 0;
+    height: 100%; /* header 높이에 맞춰 정렬 */
+}
+
+.nav-menu li {
+    display: flex;
+    align-items: center;
 }
 
 .nav-menu a {
+    display: flex;
+    align-items: center; /* 텍스트 수직 정렬 */
     text-decoration: none;
     color: #1d1d1f;
     font-weight: 500;
     transition: color 0.3s;
     font-size: 19px;
+    height: 100%; /* 부모 기준 정렬을 위해 */
+    padding: 8px 0; /* 텍스트와 주변 요소 간 여백 */
 }
 
 .nav-menu a:hover {
     color: #162D43;
 }
+
 
 /* Search Section */
 .search-container {
