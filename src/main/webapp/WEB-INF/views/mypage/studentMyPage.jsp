@@ -1261,7 +1261,7 @@
                             </div>
                           </div>
                         `;
-                        if (tab === 'completed' && rate ==0) {//rate>=80 으로 바꾸기
+                        if (tab === 'completed' && rate == 0) {//rate>=80 으로 바꾸기
                             html += `<div class="course-actions" style="margin-top: 10px;">`;
 
                             if (course.reviewWritten === 'N') {
@@ -1283,7 +1283,7 @@
 
                             html += `
                                     <button class="btn btn-primary"
-                                            onclick="event.stopPropagation(); downloadCertificate('\${course.enrSeq}')"
+                                            onclick="event.stopPropagation(); downloadCertificatePost(\${course.courseSeq},'\${course.courseName}','\${course.courseStartDate}','\${course.courseEndDate}')"
                                             style="padding: 4px 12px; font-size: 12px;">수료증 다운로드</button>
                                 </div>`;
                         }
@@ -1307,9 +1307,31 @@
         });
     }
 
-    function downloadCertificate(courseSeq) {
-        window.open(`${path}/certificate/download?courseSeq=\${courseSeq}`, '_blank');
+    function downloadCertificatePost(courseSeq, courseName, courseStartDate, courseEndDate) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `${path}/certificate`;
+        form.style.display = 'none';
+
+        const fields = {
+            courseSeq,
+            courseName,
+            courseStartDate,
+            courseEndDate
+        };
+
+        for (const key in fields) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = fields[key];
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
     }
+
 
 
     // Review Modal Functions
@@ -1344,7 +1366,6 @@
     }
 
 
-
     function closeReviewModal() {
         document.getElementById('reviewModal').classList.remove('active');
         document.body.style.overflow = 'auto';
@@ -1363,7 +1384,7 @@
 
     // Star rating functionality
     document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', function() {
+        star.addEventListener('click', function () {
             const rating = parseInt(this.dataset.rating);
             currentRating = rating;
 
@@ -1392,7 +1413,7 @@
         });
 
         // Hover effect
-        star.addEventListener('mouseenter', function() {
+        star.addEventListener('mouseenter', function () {
             const rating = parseInt(this.dataset.rating);
             document.querySelectorAll('.star').forEach((s, index) => {
                 if (index < rating) {
@@ -1405,7 +1426,7 @@
     });
 
     // Reset hover effect when leaving star area
-    document.getElementById('starRating').addEventListener('mouseleave', function() {
+    document.getElementById('starRating').addEventListener('mouseleave', function () {
         document.querySelectorAll('.star').forEach((star, index) => {
             if (index < currentRating) {
                 star.style.color = '#ffd700';
@@ -1431,7 +1452,7 @@
     document.getElementById('reviewContent').addEventListener('input', checkFormValidity);
 
     // Review form submission
-    $('#reviewForm').on('submit', function(e) {
+    $('#reviewForm').on('submit', function (e) {
         e.preventDefault();
         const content = $('#reviewContent').val().trim();
 
@@ -1453,12 +1474,12 @@
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),
-            success: function() {
+            success: function () {
                 showAlert(isEditMode ? '리뷰가 수정되었습니다!' : '리뷰가 등록되었습니다!');
                 closeReviewModal();
                 updateCourseList(currentTab, 1);
             },
-            error: function() {
+            error: function () {
                 showAlert('리뷰 저장 중 오류가 발생했습니다.', 'error');
             }
         });
@@ -1472,12 +1493,12 @@
             url: `${path}/review/delete`,
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ enrSeq: enrSeq }),
-            success: function(response) {
+            data: JSON.stringify({enrSeq: enrSeq}),
+            success: function (response) {
                 showAlert('리뷰가 삭제되었습니다.');
                 updateCourseList(currentTab, 1);
             },
-            error: function() {
+            error: function () {
                 showAlert('리뷰 삭제 중 오류가 발생했습니다.', 'error');
             }
         });
@@ -1485,14 +1506,14 @@
 
 
     // Close modal when clicking outside
-    document.getElementById('reviewModal').addEventListener('click', function(e) {
+    document.getElementById('reviewModal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeReviewModal();
         }
     });
 
     // Escape key to close modal
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && document.getElementById('reviewModal').classList.contains('active')) {
             closeReviewModal();
         }
@@ -1572,7 +1593,7 @@
         $.ajax({
             url: `${path}/mypage/attend-dates`,
             method: 'GET',
-            data: { courseSeq },
+            data: {courseSeq},
             success: function (timestamps) {
                 const events = timestamps.map(ts => ({
                     title: '출석',
