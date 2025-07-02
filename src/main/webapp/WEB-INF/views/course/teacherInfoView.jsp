@@ -70,8 +70,10 @@
     }
     params.cPage = cPage;
     params.numPerPage = 4;
+    params.memberSeq= ${teacher.memberSeq};
 
-    fetch(`${path}/course/search`, {
+
+    fetch(`${path}/course/teacherajax`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(params)

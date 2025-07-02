@@ -694,7 +694,7 @@
 </section>
 
 <!-- Stats -->
-<section class="stats">
+<section class="stats" >
     <div class="container">
         <div class="stats-grid">
             <div class="stat-item">
@@ -956,7 +956,7 @@
                     container.insertAdjacentHTML("beforeend", courseCard);
                 });
             })
-            .catch(() => alert("추천 강의 로딩 실패"));
+            .catch(() => console.log("추천 강의 로딩 실패"));
     }
 </script>
 <script>

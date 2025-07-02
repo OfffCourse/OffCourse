@@ -165,10 +165,10 @@ public class CourseController {
 
     @ResponseBody
     @PostMapping("/teacherajax")
-    public Map<String, Object> getCourseListByTeacherSeq(@RequestParam Long memberSeq,
-                                                         @RequestParam(defaultValue = "1") int cPage,
-                                                         @RequestParam(defaultValue = "3") int numPerPage) {
-
+    public Map<String, Object> getCourseListByTeacherSeq(@RequestBody Map<String, Object> param) {
+        Long memberSeq = Long.valueOf(param.get("memberSeq").toString());
+        int cPage = Integer.parseInt(param.get("cPage").toString());
+        int numPerPage = Integer.parseInt(param.get("numPerPage").toString());
         int totalData = service.getCourseCountByTeacher(memberSeq);
         String pageBar = ajaxPageFactory.basicPageBar(cPage, numPerPage, totalData);
         List<CourseListResponse> list = service.getCourseListByTeacher(memberSeq, cPage, numPerPage);

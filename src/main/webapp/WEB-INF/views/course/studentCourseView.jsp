@@ -608,7 +608,7 @@
                         <span class="category-text">커리큘럼</span>
                     </div>
                     <div class="category-item">
-                        <span class="category-text">${course.courseCurriculum}</span>
+                        <pre class="category-text" style="font-family: 'Cafe24Supermagic-Bold-v1.0', 'Noto Sans KR', sans-serif; white-space: pre-line;">${course.courseCurriculum}</pre>
                     </div>
                     <div class="category-item">
                         <div class="category-checkbox checked"></div>

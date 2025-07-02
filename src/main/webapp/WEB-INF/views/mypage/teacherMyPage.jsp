@@ -730,15 +730,16 @@
     // 강의 정보 수정 모달 열기
     function openEditModal(button) {
         document.getElementById('editCourseName').value = button.dataset.courseName;
-        document.getElementById('courseAddress').value = button.dataset.courseAddress;
-        document.getElementById('courseDetailAddress').value = button.dataset.courseDetailAddress;
-        document.querySelector('textarea[name="courseCurriculum"]').value = button.dataset.courseCurriculum;
-        document.querySelector('input[name="courseDiscount"]').value = button.dataset.courseDiscount;
-        document.querySelector('input[name="courseQaLink"]').value = button.dataset.courseQalink;
-        document.querySelector('input[name="courseSeq"]').value = button.dataset.courseSeq;
+        document.getElementById('editCourseAddress').value = button.dataset.courseAddress;
+        document.getElementById('editCourseDetailAddress').value = button.dataset.courseDetailAddress;
+        document.querySelector('#editForm textarea[name="courseCurriculum"]').value = button.dataset.courseCurriculum;
+        document.querySelector('#editForm input[name="courseDiscount"]').value = button.dataset.courseDiscount;
+        document.querySelector('#editForm input[name="courseQaLink"]').value = button.dataset.courseQalink;
+        document.querySelector('#editForm input[name="courseSeq"]').value = button.dataset.courseSeq;
 
         openModal('editModal');
     }
+
 
 
     // 강의 삭제 모달 열기
