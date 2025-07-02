@@ -468,14 +468,14 @@
                     <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님,<br> 환영합니다!</span>
                     <c:choose>
                         <c:when test='${loginMember.memberId eq "admin" }'>
-                            <a href="${path}/admin/listpage" class="hc-btn btn-primary mr-2">관리자페이지</a>
+                            <a href="${path}/admin/listpage" class="hc-btn hc-btn-primary mr-2">관리자페이지</a>
                         </c:when>
                         <%-- 일반과 강사회원의 마이페이지 주소 다르게 --%>
                         <c:when test="${loginMember.memberType == '0'}">
-                            <a href="${path}/mypage/student" class="hc-btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/student" class="hc-btn hc-btn-primary mr-2">마이페이지</a>
                         </c:when>
                         <c:when test="${loginMember.memberType == '1'}">
-                            <a href="${path}/mypage/teacher" class="hc-btn btn-primary mr-2">마이페이지</a>
+                            <a href="${path}/mypage/teacher" class="hc-btn hc-btn-primary mr-2">마이페이지</a>
                         </c:when>
                     </c:choose>
                     <%--<a href="${path}/member/logout" class="text-muted small align-self-center"
