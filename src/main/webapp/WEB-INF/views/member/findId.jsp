@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
-
 <!-- 전체 화면 오버레이 스피너 -->
 <div id="loadingOverlay" style="
      display: none;
@@ -19,7 +18,7 @@
     </div>
 </div>
 
-<h2 style="text-align:center; margin-top:100px;">아이디 찾기</h2>
+<h2 style="text-align:center; margin-top:120px;">아이디 찾기</h2>
 
 <!-- 폼 구성은 추후 이메일 기반으로 -->
 <form action="${path}/member/find-id" method="post" id="findIdForm" style="max-width:400px; margin: 30px auto;">
@@ -29,7 +28,7 @@
     </div>
 
     <div style="text-align:center;">
-        <button type="submit" class="btn btn-primary">아이디 찾기</button>
+        <button type="submit" class="hc-btn hc-btn-outline">아이디 찾기</button>
     </div>
 </form>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

@@ -19,7 +19,7 @@
     </div>
 </div>
 
-<h2 style="text-align:center; margin-top:100px;">비밀번호 찾기</h2>
+<h2 style="text-align:center; margin-top:120px;">비밀번호 찾기</h2>
 
 <form action="${path}/member/find-password" method="post" id="findPasswordForm" style="max-width:400px; margin: 30px auto;">
     <div class="form-group">
@@ -31,7 +31,7 @@
         <input type="email" id="memberEmail" name="memberEmail" class="form-control" required>
     </div>
     <div style="text-align:center;">
-        <button type="submit" class="btn btn-primary">임시 비밀번호 발송</button>
+        <button type="submit" class="hc-btn hc-btn-outline">임시 비밀번호 발송</button>
     </div>
 </form>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

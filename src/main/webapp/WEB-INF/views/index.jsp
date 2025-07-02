@@ -5,7 +5,7 @@
     <style>
         /* 히어로 섹션 - 비디오 배경 */
         .hero-section {
-            margin-top: 100px;
+            margin-top: -20px;
             position: relative;
             height: 100vh;
             min-height: 600px;

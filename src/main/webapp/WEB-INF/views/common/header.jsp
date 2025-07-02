@@ -460,12 +460,12 @@
                 <%-- 로그인 안 된 경우 --%>
                 <c:when test="${empty loginMember}">
                     <a href="${path}/member/loginform" class="hc-btn hc-btn-outline">로그인</a>
-                    <a href="${path}/member/enroll/select" class="hc-btn btn-link text-muted small align-self-center">회원가입</a>
+                    <button onclick="location.assign('${path}/member/enroll/select')" class="hc-btn btn-link text-muted small align-self-center">회원가입</button>
                 </c:when>
 
                 <%-- 로그인 된 경우 --%>
                 <c:otherwise>
-                    <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님, 환영합니다!</span>
+                    <span class="welcome-msg font-weight-bold mr-2">${loginMember.memberNickname}님,<br> 환영합니다!</span>
                     <c:choose>
                         <c:when test='${loginMember.memberId eq "admin" }'>
                             <a href="${path}/admin/listpage" class="hc-btn btn-primary mr-2">관리자페이지</a>
@@ -496,7 +496,6 @@
         </div>
     </div>
 </header>
-
 <!-- 알림 모달 -->
 <sec:authorize access="isAuthenticated()">
 <div class="notification-modal" id="notificationModal">
@@ -542,6 +541,7 @@
     </div>
 </div>
 </sec:authorize>
+<div id="test" style="margin-bottom: 120px"></div>
 <script>
 
     (function() {
