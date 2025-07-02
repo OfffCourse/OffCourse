@@ -39,7 +39,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: #fff;
+    background-color: #F9F7F3;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
   .card:hover {
