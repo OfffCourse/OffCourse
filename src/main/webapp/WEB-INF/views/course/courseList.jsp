@@ -11,6 +11,26 @@
         align-items: center;
         margin-bottom: 1rem;
     }
+    .no-course-message {
+        text-align: center;
+        padding: 3rem 1rem;
+        font-size: 1.3rem;
+        color: #888;
+    }
+    /* 빈 데이터 표시 */
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 16px;
+    }
+
+    .no-data::before {
+        content: "📝";
+        display: block;
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
 
 </style>
 <!-- Search Results -->
@@ -138,7 +158,7 @@
                     </c:forEach>
                 </c:if>
             </div>
-            <div id="pageBar">
+            <div id="pageBar" style="margin-top:20px;">
                 ${pageBar}
             </div>
         </div>
@@ -250,7 +270,9 @@
                 container.innerHTML = "";
 
                 if (!data || !data.courses || data.courses.length === 0) {
-                    container.innerHTML = "<p>강의가 없습니다.</p>";
+                    container.innerHTML = `
+  <div class="no-data">강의가 없습니다.</div>
+`;
                     pageBar.innerHTML = "";
                     return;
                 }
@@ -324,7 +346,7 @@
 
                 pageBar.innerHTML = data.pageBar || "";
             })
-            .catch(() => alert("강의 로딩 실패"));
+            .catch(() => console.log("강의 로딩 실패"));
     }
 
     window.addEventListener('DOMContentLoaded', () => loadCourses(1));
