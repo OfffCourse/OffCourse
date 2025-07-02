@@ -12,7 +12,7 @@
         background: #162D43;
         color: white;
         padding: 50px 0 30px;
-        margin-top: 80px;
+        /*margin-top: 80px;*/
     }
 
     .footer-content {
