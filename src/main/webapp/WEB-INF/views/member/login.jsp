@@ -45,13 +45,12 @@
       <%--아이디 저장된 쿠키에서 값을 불러옴--%>
     </div>
 
-    <div class="form-group" style="position: relative;">
+    <div class="form-group">
       <label for="memberPwd">비밀번호</label>
-      <input type="password" id="memberPwd" name="memberPwd" class="form-control" required>
-      <button type="button" id="togglePwd"
-              style="position: absolute; top: 32px; right: 10px; border: none; background: none;">
-        👁
-      </button>
+      <div style="position: relative;">
+        <input type="password" id="memberPwd" name="memberPwd" class="form-control" required>
+        <span class="toggle-password" onclick="togglePassword('memberPwd', this)">&#128065;</span>
+      </div>
     </div>
     <div class="form-group d-flex justify-content-between align-items-center" style="margin-bottom: 15px;">
       <div class="form-check">
@@ -89,10 +88,34 @@
     document.getElementById('loginForm').addEventListener('submit', function () {
       overlay.style.display = 'flex';
     });
-    // 👁 비밀번호 토글
-    document.getElementById('togglePwd').addEventListener('click', function () {
-      const pwd = document.getElementById('memberPwd');
-      pwd.type = pwd.type === 'password' ? 'text' : 'password';
-    });
   });
+
+  function togglePassword(inputId, el) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+      input.type = "text";
+      if (el) el.textContent = '👁';
+    } else {
+      input.type = "password";
+      if (el) el.textContent = '👁';
+    }
+  }
 </script>
+
+<style>
+
+
+  /* input 우측에 아이콘 공간 확보 */
+  .position-relative .form-control {
+    padding-right: 2.5rem;  /* 적당히 여유 주기 */
+  }
+
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+
+</style>

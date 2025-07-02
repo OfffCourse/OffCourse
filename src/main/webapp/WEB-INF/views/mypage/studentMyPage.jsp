@@ -820,6 +820,27 @@
         border-color: #162D43;
     }
 
+         /* form-group 내부 컨트롤을 flex box 로 만들고 간격 맞추기 */
+     .form-group > div {
+         display: flex;
+         align-items: center;
+         gap: 8px;             /* input ↔ button 간격 */
+     }
+
+    /* input 은 남는 공간을 모두 차지하도록 */
+    .form-group > div .form-input {
+        flex: 1;
+        min-width: 0;         /* flex item 의 최소 너비 조정 */
+    }
+
+    /* 버튼 높이, 줄맞춤 통일 */
+    .form-group > div .btn {
+        flex-shrink: 0;       /* 버튼은 줄어들지 않고 고정 */
+        height: 38px;         /* Bootstrap form-control height 와 맞추기 */
+        line-height: 1.2;
+        white-space: nowrap;  /* 버튼 텍스트 줄바꿈 방지 */
+    }
+
 </style>
 
 <!-- Main Container -->
@@ -930,7 +951,7 @@
                     <label>이메일</label>
                     <div style="display:flex; gap:8px; align-items:center;">
                         <input type="email" id="memberEmail" name="memberEmail" class="form-input" value="${loginMember.memberEmail}" required/>
-                        <button type="button" id="sendCodeBtn" class="btn btn-outline-secondary" disabled>인증번호 요청</button>
+                        <button type="button" id="sendCodeBtn" class="btn btn-outline-secondary" disabled>인증번호요청</button>
                     </div>
                     <div id="codeSection" style="display:none; margin-top:8px; gap:8px; align-items:center;">
                         <input type="text" id="authCode" placeholder="6자리 인증번호" class="form-input" style="width:150px;"/>
