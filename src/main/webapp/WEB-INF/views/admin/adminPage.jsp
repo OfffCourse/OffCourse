@@ -206,6 +206,7 @@
 
     $(document).ready(function () {
         // 초기 로딩 - 기본은 member 탭으로 설정
+        let currentUserTab = "member-all";
         loadUserManagementData(currentUserTab, 1);
 
         // 탭 클릭 시 전환 처리
@@ -475,11 +476,11 @@
     /* Main Container */
     .main-container {
         max-width: 1200px;
-        margin: 30px auto;
         padding: 0 20px;
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 30px;
+        margin-top: 120px;
     }
 
     /* Sidebar */

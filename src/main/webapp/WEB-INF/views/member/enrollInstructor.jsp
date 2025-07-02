@@ -183,7 +183,7 @@
     </div>
 
     <div class="form-group" style="text-align:center; margin-top:30px;">
-      <button type="submit" class="btn btn-primary">회원가입</button>
+      <button type="submit" class="hc-btn hc-btn-outline">회원가입</button>
     </div>
   </form>
 </div>
