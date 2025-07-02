@@ -819,7 +819,20 @@
     #pwChangeSection .form-input {
         border-color: #162D43;
     }
+    /* 빈 데이터 표시 */
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 16px;
+    }
 
+    .no-data::before {
+        content: "📝";
+        display: block;
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
 </style>
 
 <!-- Main Container -->
@@ -1423,7 +1436,7 @@
                 $container.empty();
 
                 if (courseList.length === 0) {
-                    $container.append('<p>수강 내역이 없습니다.</p>');
+                    $container.append('<div class="no-data">수강 내역이 없습니다.</div>');
                     $('#pageBarContainer').empty();
                     return;
                 }
@@ -1723,8 +1736,12 @@
 
     function getCourseStatus(startDateStr, endDateStr) {
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         const startDate = new Date(startDateStr);
         const endDate = new Date(endDateStr);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
 
         if (today < startDate) return '대기중';
         if (today > endDate) return '수강완료';
@@ -1766,10 +1783,19 @@
                     $select.append(`<option value="\${course.courseSeq}"
                     data-rate="\${course.presentRate}"
                     data-present="\${course.presentCount}"
-                    data-total="\${course.totalEpisodeCount}">
+                    data-total="\${course.totalEpisodeCount}"
+                    data-completed="\${course.completedEpisodeCount}">
                     \${course.courseName}
                 </option>`);
                 });
+                if (!calendar) {
+                    calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                        initialView: 'dayGridMonth',
+                        events: []
+                    });
+                    calendar.render();
+                }
+
             }
         });
     }
@@ -1781,12 +1807,13 @@
         const rateRaw = $('option:selected', this).data('rate') ?? 0;
         const rate = Math.round(rateRaw);
         const present = $('option:selected', this).data('present') ?? 0;
-        const total = $('option:selected', this).data('total') ?? 0;
-        const absent = total - present;
+        const completed = $('option:selected', this).data('completed') ?? 0;
+        const absent = completed - present;
 
         $('#statRate').text(rate + '%');
         $('#statPresent').text(present);
         $('#statAbsent').text(absent < 0 ? 0 : absent);
+
 
         loadPresentDates(courseSeq);
     });
