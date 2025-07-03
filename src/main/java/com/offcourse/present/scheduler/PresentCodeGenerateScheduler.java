@@ -32,7 +32,7 @@ public class PresentCodeGenerateScheduler {
      * 해당 강의를 수강하고 있는 학생들에게 Kafka 메시지 전송
      */
 //    @Scheduled(cron = "0 0 9 * * *")
-    @Scheduled(cron = "* 30 * * * *")
+    @Scheduled(cron = "30 30 * * * *")
     public void generatePresentCode() {
         int countStudents = 0;
 
