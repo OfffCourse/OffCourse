@@ -1262,7 +1262,7 @@
             case 'STUDENT_JOIN_SUCCESS':
                 return '회원가입이 성공적으로 완료되었습니다. 원하는 강의를 찾아보세요';
             case 'TEACHER_JOIN_SUCCESS':
-                return '회원가입이 성공적으로 완료되었습니다. 원하는 강의를 찾아보세요';
+                return '회원가입이 성공적으로 완료되었습니다. 원하는 강의를 등록해보세요';
             case 'ENROLL_SUCCESS':
                 return '수강신청 및 결제가 완료되었습니다.';
             case 'REFUND_SUCCESS':
@@ -1270,7 +1270,7 @@
             case 'ATTENDANCE_REQUEST':
                 return '출석 확인을 위해 인증 코드를 입력해주세요.';
             case 'CERTIFICATE_ISSUED':
-                return '수료증이 발급되었습니다.';
+                return '강의 수료를 축하합니다!! 수료증이 발급되었습니다.';
             case 'ACCOUNT_AVAILABLE':
                 return '정산 신청이 가능합니다. 지금 신청하세요.';
             case 'MATERIAL_UPLOADED':
