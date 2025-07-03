@@ -25,8 +25,7 @@
   <form action="${path}/member/enroll"
         method="post"
         enctype="multipart/form-data"
-        id="instructorEnrollForm"
-        onsubmit="return validateForm();">
+        id="instructorEnrollForm">
     <input type="hidden" name="memberType" value="1"/>
 
     <!-- 에러 메시지 -->
@@ -192,31 +191,6 @@
 
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
-  function execDaumPostcode() {
-    new daum.Postcode({
-      oncomplete: function(data) {
-        document.getElementById('postcode').value = data.zonecode;
-        document.getElementById('roadAddress').value = data.roadAddress;
-        document.getElementById('memberAddress').focus();
-      }
-    }).open();
-  }
-
-  // 비밀번호 확인
-  document.getElementById("confirmPassword")
-          .addEventListener("input", function() {
-            const pwd     = document.getElementById("password").value;
-            const confirm = this.value;
-            const msg     = document.getElementById("passwordMatch");
-            if (pwd !== confirm) {
-              msg.textContent = "비밀번호가 일치하지 않습니다.";
-              msg.style.color = "red";
-            } else {
-              msg.textContent = "비밀번호가 일치합니다.";
-              msg.style.color = "green";
-            }
-          });
-
   // 비밀번호 토글
   function togglePassword(inputId, el) {
     const input = document.getElementById(inputId);
@@ -229,77 +203,6 @@
     }
   }
 
-  // 최종 유효성 검사 + 주소 합치기
-  function validateForm() {
-    // ① 비밀번호 일치 체크
-    const pwd     = document.getElementById("password").value;
-    const confirm = document.getElementById("confirmPassword").value;
-    if (pwd !== confirm) {
-      alert("비밀번호가 일치하지 않습니다.");
-      return false;
-    }
-    // ② 복합성 체크
-    const ok = pwd.length>=8
-            && /[A-Za-z]/.test(pwd)
-            && /\d/.test(pwd)
-            && /[!@#$%^&*()_+=-]/.test(pwd);
-    if (!ok) {
-      alert("비밀번호는 8자 이상, 영문자·숫자·특수문자를 최소 1개씩 포함해야 합니다.");
-      return false;
-    }
-    // ③ 강사 포트폴리오 필수
-    const portfolio = document.getElementById('portfolioFile').files;
-    if (portfolio.length === 0) {
-      alert('강사 회원은 포트폴리오 파일을 반드시 첨부해야 합니다.');
-      return false;
-    }
-    // ④ 주소 합치기
-    const road   = document.getElementById("roadAddress").value;
-    const detail = document.getElementById("memberAddress").value;
-    document.getElementById("memberAddress").value = road + " " + detail;
-    return true;
-  }
-
-  document.getElementById('profileFile')
-          .addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-              document.getElementById('profilePreview').src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-          });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('loadingOverlay');
-    document.getElementById('instructorEnrollForm').addEventListener('submit', function() {
-      overlay.style.display = 'flex';
-    });
-  });
-
-  // 비밀번호 입력 시 실시간 체크
-  document.getElementById('password')
-          .addEventListener('input', function() {
-            const v = this.value;
-            const checks = {
-              'crit-length': v.length >= 8,
-              'crit-letter': /[A-Za-z]/.test(v),
-              'crit-number': /\d/.test(v),
-              'crit-special': /[!@#$%^&*()_+=-]/.test(v)
-            };
-            for (let id in checks) {
-              const el = document.getElementById(id);
-              if (checks[id]) {
-                el.style.color = 'green';
-                el.style.textDecoration = 'none';
-              } else {
-                el.style.color = 'red';
-                el.style.textDecoration = 'none';
-              }
-            }
-          });
-
   document.addEventListener('DOMContentLoaded', function() {
     const path = '${path}';
     const overlay      = document.getElementById('loadingOverlay');
@@ -310,7 +213,81 @@
     const emailMsg   = document.getElementById('emailMsg');
     const codeSection= document.getElementById('codeSection');
     const timerEl    = document.getElementById('timer');
+    const form = document.getElementById('instructorEnrollForm');
+    const detailInput   = document.getElementById('memberAddress');
+    const postcodeEl    = document.getElementById('postcode');
+    const roadAddressEl = document.getElementById('roadAddress');
+    const password      = document.getElementById('password');
+    const confirmPassword  = document.getElementById('confirmPassword');
+    const passwordMatch = document.getElementById('passwordMatch');
     let timerInterval;
+    let isEmailVerified    = false;
+
+    // Daum Postcode
+    window.execDaumPostcode = function() {
+      new daum.Postcode({
+        oncomplete: function(data) {
+          document.getElementById('postcode').value      = data.zonecode;
+          document.getElementById('roadAddress').value   = data.roadAddress;
+          document.getElementById('memberAddress').focus();
+        }
+      }).open();
+    };
+
+    form.addEventListener('submit', function(e) {
+      const portfolio = document.getElementById('portfolioFile').files;
+      if (portfolio.length === 0) {
+        e.preventDefault();
+        alert('강사 회원은 포트폴리오 파일을 반드시 첨부해야 합니다.');
+        return;
+      }
+
+      // 이메일 변경 시도했으나 인증 안 된 경우
+      if (!isEmailVerified) {
+        e.preventDefault();
+        alert('이메일 인증을 완료해야 합니다.');
+        return;
+      }
+
+      // 우편번호·도로명주소 값이 채워졌는지 확인
+      if (!postcodeEl.value.trim() || !roadAddressEl.value.trim()) {
+        e.preventDefault();
+        alert('주소를 제대로 입력하지 않았습니다.');
+        return;
+      }
+      this.memberAddress.value =
+              roadAddressEl.value.trim()
+              + ' '
+              + detailInput.value.trim();
+
+      // 비밀번호 복합성 검증
+      const v  = password.value;
+      if (v) {
+        const ok = v.length >= 8
+                && /[A-Za-z]/.test(v)
+                && /\d/.test(v)
+                && /[!@#$%^&*()_+=-]/.test(v);
+        if (!ok) {
+          e.preventDefault();
+          alert('비밀번호는 8자 이상, 영문자·숫자·특수문자를 최소 1개씩 포함해야 합니다.');
+          return;
+        }
+        if (password.value !== confirmPassword.value) {
+          e.preventDefault();
+          alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+          return;
+        }
+      }
+      overlay.style.display = 'flex';
+    });
+
+    emailInput.addEventListener('input', () => {
+      // 입력 바꾸면 이전에 완료된 인증 무효화
+      isEmailVerified    = false;
+      verifyBtn.disabled = true;
+      codeSection.style.display = 'none';
+      emailMsg.textContent      = '';
+    });
 
     // 1) 인증번호 전송
     sendBtn.addEventListener('click', function() {
@@ -319,29 +296,48 @@
         alert('이메일을 입력해주세요.');
         return;
       }
-      emailMsg.textContent = '';
-      overlay.style.display = 'flex';
 
-      fetch(path + '/member/sendAuthCode', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: 'email=' + encodeURIComponent(email)
-      })
+      // 1. 이메일 중복 체크
+      overlay.style.display = 'flex';
+      fetch(path + '/member/check-email?email=' + encodeURIComponent(email))
               .then(res => {
+                if (!res.ok) throw new Error(res.status);
+                return res.json();
+              })
+              .then(data => {
+                overlay.style.display = 'none';
+                if (data.duplicate) {
+                  alert('이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요.');
+                  return;
+                }
+
+                // 2. 중복이 아니라면 인증번호 요청
+                emailMsg.textContent = '';
+                overlay.style.display = 'flex';
+                return fetch(path + '/member/sendAuthCode', {
+                  method: 'POST',
+                  headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                  body: 'email=' + encodeURIComponent(email)
+                });
+              })
+              .then(res => {
+                if (!res) return; // 중복된 경우 fetch null
                 overlay.style.display = 'none';
                 if (!res.ok) throw new Error(res.status);
                 return res.text();
               })
               .then(msg => {
-                codeSection.style.display  = 'flex';
-                emailInput.readOnly      = true;
-                sendBtn.textContent = '재요청';
+                if (!msg) return; // 중복된 경우
+                codeSection.style.display = 'flex';
+                emailInput.readOnly       = true;
+                sendBtn.textContent       = '재요청';
+                verifyBtn.disabled        = false;
                 startTimer(300);
               })
               .catch(err => {
                 overlay.style.display = 'none';
                 console.error(err);
-                alert('인증번호 전송에 실패했습니다.');
+                alert('인증번호 요청 중 오류가 발생했습니다.');
               });
     });
 
@@ -357,6 +353,7 @@
               .then(data => {
                 if (data.success) {
                   clearInterval(timerInterval);
+                  isEmailVerified  = true;
                   emailMsg.textContent = '✅ 이메일 인증 완료';
                   emailInput.readOnly  = true;
                   codeInput.readOnly  = true;
@@ -387,7 +384,42 @@
         timerEl.textContent = m + ':' + s;
       }, 1000);
     }
+    function checkNewPwdMatch() {
+      if (!password.value || !confirmPassword.value) {
+        passwordMatch.textContent = '';
+        return;
+      }
+      if (password.value === confirmPassword.value) {
+        passwordMatch.style.color   = 'green';
+        passwordMatch.textContent   = '비밀번호가 일치합니다.';
+      } else {
+        passwordMatch.style.color   = 'red';
+        passwordMatch.textContent   = '비밀번호가 일치하지 않습니다.';
+      }
+    }
 
+    password.addEventListener('input', checkNewPwdMatch);
+    confirmPassword.addEventListener('input', checkNewPwdMatch);
+
+    password.addEventListener('input', function () {
+      const v = this.value;
+      const checks = {
+        'crit-length': v.length >= 8,
+        'crit-letter': /[A-Za-z]/.test(v),
+        'crit-number': /\d/.test(v),
+        'crit-special': /[!@#$%^&*()_+=-]/.test(v)
+      };
+      for (let id in checks) {
+        const el = document.getElementById(id);
+        if (checks[id]) {
+          el.style.color = 'green';
+          el.style.textDecoration = 'none';
+        } else {
+          el.style.color = 'red';
+          el.style.textDecoration = 'none';
+        }
+      }
+    });
   });
 </script>
 
