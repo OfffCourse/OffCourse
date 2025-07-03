@@ -26,7 +26,7 @@ public class QueueService {
     private static final String LAST_ACTIVITY_KEY = "queue:activity:";
     private static final String LOCK_KEY = "queue:lock:";
 
-    @Value("${queue.max-processing-count:1}")
+    @Value("${queue.max-processing-count:5}")
     private int maxProcessingCount;
 
     @Value("${queue.avg-processing-time:30}")
