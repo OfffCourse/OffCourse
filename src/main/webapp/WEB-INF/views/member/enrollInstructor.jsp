@@ -392,6 +392,27 @@
 </script>
 
 <style>
+  /* form-group 내부 컨트롤 (input + button) 를 flex 로 정렬 */
+  .form-group > div {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 컨트롤 간 간격 */
+  }
+
+  /* input(form-control)은 남는 공간을 다 채우기 */
+  .form-group > div .form-control {
+    flex: 1;
+    min-width: 0; /* flex 아이템의 최소 너비 설정 */
+  }
+
+  /* 버튼은 고정 크기, 입력창과 높이 라인을 맞추기 */
+  .form-group > div .btn {
+    flex-shrink: 0;
+    height: calc(1.5em + .75rem + 2px); /* Bootstrap 기본 form-control 높이와 맞춤 */
+    line-height: 1.2;
+    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+  }
+
   .toggle-password {
     position: absolute;
     top: 50%;
