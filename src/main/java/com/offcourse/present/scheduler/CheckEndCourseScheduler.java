@@ -31,7 +31,7 @@ public class CheckEndCourseScheduler {
      * 해당 강의 강사에게는 정산 요청 알림 전송
      * 해당 강의 수강생 중 80%이상 수강한 학생들에게는 수료증 발급 알림 전송하기
      */
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 30 * * * *")
     public void checkEndCourse() {
         List<CourseStudentDto> courseList = courseService.getCourseSeqsByEndDate(LocalDate.now().minusDays(1));
         for (CourseStudentDto courseStudentDto : courseList) {

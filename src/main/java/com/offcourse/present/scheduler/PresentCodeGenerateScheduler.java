@@ -32,7 +32,7 @@ public class PresentCodeGenerateScheduler {
      * 해당 강의를 수강하고 있는 학생들에게 Kafka 메시지 전송
      */
 //    @Scheduled(cron = "0 0 9 * * *")
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 10 * * * *")
     public void generatePresentCode() {
         int countStudents = 0;
 
@@ -48,7 +48,7 @@ public class PresentCodeGenerateScheduler {
 
             //Redis 저장
             String key = "present:course:" + courseSeq;
-            redisService.setValueWithTTL(key, presentCode, 1800);
+            redisService.setValueWithTTL(key, presentCode, 3600);
 
             //Kafka 메시지 publish
             for (Long memberSeq : studentSeqList) {
