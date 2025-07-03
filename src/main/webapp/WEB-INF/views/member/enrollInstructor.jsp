@@ -141,12 +141,12 @@
              readonly
              class="form-control mt-2">
       <input type="text"
-             name="memberAddress"
-             id="memberAddress"
+             name="detailAddress"
+             id="detailAddress"
              placeholder="상세 주소를 입력해주세요"
              class="form-control mt-2"
-             required
-             value="${member.memberAddress}"/>
+             required/>
+      <input type="hidden" name="memberAddress" id="memberAddress" value="">
     </div>
 
     <div class="form-group">
@@ -214,7 +214,7 @@
     const codeSection= document.getElementById('codeSection');
     const timerEl    = document.getElementById('timer');
     const form = document.getElementById('instructorEnrollForm');
-    const detailInput   = document.getElementById('memberAddress');
+    const detailInput   = document.getElementById('detailAddress');
     const postcodeEl    = document.getElementById('postcode');
     const roadAddressEl = document.getElementById('roadAddress');
     const password      = document.getElementById('password');
@@ -229,7 +229,7 @@
         oncomplete: function(data) {
           document.getElementById('postcode').value      = data.zonecode;
           document.getElementById('roadAddress').value   = data.roadAddress;
-          document.getElementById('memberAddress').focus();
+          document.getElementById('detailAddress').focus();
         }
       }).open();
     };
