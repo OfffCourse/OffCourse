@@ -6,6 +6,21 @@
 <fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy-MM-dd" var="today"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <style>
+  /* 빈 데이터 표시 */
+  .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 16px;
+  }
+
+  .no-data::before {
+    content: "📝";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
   @font-face {
     font-family: 'Cafe24Supermagic-Bold-v1.0';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/Cafe24Supermagic-Bold-v1.0.woff2') format('woff2');
@@ -25,6 +40,7 @@
     color: #333;
     background-color: #f8f9fa;
     padding-top: 100px;
+    margin-top: -100px;
   }
 
   /* Header */
@@ -616,7 +632,7 @@
         <div class="curriculum-list" id="episode-list">
           <!-- JS로 렌더링 -->
         </div>
-        <div id="episode-page-bar">
+        <div id="episode-page-bar" style="margin-top:20px;">
           <!-- JS로 페이징 바 렌더링 -->
         </div>
       </div>
@@ -624,7 +640,8 @@
         <h2 class="section-title">수강생 리뷰</h2>
         <div class="curriculum-list" id="review-container">
         </div>
-        <div id="review-page-bar"></div>
+        <div id="review-page-bar" style="margin-top:20px;"
+        ></div>
 
       </div>
     </div>
@@ -710,7 +727,7 @@
               정원이 가득 찼습니다
             </button>
           </c:when>
-            <c:when test="${course.courseStartDate <= today}">
+            <c:when test="${course.courseStartDate < today}">
               <button class="enroll-btn full-capacity" disabled>
                 신청 가능 날짜가 아닙니다
               </button>
@@ -930,7 +947,7 @@
               container.innerHTML = "";
 
               if (!data || !data.reviews || data.reviews.length === 0) {
-                container.innerHTML = "<p>리뷰가 없습니다.</p>";
+                container.innerHTML = `<div class="no-data">리뷰가 없습니다.</div>`;
                 pageBar.innerHTML = "";
                 return;
               }

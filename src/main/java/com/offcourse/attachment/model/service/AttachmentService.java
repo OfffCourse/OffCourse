@@ -79,7 +79,7 @@ public class AttachmentService {
                                 .build()
                 );
             } catch (Exception kafkaEx) {
-                log.error("⚠️ Kafka 알림 발송 실패 (영상 업로드): {}", kafkaEx.getMessage());
+                log.error("⚠️ Kafka 알림 발송 실패 (수업자료 업로드): {}", kafkaEx.getMessage());
             }
         }
     }

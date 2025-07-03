@@ -12,6 +12,21 @@
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <style>
+    /* 빈 데이터 표시 */
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 16px;
+    }
+
+    .no-data::before {
+        content: "📝";
+        display: block;
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
     @font-face {
         font-family: 'Cafe24Supermagic-Bold-v1.0';
         src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/Cafe24Supermagic-Bold-v1.0.woff2') format('woff2');
@@ -31,6 +46,7 @@
         color: #333;
         background-color: #f8f9fa;
         padding-top: 100px;
+        margin-top: -100px;
     }
 
     /* Header */
@@ -624,7 +640,7 @@
                 <div class="curriculum-list" id="episode-list">
                     <!-- JS로 렌더링 -->
                 </div>
-                <div id="episode-page-bar">
+                <div id="episode-page-bar" style="margin-top:20px;">
                     <!-- JS로 페이징 바 렌더링 -->
                 </div>
             </div>
@@ -632,7 +648,7 @@
                 <h2 class="section-title">수강생 리뷰</h2>
                 <div class="curriculum-list" id="review-container">
                 </div>
-                <div id="review-page-bar"></div>
+                <div id="review-page-bar" style="margin-top:20px;"></div>
 
             </div>
         </div>
@@ -740,7 +756,7 @@
             <div class="modal-body">
                 <input type="hidden" id="record-episodeSeq" />
                 <button class="btn btn-primary" id="startRecordBtn">녹화 시작</button>
-                <button class="btn btn-danger" id="stopRecordBtn">녹화 중지</button>
+                <button class="btn btn-danger" id="stopRecordBtn" style="display: none;">녹화 중지</button>
                 <hr>
                 <h5>녹화된 영상 목록</h5>
                 <ul id="videoList" class="list-group"></ul>
@@ -748,7 +764,21 @@
         </div>
     </div>
 </div>
-
+<!-- 오버레이 로딩 화면 -->
+<div id="uploadOverlay" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
 <script>
     $('#showAttendanceBtn').on('click', function () {
         const courseSeq = $(this).data('course-seq');
@@ -939,7 +969,7 @@
                 container.innerHTML = "";
 
                 if (!data || !data.reviews || data.reviews.length === 0) {
-                    container.innerHTML = "<p>리뷰가 없습니다.</p>";
+                    container.innerHTML = `<div class="no-data">리뷰가 없습니다.</div>`;
                     pageBar.innerHTML = "";
                     return;
                 }
@@ -1065,7 +1095,7 @@
             mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
             mediaRecorder.onstop = async () => {
-                confirm("업로드 완료 알림창이 뜰 때까지 기다려주세요.");
+                //confirm("업로드 완료 알림창이 뜰 때까지 기다려주세요.");
                 videoBlob = new Blob(chunks, {type: 'video/webm'});
                 await uploadInChunks(videoBlob, epSeq);
                 alert("업로드 완료");
@@ -1091,6 +1121,9 @@
         const CHUNK_SIZE = 5 * 1024 * 1024;
         const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
         const videoTitle = document.getElementById('videoTitleInput').value || '제목없음';
+
+        showUploadOverlay();
+
         for (let i = 0; i < totalChunks; i++) {
             const chunk = blob.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
             const formData = new FormData();
@@ -1105,6 +1138,7 @@
                 body: formData
             });
         }
+        hideUploadOverlay();
     }
 
     function loadVideoList(episodeSeq) {
@@ -1208,6 +1242,33 @@
                 }
             });
     }
+</script>
+<script>
+    document.getElementById("startRecordBtn").onclick = () => {
+        const epSeq = document.getElementById('record-episodeSeq').value;
+        startRecording(epSeq);
+
+        // 버튼 토글
+        document.getElementById("startRecordBtn").style.display = "none";
+        document.getElementById("stopRecordBtn").style.display = "inline-block";
+    };
+
+    document.getElementById("stopRecordBtn").onclick = () => {
+        stopRecording();
+
+        // 버튼 토글
+        document.getElementById("startRecordBtn").style.display = "inline-block";
+        document.getElementById("stopRecordBtn").style.display = "none";
+    };
+
+    function showUploadOverlay() {
+        document.getElementById("uploadOverlay").style.display = "flex";
+    }
+    function hideUploadOverlay() {
+        document.getElementById("uploadOverlay").style.display = "none";
+    }
+
+
 </script>
 
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

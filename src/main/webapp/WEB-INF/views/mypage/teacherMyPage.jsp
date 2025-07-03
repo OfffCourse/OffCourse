@@ -283,9 +283,10 @@
                         </div>
                     </c:forEach>
                 </c:if>
+                <c:if test="${empty myPageResponses}"><div class="no-data">등록한 강의가 없습니다.</div></c:if>
             </div>
             <c:if test="${section == 'manage-courses'}">
-                <div id="pageBar">${pageBar}</div>
+                <div id="pageBar" style="margin-top:20px;">${pageBar}</div>
             </c:if>
         </div>
 
@@ -342,7 +343,7 @@
                 </c:if>
             </div>
             <c:if test="${section == 'settlement'}">
-                <div id="pageBar">${pageBar}</div>
+                <div id="pageBar" style="margin-top:20px;">${pageBar}</div>
             </c:if>
         </div>
 
