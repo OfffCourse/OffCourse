@@ -1,5 +1,6 @@
-package com.offcourse.redis.controller;
+package com.offcourse.redis.scheduler;
 
+import com.offcourse.payment.model.service.PaymentQueueService;
 import com.offcourse.redis.model.service.QueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import java.util.Set;
 public class QueueScheduler {
 
     private final QueueService queueService;
+    private final PaymentQueueService paymentQueueService;
     private final StringRedisTemplate stringRedisTemplate;
 
     /**
@@ -26,10 +28,21 @@ public class QueueScheduler {
             if (!queueService.shouldProcessQueue()) {
                 return; // 조건에 맞지 않으면 종료
             }
-
             queueService.processWaitingQueue();
         } catch (Exception e) {
             log.warn("대기열 처리 중 오류: {}" , e.getMessage());
+        }
+    }
+
+    /**
+     * 15초마다 결제 대기열 처리
+     */
+    @Scheduled(fixedDelay = 15000)
+    public void processPaymentQueuesPeriodically() {
+        try {
+            paymentQueueService.processPaymentQueues();
+        } catch (Exception e) {
+            log.warn("결제 대기열 처리 중 오류: {}", e.getMessage());
         }
     }
 
