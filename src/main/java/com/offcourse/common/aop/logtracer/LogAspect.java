@@ -6,20 +6,19 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
 @Aspect
 @Slf4j
 @RequiredArgsConstructor
-@Component
+//@Component
 public class LogAspect {
 
     private final LogTracer logTracer;
 
     @Pointcut("execution(* com.offcourse..*Controller.*(..)) || execution(* com.offcourse..*Service.*(..)) || " +
-            "execution(* com.offcourse..*Repository.*(..)) || execution(* com.offcourse..*Scheduler.*(..))")
+            "execution(* com.offcourse..*Repository.*(..))")
     public void everyRequest() { }
 
     @Around("everyRequest()")
