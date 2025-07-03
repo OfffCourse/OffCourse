@@ -628,7 +628,29 @@
         </div>
     </div>
 </section>
-
+    <!-- Stats -->
+    <section class="stats" >
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">50,000+</div>
+                    <div class="stat-label">수강생</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">200+</div>
+                    <div class="stat-label">강의</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">만족도</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">80%</div>
+                    <div class="stat-label">취업률</div>
+                </div>
+            </div>
+        </div>
+    </section>
 <!-- Courses -->
 <section class="courses" id="courses">
     <div class="container">
@@ -646,73 +668,8 @@
         </div>
 
         <div class="course-grid">
-            <!-- Course 1 -->
-            <%--<div class="course-card" data-category="programming">
-                <div class="course-image">
-                    <span class="course-badge">HOT</span>
-                    React & Node.js
-                </div>
-                <div class="course-content">
-                    <div class="course-meta">
-                        <span>👨‍💻 프로그래밍</span>
-                        <span>⭐ 4.9 (234)</span>
-                    </div>
-                    <h3 class="course-title">풀스택 웹개발 마스터 부트캠프</h3>
-                    <p class="course-instructor">김개발 강사 · 네이버 출신</p>
 
-                    <div class="course-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">기간</span>
-                            <span class="schedule-value">12주 (120시간)</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">일시</span>
-                            <span class="schedule-value">평일반 19:00-22:00</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">장소</span>
-                            <span class="schedule-value">강남 캠퍼스</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">시작일</span>
-                            <span class="schedule-value">2025.07.01</span>
-                        </div>
-                    </div>
 
-                    <div class="course-footer">
-                        <div class="course-price">
-                            <span class="price-original">₩1,200,000</span>
-                            <span class="price-current">₩890,000</span>
-                        </div>
-                        <button class="btn-enroll">수강 신청</button>
-                    </div>
-                </div>
-            </div>--%>
-
-        </div>
-    </div>
-</section>
-
-<!-- Stats -->
-<section class="stats" >
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">50,000+</div>
-                <div class="stat-label">수강생</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">200+</div>
-                <div class="stat-label">강의</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">95%</div>
-                <div class="stat-label">만족도</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">80%</div>
-                <div class="stat-label">취업률</div>
-            </div>
         </div>
     </div>
 </section>

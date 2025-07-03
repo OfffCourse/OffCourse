@@ -41,7 +41,7 @@
           </c:forEach>
         </c:if>
       </div>
-      <div id="pageBar">
+      <div id="pageBar" style="margin-top:20px;">
         ${pageBar}
       </div>
     </div>

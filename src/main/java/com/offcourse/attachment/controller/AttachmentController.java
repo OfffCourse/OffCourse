@@ -40,7 +40,7 @@ public class AttachmentController {
         // 1. 실제 경로 얻기 (webapp 아래에 저장)
         String tempPath = session.getServletContext().getRealPath("/resources/upload/lecture/temp/");
         String finalPath = session.getServletContext().getRealPath("/resources/upload/lecture/video/");
-        System.out.println("실제 temp 경로: " + tempPath);
+        log.debug("실제 temp 경로: " + tempPath);
 
         // 2. 디렉토리 생성
         File tempDir = new File(tempPath);
@@ -71,6 +71,7 @@ public class AttachmentController {
                 String renamedFileName = "offcourse_" + timeStamp + "_" + rnd + ".mp4";
                 File convertedMp4File = new File(finalDir, renamedFileName);
 
+                //URL exePath = getClass().getResource("/ffmpeg2/ffmpeg");
                 URL exePath = getClass().getResource("/ffmpeg/bin/ffmpeg.exe");
                 ProcessBuilder pb = new ProcessBuilder(exePath.getPath(),
                         "-i", mergedFile.getAbsolutePath(),

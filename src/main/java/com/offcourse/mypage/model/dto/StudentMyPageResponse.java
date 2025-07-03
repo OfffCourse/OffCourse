@@ -20,6 +20,7 @@ public class StudentMyPageResponse {
     private String courseAddress;
     private Double presentRate;
     private Integer presentCount;
+    private Integer completedEpisodeCount;
     private String cancelable;
     private String reviewWritten;
     private Integer courseCurrentSize;

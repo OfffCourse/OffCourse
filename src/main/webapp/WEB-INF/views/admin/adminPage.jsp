@@ -874,7 +874,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">0</div>
-                    <div class="stat-label">활성 강의</div>
+                    <div class="stat-label">진행 강의</div>
                 </div>
             </div>
         </div>
