@@ -38,6 +38,7 @@
         color: #333;
         background-color: #f8f9fa;
         padding-top: 100px;
+        margin-top: -100px;
     }
 
     /* Header */

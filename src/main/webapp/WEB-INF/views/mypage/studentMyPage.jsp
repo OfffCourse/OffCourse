@@ -1450,7 +1450,7 @@
         $.ajax({
             url,
             method: 'POST',
-            data: {cPage: page, numPerPage: 1},
+            data: {cPage: page, numPerPage: 3},
             success: function (res) {
                 const courseList = res.courses || [];
                 const $container = $('#currentCourses');
@@ -1497,7 +1497,7 @@
                             </div>
                           </div>
                         `;
-                        if (tab === 'completed' && rate == 0) {//rate>=80 으로 바꾸기
+                        if (tab === 'completed' && rate >= 80) {//rate>=80 으로 바꾸기
                             html += `<div class="course-actions" style="margin-top: 10px;">`;
 
                             if (course.reviewWritten === 'N') {

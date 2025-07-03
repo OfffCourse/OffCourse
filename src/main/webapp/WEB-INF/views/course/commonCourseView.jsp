@@ -40,6 +40,7 @@
     color: #333;
     background-color: #f8f9fa;
     padding-top: 100px;
+    margin-top: -100px;
   }
 
   /* Header */
@@ -726,7 +727,7 @@
               정원이 가득 찼습니다
             </button>
           </c:when>
-            <c:when test="${course.courseStartDate <= today}">
+            <c:when test="${course.courseStartDate < today}">
               <button class="enroll-btn full-capacity" disabled>
                 신청 가능 날짜가 아닙니다
               </button>
