@@ -13,7 +13,7 @@ public class PresentDao {
     private final SqlSessionTemplate session;
 
     public int countPresentByCourseAndStudent(Long courseSeq, Long studentSeq) {
-        return session.selectOne("present.countPresentByCourseAndStudent", Map.of("courseSeq", courseSeq, "studentSeq", studentSeq));
+        return session.selectOne("present.countPresentByCourseAndStudent", Map.of("courseSeq", courseSeq, "memberSeq", studentSeq));
     }
 
     public int insertPresent(CheckPresentCode checkPresentCode) {

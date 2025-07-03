@@ -772,14 +772,14 @@
         const minute = now.getMinutes();
 
         // 09:00 ~ 09:30 사이인지 확인
-        if (hour === 9 && minute >= 0 && minute <= 30) {
+        // if (hour === 9 && minute >= 0 && minute <= 30) {
             $('.code-input').val('');
             $('#submitAttendanceBtn').prop('disabled', true);
             $('#attendanceInputModal').modal('show');
             $('.code-input').first().focus();
-        } else {
-            alert('출석은 오전 9시부터 9시 30분 사이에만 가능합니다.');
-        }
+        // } else {
+        //     alert('출석은 오전 9시부터 9시 30분 사이에만 가능합니다.');
+        // }
     });
 
     // 입력칸 자동 이동 & 버튼 활성화

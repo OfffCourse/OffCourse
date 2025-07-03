@@ -784,9 +784,11 @@
         const courseSeq = $(this).data('course-seq');
         const now = new Date();
         const availableMinTime = new Date();
-        availableMinTime.setHours(9, 0, 0, 0);
+        // availableMinTime.setHours(9, 0, 0, 0);
+        availableMinTime.setHours(0, 0, 0, 0);
         const availableMaxTime = new Date();
-        availableMaxTime.setHours(9, 30, 0, 0);
+        availableMaxTime.setHours(23, 59, 0, 0);
+        // availableMaxTime.setHours(9, 30, 0, 0);
         $.ajax({
             url: `${path}/present/\${courseSeq}`,
             method: 'GET',
@@ -796,9 +798,11 @@
 
                 const now = new Date();
                 const availableMinTime = new Date();
-                availableMinTime.setHours(9, 0, 0, 0);
+                // availableMinTime.setHours(9, 0, 0, 0);
+                availableMinTime.setHours(0, 0, 0, 0);
                 const availableMaxTime = new Date();
-                availableMaxTime.setHours(9, 30, 0, 0);
+                // availableMaxTime.setHours(9, 30, 0, 0);
+                availableMaxTime.setHours(23, 59, 0, 0);
 
                 if (now < availableMinTime || now > availableMaxTime) {
                     alert("출석 코드는 9시부터 9시 30분에만 조회가 가능합니다.");
