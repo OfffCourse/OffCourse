@@ -33,6 +33,7 @@ public class QueueController {
 
             model.addAttribute("queue", response);
             model.addAttribute("sessionId", sessionId);
+            model.addAttribute("queueType", "GENERAL");
 
             if (response.isAccessAllowed()) {
                 log.debug("사용자 {} 이미 접근 허용됨, 메인으로 리다이렉트", sessionId);
@@ -47,12 +48,14 @@ public class QueueController {
         }
     }
 
+    /**
+     * 대기열 상태 조회
+     */
     @GetMapping("/status")
     @ResponseBody
     public Queue getQueueStatus(HttpSession session) {
         String sessionId = session.getId();
         try{
-//            Queue status = queueService.getQueueStatus(sessionId);
             Queue status = queueService.enterQueue(sessionId);
             log.debug("대기열 상태 조회 - 세션: {}, 상태: {}, 순번: {}",
                     sessionId, status.getStatus(), status.getPosition());
@@ -67,6 +70,9 @@ public class QueueController {
         }
     }
 
+    /**
+     * 서비스 완료
+     */
     @PostMapping("/complete")
     public String completeService(HttpSession session) {
         String sessionId = session.getId();
@@ -80,8 +86,9 @@ public class QueueController {
         return "redirect:/";
     }
 
+
     /**
-     * 탭 닫기 감지
+     * 대기열 탈퇴
      */
     @PostMapping("/leave")
     @ResponseBody
@@ -126,6 +133,8 @@ public class QueueController {
                     "sessionId", sessionId,
                     "queueStatus", status.getStatus().name(),
                     "position", status.getPosition() != null ? status.getPosition() : 0,
+                    "estimatedWaitTime", status.getEstimatedWaitTime() != null ? status.getEstimatedWaitTime() : 0,
+                    "message", status.getMessage(),
                     "timestamp", LocalDateTime.now()
             ));
 
@@ -155,6 +164,7 @@ public class QueueController {
 
             model.addAttribute("queue", response);
             model.addAttribute("sessionId", sessionId);
+            model.addAttribute("queueType", "GENERAL");
             model.addAttribute("forceEntry", true); // 강제 진입 플래그
             model.addAttribute("entryReason", getReasonMessage(reason)); // 진입 사유 메시지
 
@@ -165,6 +175,8 @@ public class QueueController {
         } catch (Exception e) {
             log.error("강제 대기열 진입 중 오류 - SessionId: {}", sessionId, e);
             model.addAttribute("error", "대기열 진입 중 오류가 발생했습니다.");
+            model.addAttribute("sessionId", sessionId);
+            model.addAttribute("queueType", "GENERAL");
             return "common/queue";
         }
     }
@@ -173,18 +185,13 @@ public class QueueController {
      * 진입 사유별 메시지 반환
      */
     private String getReasonMessage(String reason) {
-        switch (reason) {
-            case "HEARTBEAT_FAILED":
-                return "네트워크 연결 문제로 인해 대기열로 이동되었습니다.";
-            case "SESSION_EXPIRED":
-                return "세션이 만료되어 대기열로 이동되었습니다.";
-            case "ADMIN_ACTION":
-                return "관리자에 의해 대기열로 이동되었습니다.";
-            case "SYSTEM_ERROR":
-                return "시스템 오류로 인해 대기열로 이동되었습니다.";
-            default:
-                return "대기열로 이동되었습니다.";
-        }
+        return switch (reason) {
+            case "HEARTBEAT_FAILED" -> "네트워크 연결 문제로 인해 대기열로 이동되었습니다.";
+            case "SESSION_EXPIRED" -> "세션이 만료되어 대기열로 이동되었습니다.";
+            case "ADMIN_ACTION" -> "관리자에 의해 대기열로 이동되었습니다.";
+            case "SYSTEM_ERROR" -> "시스템 오류로 인해 대기열로 이동되었습니다.";
+            default -> "대기열로 이동되었습니다.";
+        };
     }
 
     /**
@@ -201,76 +208,6 @@ public class QueueController {
                     "error", true,
                     "message", "시스템 상태 조회 중 오류가 발생했습니다.",
                     "timestamp", LocalDateTime.now()
-            );
-        }
-    }
-
-    /**
-     * 관리자용 - 사용자 강제 제거
-     */
-    @PostMapping("/admin/remove")
-    @ResponseBody
-    public Map<String, Object> forceRemoveUser(@RequestParam String targetSessionId) {
-        try {
-            boolean success = queueService.leaveQueue(targetSessionId);
-            log.info("관리자 사용자 제거 - 대상: {}, 결과: {}", targetSessionId, success);
-
-            return Map.of(
-                    "success", success,
-                    "message", success ? "사용자가 제거되었습니다." : "해당 사용자를 찾을 수 없습니다.",
-                    "targetSessionId", targetSessionId,
-                    "timestamp", LocalDateTime.now()
-            );
-        }catch (Exception e){
-            log.error("사용자 제거 중 오류 - Target: {}", targetSessionId, e);
-            return Map.of(
-                    "success", false,
-                    "message", "사용자 제거 중 오류: " + e.getMessage()
-            );
-        }
-    }
-
-    /**
-     * 관리자용 - 비활성 사용자 수동 정리
-     */
-    @PostMapping("/admin/cleanup")
-    @ResponseBody
-    public Map<String, Object> manualCleanup() {
-        try {
-            queueService.cleanupInactiveUsers();
-            log.info("수동 정리 실행");
-            return Map.of(
-                    "success", true,
-                    "message", "비활성 사용자 정리가 완료되었습니다.",
-                    "timestamp", LocalDateTime.now()
-            );
-        } catch (Exception e) {
-            log.error("수동 정리 중 오류", e);
-            return Map.of(
-                    "success", false,
-                    "message", "정리 중 오류: " + e.getMessage()
-            );
-        }
-    }
-
-    /**
-     * 관리자용 - 수동 대기열 처리
-     */
-    @PostMapping("/admin/process")
-    @ResponseBody
-    public Map<String, Object> manualProcessQueue() {
-        try {
-            queueService.processWaitingQueue();
-            return Map.of(
-                    "success", true,
-                    "message", "대기열 처리가 완료되었습니다.",
-                    "timestamp", LocalDateTime.now()
-            );
-        } catch (Exception e) {
-            log.error("수동 대기열 처리 중 오류", e);
-            return Map.of(
-                    "success", false,
-                    "message", "처리 중 오류: " + e.getMessage()
             );
         }
     }
