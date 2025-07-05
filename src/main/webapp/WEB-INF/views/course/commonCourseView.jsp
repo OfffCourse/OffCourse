@@ -722,14 +722,19 @@
             <c:param name="paymentPrice" value="${course.coursePrice * (100 - course.courseDiscount) / 100}"/>
           </c:url>
           <c:choose>
-          <c:when test="${course.courseCurrentSize >= course.courseSize}">
-            <button class="enroll-btn full-capacity" disabled>
-              정원이 가득 찼습니다
-            </button>
-          </c:when>
+            <c:when test="${course.courseEndDate < today}">
+              <button class="enroll-btn full-capacity" disabled>
+                이미 종료된 강의입니다
+              </button>
+            </c:when>
             <c:when test="${course.courseStartDate < today}">
               <button class="enroll-btn full-capacity" disabled>
                 신청 가능 날짜가 아닙니다
+              </button>
+            </c:when>
+            <c:when test="${course.courseCurrentSize >= course.courseSize}">
+              <button class="enroll-btn full-capacity" disabled>
+                정원이 가득 찼습니다
               </button>
             </c:when>
           <c:otherwise>

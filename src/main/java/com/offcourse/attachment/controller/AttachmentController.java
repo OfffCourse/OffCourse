@@ -71,7 +71,9 @@ public class AttachmentController {
                 String renamedFileName = "offcourse_" + timeStamp + "_" + rnd + ".mp4";
                 File convertedMp4File = new File(finalDir, renamedFileName);
 
+                //리눅스
                 //URL exePath = getClass().getResource("/ffmpeg2/ffmpeg");
+                //윈도우
                 URL exePath = getClass().getResource("/ffmpeg/bin/ffmpeg.exe");
                 ProcessBuilder pb = new ProcessBuilder(exePath.getPath(),
                         "-i", mergedFile.getAbsolutePath(),

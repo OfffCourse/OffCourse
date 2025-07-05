@@ -480,7 +480,8 @@
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 30px;
-        margin-top: 120px;
+        /*margin-top: 120px;*/
+        margin: 30px auto;
     }
 
     /* Sidebar */

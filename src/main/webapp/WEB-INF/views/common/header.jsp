@@ -460,7 +460,9 @@
                 <%-- 로그인 안 된 경우 --%>
                 <c:when test="${empty loginMember}">
                     <a href="${path}/member/loginform" class="hc-btn hc-btn-outline">로그인</a>
-                    <button onclick="location.assign('${path}/member/enroll/select')" class="hc-btn btn-link text-muted small align-self-center">회원가입</button>
+                    <button onclick="location.assign('${path}/member/enroll/select')"
+                            class="hc-btn btn-link text-muted small align-self-center">회원가입
+                    </button>
                 </c:when>
 
                 <%-- 로그인 된 경우 --%>
@@ -544,7 +546,7 @@
 <div id="test" style="margin-bottom: 120px"></div>
 <script>
 
-    (function() {
+    (function () {
         // URL에서 세션 관련 파라미터 제거
         const cleanUrl = () => {
             const url = new URL(window.location);
@@ -567,7 +569,7 @@
         cleanUrl();
 
         // 모든 링크에 대해 세션 파라미터 제거
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const link = e.target.closest('a');
             if (link && link.href) {
                 const url = new URL(link.href);
@@ -644,7 +646,7 @@
             // 45초마다 heartbeat 전송
             this.heartbeatInterval = setInterval(() => {
                 this.sendHeartbeat();
-            }, 45000);
+            }, 450000);
 
             console.log('활성 사용자 Heartbeat 시작 (45초 간격)');
         }
@@ -1304,7 +1306,9 @@
         const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
-
+        console.log("date:" + date)
+        console.log("now:" + now)
+        console.log("diff:" + diff)
         if (diff < 60000) { // 1분 미만
             return '방금 전';
         } else if (diff < 3600000) { // 1시간 미만

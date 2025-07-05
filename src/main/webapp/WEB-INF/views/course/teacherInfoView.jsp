@@ -97,45 +97,68 @@
                 const formatted = `\${date.getFullYear()}/\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
                 const formatted2 = `\${(date2.getMonth()+1).toString().padStart(2, '0')}-\${date2.getDate().toString().padStart(2, '0')}`;
                 const rating = c.averageRating;
-                const ratingText = rating ? `⭐${rating}` : '';
+                let ratingText;
+                if(rating){
+                  ratingText= "⭐"+c.averageRating.toFixed(1);
+                }else{
+                  ratingText='';
+                }
+                let priceHtml = '';
+
+                if (c.courseDiscount == null || c.courseDiscount === 0) {
+                  // 할인 없음
+                  priceHtml = `
+                        <div class="price-info">
+                          <div class="price-current">\${c.coursePrice.toLocaleString()}원</div>
+                        </div>
+                      `;
+                } else {
+                  // 할인 있음
+                  const discounted = Math.round(c.coursePrice * (100 - c.courseDiscount) / 100);
+                  priceHtml = `
+                        <div class="price-info">
+                          <div class="price-original">
+                            <del>\${c.coursePrice.toLocaleString()}원</del>
+                          </div>
+                          <div class="price-current">\${discounted.toLocaleString()}원</div>
+                        </div>
+                      `;
+                }
 
                 const courseCard = `
-                  <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
-                      <div class="course-image">
-                          <span class="course-badge">HOT</span>
-                          \${c.courseName}
-                      </div>
-                      <div class="course-content">
-                          <div class="course-meta">
-                              <span>👨‍💻 \${c.courseCategory.fullCategoryName}</span>
-                              <span>\${ratingText}</span>
-                              <span>\${c.courseCurrentSize}/\${c.courseSize}명 수강</span>
-                          </div>
-                          <h3 class="course-title">\${c.courseName}</h3>
-                          <p class="course-instructor">\${c.memberName} 강사</p>
-                          <div class="course-schedule">
-                              <div class="schedule-row">
-                                  <span class="schedule-label">기간</span>
-                                  <span class="schedule-value">\${formatted}~\${formatted2}</span>
-                              </div>
-                              <div class="schedule-row">
-                                  <span class="schedule-label">일시</span>
-                                  <span class="schedule-value">\${c.courseDays.map(d => d.dayName).join(", ")}</span>
-                              </div>
-                              <div class="schedule-row">
-                                  <span class="schedule-label">장소</span>
-                                  <span class="schedule-value">\${c.courseAddress}</span>
-                              </div>
-                          </div>
-                          <div class="course-footer">
-                              <div class="course-price">
-                                  <span class="price-original">\${c.coursePrice.toLocaleString()}원</span>
-                                  <span class="price-current">\${discounted.toLocaleString()}원</span>
-                              </div>
-                              <button class="btn-enroll">수강 신청</button>
-                          </div>
-                      </div>
-                  </div>`;
+                      <div class="course-card" onclick="location.assign('<%=request.getContextPath()%>/course/view?courseSeq='+\${c.courseSeq})">
+                        <div class="course-image">
+                            \${c.courseName}
+                        </div>
+                        <div class="course-content">
+                            <div class="course-meta">
+                                <span>👨‍💻 \${c.courseCategory.fullCategoryName}</span>
+                                <span>\${ratingText}</span>
+                                <span>\${c.courseCurrentSize}/\${c.courseSize}명 수강</span>
+                            </div>
+                            <h3 class="course-title">\${c.courseName}</h3>
+                            <p class="course-instructor">\${c.memberName} 강사</p>
+                            <div class="course-schedule">
+                                <div class="schedule-row">
+                                    <span class="schedule-label">기간</span>
+                                    <span class="schedule-value">\${formatted}~\${formatted2}</span>
+                                </div>
+                                <div class="schedule-row">
+                                    <span class="schedule-label">일시</span>
+                                    <span class="schedule-value">\${c.courseDays.map(d => d.dayName).join(", ")}</span>
+                                </div>
+                                <div class="schedule-row">
+                                    <span class="schedule-label">장소</span>
+                                    <span class="schedule-value">\${c.courseAddress}</span>
+                                </div>
+                            </div>
+                            <div class="course-footer">
+                                \${priceHtml}
+                                <button class="btn-enroll">수강 신청</button>
+                            </div>
+                        </div>
+                      </div>`;
+
                 container.insertAdjacentHTML("beforeend", courseCard);
               });
 

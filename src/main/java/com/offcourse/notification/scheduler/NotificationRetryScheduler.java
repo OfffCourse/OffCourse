@@ -19,7 +19,8 @@ public class NotificationRetryScheduler {
     private final EmitterService emitterService;
 
     //5분마다 Redis에 백업된 알림 재전송 시도
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    //@Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void retryUnsentNotifications() {
         Set<String> keys = redisService.getAllBackupKeys();
 

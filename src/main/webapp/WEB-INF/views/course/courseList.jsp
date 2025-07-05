@@ -284,7 +284,12 @@
                     const formatted = `\${date.getFullYear()}/\${(date.getMonth()+1).toString().padStart(2, '0')}-\${date.getDate().toString().padStart(2, '0')}`;
                     const formatted2 = `\${(date2.getMonth()+1).toString().padStart(2, '0')}-\${date2.getDate().toString().padStart(2, '0')}`;
                     const rating = c.averageRating;
-                    const ratingText = rating ? `⭐${rating}` : '';
+                    let ratingText;
+                    if(rating){
+                         ratingText= "⭐"+c.averageRating.toFixed(1);
+                    }else{
+                        ratingText='';
+                    }
                     let priceHtml = '';
 
                     if (c.courseDiscount == null || c.courseDiscount === 0) {
