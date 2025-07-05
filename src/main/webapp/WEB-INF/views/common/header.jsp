@@ -646,7 +646,7 @@
             // 45초마다 heartbeat 전송
             this.heartbeatInterval = setInterval(() => {
                 this.sendHeartbeat();
-            }, 45000);
+            }, 450000);
 
             console.log('활성 사용자 Heartbeat 시작 (45초 간격)');
         }
