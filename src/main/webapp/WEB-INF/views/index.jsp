@@ -616,14 +616,14 @@
                 <p class="category-desc">사용자 인터페이스 개발에 필요한 기술을 익혀보세요</p>
             </div>
             <div class="category-card" onclick="filterCourses(['9', '10'])">
-                <div class="category-icon design">🎨</div>
-                <h3 class="category-title">디자인</h3>
-                <p class="category-desc">UI/UX, 그래픽 디자인, 브랜딩까지 창의적 역량을 키워보세요</p>
-            </div>
-            <div class="category-card" onclick="filterCourses(['11', '12'])">
                 <div class="category-icon business">📊</div>
                 <h3 class="category-title">비즈니스</h3>
                 <p class="category-desc">마케팅, 기획, 경영 전략으로 비즈니스 역량을 강화하세요</p>
+            </div>
+            <div class="category-card" onclick="filterCourses(['11', '12'])">
+                <div class="category-icon design">🎨</div>
+                <h3 class="category-title">디자인</h3>
+                <p class="category-desc">UI/UX, 그래픽 디자인, 브랜딩까지 창의적 역량을 키워보세요</p>
             </div>
         </div>
     </div>
@@ -663,8 +663,8 @@
             <button class="filter-btn active" onclick="loadRecommendedCourses(null, this)">전체</button>
             <button class="filter-btn" onclick="loadRecommendedCourses([5,6], this)">백엔드</button>
             <button class="filter-btn" onclick="loadRecommendedCourses([7,8], this)">프론트엔드</button>
-            <button class="filter-btn" onclick="loadRecommendedCourses([9,10], this)">디자인</button>
-            <button class="filter-btn" onclick="loadRecommendedCourses([11,12], this)">비즈니스</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([9,10], this)">비즈니스</button>
+            <button class="filter-btn" onclick="loadRecommendedCourses([11,12], this)">디자인</button>
         </div>
 
         <div class="course-grid">
