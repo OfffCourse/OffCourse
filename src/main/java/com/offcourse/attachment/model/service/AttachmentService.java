@@ -6,6 +6,7 @@ import com.offcourse.course.model.dao.CourseDao;
 import com.offcourse.course.model.dto.Episode;
 import com.offcourse.notification.model.dto.NotificationEvent;
 import com.offcourse.notification.model.dto.NotificationType;
+import com.offcourse.notification.model.service.EmitterService;
 import com.offcourse.notification.model.service.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class AttachmentService {
     private final AttachmentDao dao;
     private final CourseDao courseDao;
     private final NotificationProducer notificationProducer;
+    private final EmitterService emitterService;
 
     @Transactional
     public int insertAttachment(Attachment attachment) {

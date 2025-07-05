@@ -31,8 +31,7 @@ public class PresentCodeGenerateScheduler {
      * 강의 시작일 <= 오늘날짜 <= 강의 종료일인 강의 찾기
      * 해당 강의를 수강하고 있는 학생들에게 Kafka 메시지 전송
      */
-//    @Scheduled(cron = "0 0 9 * * *")
-    @Scheduled(cron = "0 10 * * * *")
+    @Scheduled(cron = "0 0 9 * * *")
     public void generatePresentCode() {
         int countStudents = 0;
 

@@ -8,17 +8,21 @@ package com.offcourse.redis.model.service;
 
 import com.offcourse.notification.model.dto.NotificationEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -67,15 +71,27 @@ public class RedisService {
 
     //Redis에 백업 알림 메시지 저장
     public void backupNotification(NotificationEvent event) {
-        String key = "backup:notification:" + event.getMemberSeq();
-        redisTemplate.opsForList().rightPush(key, event);
-        redisTemplate.expire(key, Duration.ofDays(7));
+        try {
+            String key = "backup:notification:" + event.getMemberSeq();
+            String field = String.valueOf(event.getMsgSeq());
+            redisTemplate.opsForHash().put(key, field, event);
+            redisTemplate.expire(key, Duration.ofDays(7));
+            log.info("✅ Redis에 백업 완료: memberSeq={}, msgSeq={}", event.getMemberSeq(), event.getMsgSeq());
+        } catch (Exception e) {
+            log.error("❌ Redis 백업 실패: memberSeq={}, msgSeq={}, error={}", event.getMemberSeq(), event.getMsgSeq(), e.getMessage());
+        }
     }
 
-    //Redis에 백업된 특정 회원의 알림 메시지 가져오기
-    public List<Object> getBackupNotifications(Long memberSeq) {
+    public List<NotificationEvent> getBackupNotifications(Long memberSeq) {
         String key = "backup:notification:" + memberSeq;
-        return redisTemplate.opsForList().range(key, 0, -1);
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
+        List<NotificationEvent> list = new ArrayList<>();
+        for (Object value : entries.values()) {
+            if (value instanceof NotificationEvent) {
+                list.add((NotificationEvent) value);
+            }
+        }
+        return list;
     }
 
     //Redis에 백업된 메시지 중 전송 완료된 메시지 삭제
@@ -86,17 +102,19 @@ public class RedisService {
 
     // 백업된 알림 재전송
     public void retryBackupNotifications(Long memberSeq, Function<NotificationEvent, Boolean> sendLogic) {
-        List<Object> backupList = getBackupNotifications(memberSeq);
+        // 복사본 생성
+        List<Object> backupList = new ArrayList<>(getBackupNotifications(memberSeq));
+
         for (Object obj : backupList) {
             if (obj instanceof NotificationEvent event) {
                 if (isAlreadySent(event)) {
-                    removeFirstBackupNotification(memberSeq); // 이미 보낸 알림이면 제거
+                    removeBackupNotification(event); // 이미 보낸 알림이면 제거
                     continue;
                 }
 
                 boolean success = sendLogic.apply(event);
                 if (success) {
-                    removeFirstBackupNotification(memberSeq);
+                    removeBackupNotification(event);
                     resetFailCount(event);
                     markAsSent(event); // 성공 시 기록
                 } else {
@@ -104,7 +122,7 @@ public class RedisService {
                     if (getFailCount(event) > 5) {
                         moveToDeadLetter(event);
                         resetFailCount(event);
-                        removeFirstBackupNotification(memberSeq);
+                        removeBackupNotification(event);
                     }
                     break;
                 }
@@ -120,35 +138,41 @@ public class RedisService {
     }
 
     //failCount 가져오기
+    public void removeBackupNotification(NotificationEvent event) {
+        String key = "backup:notification:" + event.getMemberSeq();
+        String field = String.valueOf(event.getMsgSeq());
+        redisTemplate.opsForHash().delete(key, field);
+    }
+
     private int getFailCount(NotificationEvent event) {
         String key = "fail:notification:" + event.getMsgSeq();
         String val = stringRedisTemplate.opsForValue().get(key);
         return val != null ? Integer.parseInt(val) : 0;
     }
-
     //failCount reset 처리
+
     private void resetFailCount(NotificationEvent event) {
         String key = "fail:notification:" + event.getMsgSeq();
         stringRedisTemplate.delete(key);
     }
-
     //재전송 일정 횟수 이상 시도 시 삭제처리
+
     private void moveToDeadLetter(NotificationEvent event) {
         redisTemplate.opsForList().rightPush("deadletter:notification", event);
     }
-
     //백업된 모든 메시지 가져오기
+
     public Set<String> getAllBackupKeys() {
         return redisTemplate.keys("backup:notification:*");
     }
-
     //이미 보낸 메시지인지 체크
+
     public boolean isAlreadySent(NotificationEvent event) {
         String key = "sent:notification:" + event.getMsgSeq();
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
-
     //메시지 전송했음을 기록 (중복처리 방지)
+
     public void markAsSent(NotificationEvent event) {
         String key = "sent:notification:" + event.getMsgSeq();
         stringRedisTemplate.opsForValue().set(key, "1", Duration.ofDays(7)); // 보존 기간 7일
