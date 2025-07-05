@@ -8,6 +8,7 @@ package com.offcourse.redis.model.service;
 
 import com.offcourse.notification.model.dto.NotificationEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -69,10 +71,15 @@ public class RedisService {
 
     //Redis에 백업 알림 메시지 저장
     public void backupNotification(NotificationEvent event) {
-        String key = "backup:notification:" + event.getMemberSeq();
-        String field = String.valueOf(event.getMsgSeq());
-        redisTemplate.opsForHash().put(key, field, event);
-        redisTemplate.expire(key, Duration.ofDays(7));
+        try {
+            String key = "backup:notification:" + event.getMemberSeq();
+            String field = String.valueOf(event.getMsgSeq());
+            redisTemplate.opsForHash().put(key, field, event);
+            redisTemplate.expire(key, Duration.ofDays(7));
+            log.info("✅ Redis에 백업 완료: memberSeq={}, msgSeq={}", event.getMemberSeq(), event.getMsgSeq());
+        } catch (Exception e) {
+            log.error("❌ Redis 백업 실패: memberSeq={}, msgSeq={}, error={}", event.getMemberSeq(), event.getMsgSeq(), e.getMessage());
+        }
     }
 
     public List<NotificationEvent> getBackupNotifications(Long memberSeq) {
