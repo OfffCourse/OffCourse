@@ -15,13 +15,19 @@ public class NotificationProducer {
     private final RedisService redisService;
 
     public void send(NotificationEvent event) {
+        // 1. Redis에 백업
+        redisService.backupNotification(event);
+
+        // 2. Kafka 전송
         kafkaTemplate.send("offcourse-topic", event)
                 .addCallback(
-                        result -> log.info("Kafka 전송 성공: {}", event),
-                        ex -> {
-                            log.error("Kafka 전송 실패: {}", event, ex);
-                            redisService.backupNotification(event);
-                        }
+                        result -> {
+                            log.info("Kafka 전송 성공: {}", event);
+                            // msgSeq 기반 정확한 삭제 필요
+                            redisService.removeBackupNotification(event);
+                            redisService.markAsSent(event);
+                        },
+                        ex -> log.error("Kafka 전송 실패: {}", event, ex)
                 );
     }
 }

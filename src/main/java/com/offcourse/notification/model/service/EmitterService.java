@@ -70,7 +70,7 @@ public class EmitterService {
         }
     }
 
-    private void backupToRedis(NotificationEvent event) {
+    public void backupToRedis(NotificationEvent event) {
         try {
             String key = "unread:member:" + event.getMemberSeq();
             redisTemplate.opsForList().rightPush(key, event);
